@@ -1,4 +1,4 @@
-/* Wehrwerk – Hallen-Dashboard (Tablet/Bildschirm mit Touch in der Fahrzeughalle).
+/* SPIND – Hallen-Dashboard (Tablet/Bildschirm mit Touch in der Fahrzeughalle).
    Nach dem Einsatz: die Anwesenheitsliste – so schnell wie der Zettel: alle Namen auf einen Blick, antippen, Fahrzeug, fertig.
    Zwei Wege: „Nach Person“ (jeder trägt sich selbst ein) oder „Nach Fahrzeug“ (einer trägt die ganze Besatzung ein).
    Funktion (EL, ZF, GF, MA, AGT) optional mit einem Tipp. Sonst: Fahrzeugstatus, Einsätze, Fahrzeugbuchungen – keine Termine.

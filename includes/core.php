@@ -20,7 +20,7 @@ function myf_demo_ctx() {
     $keys = array_filter([(string) ($dm['hall_key'] ?? ''), (string) ($dm['screen_key'] ?? '')]);
     $cand = [];
     foreach (['myf_halle', 'myf_screen', 'key'] as $k) { if (isset($_GET[$k])) $cand[] = (string) $_GET[$k]; if (isset($_POST[$k])) $cand[] = (string) $_POST[$k]; }
-    if (!empty($_SERVER['HTTP_X_WEHRWERK_KEY'])) $cand[] = (string) $_SERVER['HTTP_X_WEHRWERK_KEY'];
+    foreach (['HTTP_X_SPIND_KEY', 'HTTP_X_WEHRWERK_KEY'] as $hk) if (!empty($_SERVER[$hk])) $cand[] = (string) $_SERVER[$hk]; // früherer Name gilt weiter
     if (stripos((string) ($_SERVER['CONTENT_TYPE'] ?? ''), 'json') !== false && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) < 20000) {
         $j = json_decode((string) file_get_contents('php://input'), true);
         if (is_array($j) && isset($j['key']) && is_string($j['key'])) $cand[] = $j['key'];
@@ -244,6 +244,7 @@ function myf_install() {
     myf_install_teamwork($c);
     myf_install_security();
     myf_install_drills($c);
+    if (function_exists('myf_install_events')) myf_install_events($c);
     myf_install_hall($c);
     if (function_exists('myf_install_passkeys')) myf_install_passkeys($c);
     myf_install_archive($c);
@@ -325,6 +326,8 @@ function myf_settings() {
         'screen_theme' => 'auto', 'screen_lat' => myf_local('lat'), 'screen_lon' => myf_local('lon'),
         // Warnungen (NINA: DWD, MoWaS, KATWARN …) für den Kreis – Amtlicher Regionalschlüssel, letzte 7 Stellen 0
         'screen_ars' => myf_local('ars'), 'screen_weather' => true, 'screen_warnings' => true,
+        // Atemschutz: einsatzbereit nur mit zweitem Nachweis in 12 Monaten (Einsatzübung/Einsatz unter Atemschutz oder zweite Übungsstrecke)
+        'agt_second' => false,
     ]);
 }
 
@@ -374,9 +377,9 @@ function myf_member_page_url() {
     global $wpdb;
     static $url = null;
     if ($url !== null) return $url;
-    // Seite mit dem Mitgliederbereich: Shortcode [myfeuerwehr] oder [wehrwerk] – nicht verwechseln mit [wehrwerk_einsatz], [wehrwerk_einsatzberichte] …
-    $rows = $wpdb->get_results("SELECT ID, post_content, post_status FROM {$wpdb->posts} WHERE post_status IN ('publish','private') AND post_type = 'page' AND (post_content LIKE '%[myfeuerwehr%' OR post_content LIKE '%[wehrwerk%') ORDER BY post_status = 'publish' DESC, ID");
-    foreach ($rows as $r) if (preg_match('/\[(myfeuerwehr|wehrwerk)[\s\]\/]/', $r->post_content)) return $url = get_permalink($r->ID);
+    // Seite mit dem Mitgliederbereich: Shortcode [myfeuerwehr], [spind] oder (früher) [wehrwerk] – nicht verwechseln mit [spind_einsatz], [spind_einsatzberichte] …
+    $rows = $wpdb->get_results("SELECT ID, post_content, post_status FROM {$wpdb->posts} WHERE post_status IN ('publish','private') AND post_type = 'page' AND (post_content LIKE '%[myfeuerwehr%' OR post_content LIKE '%[spind%' OR post_content LIKE '%[wehrwerk%') ORDER BY post_status = 'publish' DESC, ID");
+    foreach ($rows as $r) if (preg_match('/\[(myfeuerwehr|spind|wehrwerk)[\s\]\/]/', $r->post_content)) return $url = get_permalink($r->ID);
     return $url = home_url('/');
 }
 
@@ -535,7 +538,7 @@ function myf_upload_sniff_ok($tmp, $ext) {
 
 // ---- REST-Schnittstelle /wp-json/ absichern ----------------------------------------------------------------------
 // Fehlen in den Permalink-Regeln die Einträge für /wp-json/, antwortet die ganze REST-Schnittstelle mit 404:
-// Block-Editor (Veröffentlichen), Cookie-Banner und Wehrwerk fallen aus. Das passiert, wenn ein anderes Plugin die
+// Block-Editor (Veröffentlichen), Cookie-Banner und SPIND fallen aus. Das passiert, wenn ein anderes Plugin die
 // Regeln zu früh neu schreibt (vor „init“, wenn WordPress die REST-Regeln noch nicht angemeldet hat).
 // Drei Sperren: beim Erzeugen, beim Speichern und beim Auswerten jeder Anfrage – die Regeln können nicht mehr ohne sie bestehen.
 function myf_rest_rules() {

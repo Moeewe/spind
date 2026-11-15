@@ -48,8 +48,8 @@ function myf_api_me() {
 
     $agt = null;
     if ($me->agt) {
-        $log = $wpdb->get_results($wpdb->prepare('SELECT * FROM ' . myf_t('agt_log') . ' WHERE member_id = %d ORDER BY date DESC LIMIT 20', $me->id));
-        $agt = ['g26_until' => $me->g26_until, 'course' => isset(myf_agt_course_ids()[(int) $me->id]), 'log' => array_map('myf_agt_log_out', $log),
+        $log = $wpdb->get_results($wpdb->prepare('SELECT * FROM ' . myf_t('agt_log') . ' WHERE member_id = %d ORDER BY date DESC LIMIT 40', $me->id));
+        $agt = ['g26_until' => $me->g26_until, 'course' => isset(myf_agt_course_ids()[(int) $me->id]), 'log' => array_map('myf_agt_log_out', $log), 'second' => !empty($s['agt_second']),
             'doctor' => function_exists('myf_g26_doctor') ? myf_g26_doctor() : null]; // Betriebsarzt für die G26 (Einstellungen)
     }
 

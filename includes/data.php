@@ -27,7 +27,7 @@ function myf_export_sets() {
         'training' => ['courses', 'Ausbildung (alle Lehrgänge je Person)', function () use ($wpdb, $mem, $split) {
             $m = $mem(); $rows = [];
             foreach ($wpdb->get_results('SELECT n.member_id, c.year, c.title, c.short, d.start_date, d.end_date, d.location FROM ' . myf_t('needs') . ' n JOIN ' . myf_t('courses') . ' c ON c.id = n.course_id LEFT JOIN ' . myf_t('dates') . " d ON d.id = n.date_id WHERE n.status = 'completed'") as $r) {
-                [$l, $f] = $split($m[(int) $r->member_id] ?? ''); $rows[] = [$l, $f, $r->title, $r->short, $r->year, $r->start_date, $r->end_date, $r->location, 'Wehrwerk'];
+                [$l, $f] = $split($m[(int) $r->member_id] ?? ''); $rows[] = [$l, $f, $r->title, $r->short, $r->year, $r->start_date, $r->end_date, $r->location, 'SPIND'];
             }
             foreach ($wpdb->get_results('SELECT * FROM ' . myf_t('quals')) as $q) { [$l, $f] = $split($m[(int) $q->member_id] ?? ''); $rows[] = [$l, $f, $q->title, $q->short, $q->year, $q->date, '', $q->note, 'nachgetragen']; }
             return [['Nachname', 'Vorname', 'Lehrgang', 'Kurz', 'Jahr', 'von', 'bis', 'Ort / Bemerkung', 'Quelle'], $rows];
@@ -182,9 +182,19 @@ function myf_api_import(WP_REST_Request $req) {
             $d = myf_date_or_null(myf_de_date($r['g26'] ?? ''));
             $wpdb->update(myf_t('members'), ['agt' => 1] + ($d ? ['g26_until' => $d] : []), ['id' => $mid]);
             if ($d) $wpdb->insert(myf_t('agt_log'), ['member_id' => $mid, 'date' => current_time('Y-m-d'), 'kind' => 'g26', 'note' => 'gültig bis ' . date('d.m.Y', strtotime($d)) . ' · per Import (Liste)', 'by_name' => myf_actor()]);
-            $last = myf_date_or_null(myf_de_date($r['strecke'] ?? ''));
-            if ($last && !$wpdb->get_var($wpdb->prepare('SELECT id FROM ' . myf_t('agt_log') . " WHERE member_id = %d AND kind = 'strecke' AND date = %s", $mid, $last)))
-                $wpdb->insert(myf_t('agt_log'), ['member_id' => $mid, 'kind' => 'strecke', 'date' => $last, 'note' => 'importiert']);
+            // Nachweise aus der Jahresliste: Übungsstrecke (auch „Strecke 1“/„Strecke 2“) und Übung/Einsatz unter Atemschutz.
+            // Eine Zelle darf mehrere Termine enthalten („07.04.2026, 11.04.2026“); ein Zusatz wie „25min“ wird Notiz. Vorhandenes bleibt.
+            foreach (['strecke' => 'strecke', 'strecke1' => 'strecke', 'strecke2' => 'strecke', 'uebung' => 'uebung'] as $col => $kind) {
+                $cell = (string) ($r[$col] ?? '');
+                if (!preg_match_all('/\b(\d{1,2}\.\d{1,2}\.\d{2,4})\b/', $cell, $mm)) continue;
+                $rest = trim(preg_replace('/\s+/', ' ', str_replace($mm[1], '', $cell)), " ,;/+");
+                foreach ($mm[1] as $raw) {
+                    $day = myf_date_or_null(myf_de_date($raw));
+                    if (!$day || !checkdate((int) substr($day, 5, 2), (int) substr($day, 8, 2), (int) substr($day, 0, 4))) continue;
+                    if ($wpdb->get_var($wpdb->prepare('SELECT id FROM ' . myf_t('agt_log') . ' WHERE member_id = %d AND kind = %s AND date = %s', $mid, $kind, $day))) continue;
+                    $wpdb->insert(myf_t('agt_log'), ['member_id' => $mid, 'kind' => $kind, 'date' => $day, 'note' => mb_substr('importiert' . ($rest !== '' ? ' · ' . sanitize_text_field($rest) : ''), 0, 255), 'by_name' => myf_actor()]);
+                }
+            }
             $added++;
         } elseif ($set === 'events') {
             // Kalendertermine (ICS) als Übungen/Dienste übernehmen – damit danach „Ich war dabei“ geht

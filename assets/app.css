@@ -1,4 +1,4 @@
-/* Wehrwerk – Mitgliederbereich und Verwaltung. Gleiche Gestaltung wie die Einsatz-Schnellerfassung. */
+/* SPIND – Mitgliederbereich und Verwaltung. Gleiche Gestaltung wie die Einsatz-Schnellerfassung. */
 .ffl {
   --ink: #111; --ink2: #313131; --mu: #76767a; --line: #e3e3e3; --soft: #f4f4f4; --paper: #fff; --bg: #fff; --on-ink: #fff; --tint-warn: #fff6e5;
   --red: #e30613; --ok: #178a45; --warn: #c27400;
@@ -153,7 +153,7 @@
 .ffl .ffl-table th { font-size: 12px; }
 .ffl .ffl-msg { line-height: 1.45; }
 
-/* ---- Wehrwerk: zusätzliche Bausteine ---- */
+/* ---- SPIND: zusätzliche Bausteine ---- */
 .ffl .ffl-panel { border: 1px solid var(--line); padding: 18px; margin-top: 16px; background: var(--paper); }
 .ffl #myf-login p { margin: 0 0 14px; }
 .ffl #myf-login label { display: block; font-family: var(--cond); font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--mu); margin-bottom: 6px; }
@@ -2290,3 +2290,7 @@ html[data-myf-theme="dark"] .ffl .ffl-msg button.ffl-sm.ffl-p, html[data-myf-the
   .ffl button:not([role=tab]):not(.ffl-iconbtn), .ffl a.ffl-btn { white-space: normal; height: auto; max-width: 100%; }
   .ffl .ffl-chip { white-space: normal; max-width: 100%; height: auto; }
 }
+
+/* Veranstaltungen (besondere Termine) im Kalender und auf der Startseite */
+.ffl .ffl-evmore { margin-top: 6px; }
+.ffl .ffl-evmore > summary { cursor: pointer; font-weight: 700; }

@@ -1,4 +1,4 @@
-/* Wehrwerk-Website – gleiche Gestaltung wie die App (NRW-Rot, Barlow / Barlow Condensed), mobile first */
+/* SPIND-Website – gleiche Gestaltung wie die App (NRW-Rot, Barlow / Barlow Condensed), mobile first */
 @font-face { font-family: "Barlow"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/Barlow-Regular.woff2") format("woff2"); }
 @font-face { font-family: "Barlow"; font-weight: 600; font-style: normal; font-display: swap; src: url("fonts/Barlow-SemiBold.woff2") format("woff2"); }
 @font-face { font-family: "Barlow"; font-weight: 700; font-style: normal; font-display: swap; src: url("fonts/Barlow-Bold.woff2") format("woff2"); }
@@ -168,6 +168,10 @@ a.ws-tile:hover .ws-tile-img img { transform: scale(1.04); }
 .ws-date time small { display: block; font-weight: 700; text-transform: uppercase; font-size: 13px; margin-top: 2px; }
 .ws-date span b { display: block; font-size: 17px; }
 .ws-date span small { color: var(--mu); font-size: 15px; }
+a.ws-date { color: inherit; text-decoration: none; }
+a.ws-date:hover, a.ws-date:focus-visible { border-color: var(--red); outline: 0; }
+.ws-date.is-top { border: 2px solid var(--red); }
+.ws-date-tag { display: block; font-style: normal; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--red); }
 
 /* Band Mitmachen */
 .ws-band { background: var(--red); color: #fff; padding: 40px 0; }

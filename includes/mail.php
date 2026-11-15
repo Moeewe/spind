@@ -1,6 +1,6 @@
 <?php
 /**
- * E-Mail-Versand: Alle WordPress-Mails (Wehrwerk, Passwort-Links, Kontaktformular) gehen auf Wunsch über ein echtes
+ * E-Mail-Versand: Alle WordPress-Mails (SPIND, Passwort-Links, Kontaktformular) gehen auf Wunsch über ein echtes
  * Postfach per SMTP statt über den Webserver. So gelten sie beim Empfänger als berechtigt (SPF) und landen nicht im Spam.
  * Das Passwort liegt verschlüsselt in einer eigenen Option (nicht in den Einstellungen und damit nicht in Export und
  * Sicherung), wird nie angezeigt und nie protokolliert. Einstellen dürfen nur Administratoren.

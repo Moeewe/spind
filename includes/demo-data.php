@@ -1,6 +1,6 @@
 <?php
 /**
- * Erweiterter Demo-Bestand: füllt alle Bereiche, damit sich Wehrwerk vollständig vorführen lässt –
+ * Erweiterter Demo-Bestand: füllt alle Bereiche, damit sich SPIND vollständig vorführen lässt –
  * mehrere Jahre Einsätze mit Berichten (abgeschlossen, Entwurf, auf Papier), Atemschutz (G26, Strecke, Überwachung, Geräte),
  * Lehrgänge, Unterweisungen, Leihkleidung, Mitgliedschaft, Meldungen und beide Postfächer.
  * Läuft nur im Demo-Kontext (Tabellen …ffl_demo_*) – echte Daten werden nie berührt.

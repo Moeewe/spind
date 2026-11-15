@@ -1,5 +1,5 @@
 <?php
-/** Seitenvorlage „Wehrwerk-Website“: eigener Kopf mit Menü, Inhalt der Seite, Fuß mit Adresse und Links. */
+/** Seitenvorlage „SPIND-Website“: eigener Kopf mit Menü, Inhalt der Seite, Fuß mit Adresse und Links. */
 defined('ABSPATH') || exit;
 $s = myf_site(); $b = myf_brand(); $nav = myf_site_nav();
 $cur = (int) get_queried_object_id();

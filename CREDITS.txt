@@ -1,4 +1,4 @@
-Wehrwerk – Feuerwehr-Portal für WordPress
+SPIND – Feuerwehr-Portal für WordPress
 Lizenz: GPL-2.0-or-later
 
 Mitgelieferte Fremdbestandteile

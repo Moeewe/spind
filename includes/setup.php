@@ -9,7 +9,7 @@ defined('ABSPATH') || exit;
 // Kurzer Shortcode-Name zusätzlich zum alten
 add_action('init', function () {
     global $shortcode_tags;
-    if (isset($shortcode_tags['myfeuerwehr']) && !isset($shortcode_tags['wehrwerk'])) add_shortcode('wehrwerk', $shortcode_tags['myfeuerwehr']);
+    foreach (['spind', 'wehrwerk'] as $alias) if (isset($shortcode_tags['myfeuerwehr']) && !isset($shortcode_tags[$alias])) add_shortcode($alias, $shortcode_tags['myfeuerwehr']); // [wehrwerk] = früherer Name
 }, 20);
 
 // Quellen & Lizenzen: alles, was von außen kommt oder mitgeliefert wird
@@ -24,7 +24,7 @@ function myf_credits() {
     ];
 }
 
-// Alle Antworten der Wehrwerk-Schnittstelle: nicht indexieren
+// Alle Antworten der SPIND-Schnittstelle: nicht indexieren
 add_filter('rest_post_dispatch', function ($res, $server, $req) {
     if (strpos($req->get_route(), '/myf/v1') === 0 && $res instanceof WP_HTTP_Response) $res->header('X-Robots-Tag', 'noindex, nofollow');
     return $res;
@@ -37,7 +37,7 @@ function myf_locate($q) {
     $ck = 'myf_loc_' . md5($q);
     if (is_array($c = get_transient($ck))) return $c;
     $res = wp_remote_get(add_query_arg(['q' => $q, 'countrycodes' => 'de', 'format' => 'jsonv2', 'extratags' => 1, 'addressdetails' => 1, 'limit' => 5], 'https://nominatim.openstreetmap.org/search'),
-        ['timeout' => 10, 'headers' => ['User-Agent' => 'Wehrwerk/' . MYF_VERSION . ' (' . home_url('/') . ')', 'Accept-Language' => 'de']]);
+        ['timeout' => 10, 'headers' => ['User-Agent' => 'SPIND/' . MYF_VERSION . ' (' . home_url('/') . ')', 'Accept-Language' => 'de']]);
     if (is_wp_error($res) || wp_remote_retrieve_response_code($res) !== 200) return null;
     $out = [];
     foreach ((array) json_decode(wp_remote_retrieve_body($res), true) as $r) {

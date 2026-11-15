@@ -1,8 +1,8 @@
-/* Wehrwerk – gemeinsame Ausdrucke (Mitgliederbereich und Verwaltung):
+/* SPIND – gemeinsame Ausdrucke (Mitgliederbereich und Verwaltung):
    Einsatzbericht (Erfassungsbogen), Einsatzbeteiligung und Bescheinigung für den Arbeitgeber. */
 (function () {
   'use strict';
-  var APP = (window.MYF && MYF.app) || 'Wehrwerk';
+  var APP = (window.MYF && MYF.app) || 'SPIND';
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return '&#' + c.charCodeAt(0) + ';'; }); }
   function d(v) { if (!v) return ''; var p = v.slice(0, 10).split('-'); return p[2] + '.' + p[1] + '.' + p[0]; }
   function t(v) { return v && v.length >= 16 ? v.slice(11, 16) : ''; }
@@ -248,7 +248,7 @@
         preview(html, true, { title: n === 1 ? 'Bescheinigung für den Arbeitgeber' : n + ' Bescheinigungen für den Arbeitgeber', sub: r.items.map(function (x) { return x.name; }).join(' · '),
           note: (r.skipped && r.skipped.length ? 'Nicht dabei – Teilnahme noch nicht bestätigt: ' + r.skipped.join(', ') + '. ' : '') +
             (r.incomplete && r.incomplete.length ? 'Nicht dabei – es fehlen Angaben: ' + r.incomplete.join('; ') + '. ' : '') +
-            (needMark ? 'Beim Drucken vermerkt Wehrwerk die Bescheinigung als „gedruckt – zur Unterschrift“ und gibt dem Mitglied Bescheid. Danach unterschreiben lassen.' : ''),
+            (needMark ? 'Beim Drucken vermerkt SPIND die Bescheinigung als „gedruckt – zur Unterschrift“ und gibt dem Mitglied Bescheid. Danach unterschreiben lassen.' : ''),
           printLabel: needMark ? 'Drucken & vermerken' : 'PDF / Drucken',
           onPrint: function () {
             if (!needMark) return null;
@@ -261,7 +261,7 @@
     handover: function (call, rows, office, who, after) {
       var html = certHandover({ at: new Date().toISOString().slice(0, 10), by: who || '', office: office, items: rows });
       preview(html, true, { title: rows.length === 1 ? 'Bescheinigung aushändigen: ' + rows[0].name : 'Ausgabeliste – ' + rows.length + ' Bescheinigungen', sub: rows.map(function (x) { return x.name; }).join(' · '),
-        note: 'Erst ausführen, wenn die Bescheinigungen unterschrieben sind. Wehrwerk vermerkt die Ausgabe und schreibt den Mitgliedern, dass sie die Bescheinigung ihrem Arbeitgeber geben. Auf der Liste quittiert jede Person den Empfang.',
+        note: 'Erst ausführen, wenn die Bescheinigungen unterschrieben sind. SPIND vermerkt die Ausgabe und schreibt den Mitgliedern, dass sie die Bescheinigung ihrem Arbeitgeber geben. Auf der Liste quittiert jede Person den Empfang.',
         printLabel: 'Ausgabe vermerken & drucken', closeAfter: true,
         onPrint: function () { return call({ ids: rows.map(function (x) { return x.id; }) }).then(function (r) { if (after) after(r); return certHandover(r); }); } });
     },
@@ -289,7 +289,7 @@
           return row(x, st, act);
         }).join('') : '<p class="ffl-mu">Keine offenen Anfragen.</p>') + '</div>';
       h += '<div class="ffl-sec ffl-cvsec"><div class="ffl-sh">2 · Gedruckt – zur Unterschrift<em>' + iss.length + '</em></div>' +
-        (iss.length ? bar('<b>Unterschrieben?</b> Dann aushändigen – Wehrwerk druckt eine Ausgabeliste, auf der jede Person den Empfang quittiert.',
+        (iss.length ? bar('<b>Unterschrieben?</b> Dann aushändigen – SPIND druckt eine Ausgabeliste, auf der jede Person den Empfang quittiert.',
           '<button type="button" class="ffl-p" data-act="cvhand">' + (iss.length === 1 ? 'Aushändigen' : 'Alle ' + iss.length + ' aushändigen') + '</button>') +
           iss.map(function (x) { return row(x, '<span class="ffl-chip st-warn">gedruckt ' + d(x.printed) + '</span><span class="ffl-mu">von ' + esc(x.printed_by) + '</span>', '<button type="button" class="ffl-sm" data-act="cvhand1" data-v="' + x.id + '">Aushändigen</button><button type="button" class="ffl-sm" data-act="cvprint" data-v="' + x.id + '">Nochmal drucken</button>'); }).join('')
           : '<p class="ffl-mu">Nichts liegt zur Unterschrift.</p>') + '</div>';
@@ -301,7 +301,7 @@
   };
 })();
 
-/* Eingaben schützen: Wehrwerk zeichnet die Seite nach jedem Speichern neu. Was jemand gerade tippt (auch in einem
+/* Eingaben schützen: SPIND zeichnet die Seite nach jedem Speichern neu. Was jemand gerade tippt (auch in einem
    anderen Feld) und wo der Cursor steht, bleibt dabei erhalten. Nach „Speichern/Anlegen“ gilt der Kasten als erledigt. */
 (function () {
   'use strict';
@@ -384,14 +384,14 @@
   function foot(f, extra) {
     if (!f) return '';
     return '<footer class="ffl-foot"><span>© ' + f.year + ' ' + esc(f.org) + '</span>' + (extra || '') + '<a href="' + esc(f.site) + '">Zurück zur Website</a>' +
-      (f.ver ? '<span class="ffl-ver" title="installierte Version">' + esc((window.MYF && MYF.app) || 'Wehrwerk') + ' ' + esc(f.ver) + (f.channel ? ' · ' + esc(f.channel) : '') + '</span><button type="button" class="ffl-relbtn" data-relnotes="1">Was ist neu?</button>' : '') + '</footer>';
+      (f.ver ? '<span class="ffl-ver" title="installierte Version">' + esc((window.MYF && MYF.app) || 'SPIND') + ' ' + esc(f.ver) + (f.channel ? ' · ' + esc(f.channel) : '') + '</span><button type="button" class="ffl-relbtn" data-relnotes="1">Was ist neu?</button>' : '') + '</footer>';
   }
   // Versionshinweise („Was ist neu?“) als Fenster; die Seite setzt MYFUI.release = d.release nach dem Laden. Öffnen gilt als gelesen.
   function relNotes() {
     var r = window.MYFUI.release; if (!r || !r.notes) return;
     var box = document.createElement('div'), prev = document.activeElement;
     box.className = 'ffl ffl-modal ffl-rel';
-    box.innerHTML = '<div class="ffl-modal-in" role="dialog" aria-modal="true" aria-label="Was ist neu?"><div class="ffl-sh">Was ist neu?<em>' + esc((window.MYF && MYF.app) || 'Wehrwerk') + ' ' + esc(r.ver) + (r.channel ? ' · ' + esc(r.channel) : '') + '</em></div>' +
+    box.innerHTML = '<div class="ffl-modal-in" role="dialog" aria-modal="true" aria-label="Was ist neu?"><div class="ffl-sh">Was ist neu?<em>' + esc((window.MYF && MYF.app) || 'SPIND') + ' ' + esc(r.ver) + (r.channel ? ' · ' + esc(r.channel) : '') + '</em></div>' +
       (r.channel === 'Beta' ? '<p class="ffl-mu" style="margin-top:0">Beta: Alles läuft, wird aber noch getestet. Version 1.0.0 kommt mit dem produktiven Einsatz. Fehler oder Wünsche bitte an die Verwaltung.</p>' : '') +
       r.notes.map(function (n, k) {
         return '<section class="ffl-relv' + (k ? '' : ' is-cur') + '"><h4>' + esc(n.version) + (n.date ? ' <small>' + esc(String(n.date).split('-').reverse().join('.')) + '</small>' : '') + (n.version === r.ver ? ' <span class="ffl-chip st-ok">installiert</span>' : '') + '</h4>' +
@@ -414,7 +414,7 @@
   // Hinweis „Neue Version“ (einmal je Konto und Version)
   function relBar() {
     var r = window.MYFUI.release; if (!r || !r.notes || !r.notes.length || r.seen === r.ver) return '';
-    return '<div class="ffl-msg ok ffl-relbar"><span><b>Neu: ' + esc((window.MYF && MYF.app) || 'Wehrwerk') + ' ' + esc(r.ver) + (r.channel ? ' (' + esc(r.channel) + ')' : '') + '</b> – ' + esc(r.notes[0].title || '') + '</span>' +
+    return '<div class="ffl-msg ok ffl-relbar"><span><b>Neu: ' + esc((window.MYF && MYF.app) || 'SPIND') + ' ' + esc(r.ver) + (r.channel ? ' (' + esc(r.channel) + ')' : '') + '</b> – ' + esc(r.notes[0].title || '') + '</span>' +
       '<button type="button" class="ffl-sm ffl-p" data-relnotes="1">Was ist neu?</button><button type="button" class="ffl-sm ffl-q" data-relseen="1">Ausblenden</button></div>';
   }
   document.addEventListener('click', function (e) {

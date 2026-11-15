@@ -1,11 +1,11 @@
 <?php
 /**
- * Wehrwerk-App (iPhone, iPad, Mac): Geräte sicher mit dem eigenen Konto verbinden – ohne dass die App je ein Passwort sieht.
+ * SPIND-App (iPhone, iPad, Mac): Geräte sicher mit dem eigenen Konto verbinden – ohne dass die App je ein Passwort sieht.
  *
  * Ablauf (wie „Mit dem Browser anmelden“):
  *  1. Die App öffnet im System-Browser  /?myf_app=link&challenge=…&name=…  – dort meldet man sich ganz normal an
  *     (Passwort, Passkey, Zwei-Faktor) und bestätigt „Dieses Gerät verbinden“.
- *  2. Der Browser gibt einen Einmal-Code (2 Minuten gültig) an die App zurück:  wehrwerk://link?code=…
+ *  2. Der Browser gibt einen Einmal-Code (2 Minuten gültig) an die App zurück:  spind://link?code=…
  *  3. Die App tauscht Code + Nachweis (verifier, passend zur challenge – PKCE) gegen ein Geräte-Kennzeichen (Token).
  *
  * Das Token steht nur auf dem Gerät (Schlüsselbund); in der Datenbank liegt allein seine Prüfsumme. Es gilt nur für die
@@ -14,7 +14,7 @@
 
 defined('ABSPATH') || exit;
 
-const MYF_APP_SCHEME = 'wehrwerk://link';
+const MYF_APP_SCHEME = 'spind://link';
 
 // Geräte gehören zum WordPress-Konto, nicht zum Datenbestand: bewusst ohne Demo-Präfix
 function myf_app_table() { global $wpdb; return $wpdb->prefix . 'ffl_app_tokens'; }
@@ -60,7 +60,7 @@ add_action('template_redirect', function () {
         set_transient('myf_app_code_' . hash('sha256', $code), ['user' => (int) $u->ID, 'challenge' => $challenge, 'name' => $name], 2 * MINUTE_IN_SECONDS);
         $back = MYF_APP_SCHEME . '?code=' . $code;
         header('Location: ' . $back, true, 302);
-        myf_app_page('Zurück zur App', '<p>Fast fertig. Falls die App nicht von selbst aufgeht:</p><p><a class="b" href="' . esc_attr($back) . '">Wehrwerk-App öffnen</a></p>', 302);
+        myf_app_page('Zurück zur App', '<p>Fast fertig. Falls die App nicht von selbst aufgeht:</p><p><a class="b" href="' . esc_attr($back) . '">SPIND-App öffnen</a></p>', 302);
     }
     $m = myf_me();
     myf_app_page('Gerät verbinden',
@@ -79,7 +79,7 @@ function myf_app_page($title, $html, $status = 200) {
     header('X-Frame-Options: DENY');
     header('Referrer-Policy: no-referrer');
     echo '<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">' .
-        '<title>' . esc_html($title) . ' – Wehrwerk</title><style>body{margin:0;font:17px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f3f3f3;color:#111}' .
+        '<title>' . esc_html($title) . ' – SPIND</title><style>body{margin:0;font:17px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f3f3f3;color:#111}' .
         'main{max-width:440px;margin:8vh auto;padding:28px 24px;background:#fff;border-top:4px solid ' . esc_attr($color) . '}h1{font-size:26px;line-height:1.1;margin:0 0 14px}' .
         'ul{padding-left:20px;color:#555;font-size:15px}.who{color:#555;font-size:15px}form{margin-top:22px;display:flex;gap:10px;flex-wrap:wrap}' .
         '.b,.g{font:inherit;font-weight:700;padding:13px 22px;border:2px solid #111;background:#fff;color:#111;cursor:pointer;text-decoration:none;display:inline-block}' .
@@ -142,7 +142,8 @@ function myf_app_request_path() {
 add_filter('determine_current_user', function ($uid) {
     global $wpdb;
     if ($uid) return $uid;
-    $t = (string) ($_SERVER['HTTP_X_WEHRWERK_TOKEN'] ?? '');
+    // Kopfzeile X-SPIND-Token; der frühere Name wird weiter angenommen
+    $t = (string) ($_SERVER['HTTP_X_SPIND_TOKEN'] ?? $_SERVER['HTTP_X_WEHRWERK_TOKEN'] ?? '');
     if ($t === '' && preg_match('/^Bearer\s+(wwk_[0-9a-f]{64})$/', (string) ($_SERVER['HTTP_AUTHORIZATION'] ?? ($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '')), $m)) $t = $m[1];
     if (!preg_match('/^wwk_[0-9a-f]{64}$/', $t)) return $uid;
     $path = myf_app_request_path();

@@ -1,6 +1,6 @@
 <?php
 /**
- * Alarm-Schnittstelle (z. B. Alamos FE2): Bei einem Alarm schickt FE2 eine Web-Anfrage an Wehrwerk, der Einsatz wird
+ * Alarm-Schnittstelle (z. B. Alamos FE2): Bei einem Alarm schickt FE2 eine Web-Anfrage an SPIND, der Einsatz wird
  * sofort angelegt – mit Stichwort, Einsatzort und Alarmzeit. Danach: „Ich war dabei“, Dashboard zeigt den Alarm.
  * Geschützt über einen geheimen Schlüssel in der Adresse. Nimmt GET und POST, JSON und Formulardaten an und erkennt die
  * üblichen Feldnamen; eigene Feldnamen lassen sich in der Verwaltung festlegen. Jede Anfrage steht im Alarm-Protokoll.
@@ -222,7 +222,7 @@ add_action('myf_alarm_ask', function ($id) {
 add_action('rest_api_init', function () {
     register_rest_route('myf/v1', '/alarm', ['methods' => ['GET', 'POST'], 'permission_callback' => '__return_true', 'callback' => function (WP_REST_Request $req) {
         $a = myf_alarm_settings();
-        $key = (string) ($req->get_param('key') ?: $req->get_header('x-wehrwerk-key'));
+        $key = (string) ($req->get_param('key') ?: ($req->get_header('x-spind-key') ?: $req->get_header('x-wehrwerk-key')));
         if (!$a['on'] || $a['key'] === '' || !hash_equals($a['key'], $key)) return new WP_Error('myf_alarm', 'Nicht freigegeben.', ['status' => 403]);
         // Schutz vor Endlosschleifen / Missbrauch: höchstens 60 Anfragen pro Stunde
         // Missbrauchsschutz je voller Stunde – großzügig, damit an Unwettertagen (viele Alarme, Folgealarme) nichts verloren geht
@@ -233,8 +233,8 @@ add_action('rest_api_init', function () {
         $params += $req->get_body_params() + $req->get_query_params();
         $raw = trim((string) $req->get_body());
         if (!$params && $raw !== '' && !in_array($raw[0], ['{', '['], true)) $params = ['text' => $raw]; // reiner Text (z. B. SMS-/E-Mail-Weiterleitung)
-        // Zum Ausprobieren des Webhooks: test=1 (oder Header X-Wehrwerk-Test) legt nur einen Testalarm an, keinen echten Einsatz
-        $isTest = !empty($params['test']) || (string) $req->get_header('x-wehrwerk-test') !== '';
+        // Zum Ausprobieren des Webhooks: test=1 (oder Header X-SPIND-Test) legt nur einen Testalarm an, keinen echten Einsatz
+        $isTest = !empty($params['test']) || ((string) $req->get_header('x-spind-test') !== '' || (string) $req->get_header('x-wehrwerk-test') !== '');
         unset($params['key'], $params['test']);
         $flat = myf_alarm_flatten($params);
         $GLOBALS['myf_alarm_request'] = true;

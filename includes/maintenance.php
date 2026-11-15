@@ -71,7 +71,7 @@ function myf_maint_html($preview = false) {
 // Inhalt der Vorlage: kleine PHP-Weiche (503, für Schnittstellen JSON), dann die feste Seite – ohne Abhängigkeit vom Plugin
 function myf_maint_file() {
     $msg = 'Die Website wird gerade aktualisiert – bitte gleich noch einmal versuchen.';
-    return "<?php\n// " . MYF_MAINT_MARK . ": Wartungsseite, automatisch von Wehrwerk angelegt (wird beim Deaktivieren des Plugins entfernt)\n"
+    return "<?php\n// " . MYF_MAINT_MARK . ": Wartungsseite, automatisch von SPIND angelegt (wird beim Deaktivieren des Plugins entfernt)\n"
         . "\$myf_api = strpos((string) (\$_SERVER['REQUEST_URI'] ?? ''), '/wp-json/') !== false || isset(\$_GET['rest_route']) || (defined('DOING_AJAX') && DOING_AJAX);\n"
         . "if (!headers_sent()) {\n    header((\$_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1') . ' 503 Service Unavailable', true, 503);\n    header('Retry-After: 60');\n    header('Cache-Control: no-store');\n"
         . "    header('Content-Type: ' . (\$myf_api ? 'application/json' : 'text/html') . '; charset=utf-8');\n}\n"

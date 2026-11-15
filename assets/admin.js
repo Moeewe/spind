@@ -1,8 +1,8 @@
-/* Wehrwerk – Verwaltung: Übersicht, Lehrgänge (Jahre, Vorlagen, Zuteilung, Teilnahme), Mitglieder, Kleidung, Anregungen, Atemschutz, Protokoll */
+/* SPIND – Verwaltung: Übersicht, Lehrgänge (Jahre, Vorlagen, Zuteilung, Teilnahme), Mitglieder, Kleidung, Anregungen, Atemschutz, Protokoll */
 (function () {
   'use strict';
   var ORG = ((window.MYF && MYF.org) || {}).name || 'Freiwillige Feuerwehr';
-  var APP = (window.MYF && MYF.app) || 'Wehrwerk';
+  var APP = (window.MYF && MYF.app) || 'SPIND';
 
   // Auf der Website läuft die Verwaltung in einer Vollbild-Ebene (#ffl-adm), im WordPress-Menü in #ffl
   var root = document.getElementById('ffl-adm') || document.getElementById('ffl');
@@ -194,10 +194,12 @@
     if (i.gstate === 'none') why.push('G26-Datum fehlt'); else if (i.gstate === 'over') why.push('G26 abgelaufen seit ' + fmtDate(i.g26));
     if (!m.agt_course) why.push('Lehrgang Atemschutzgeräteträger nicht nachgewiesen');
     if (i.state === 'none') why.push('Übungsstrecke nie eingetragen'); else if (i.state === 'over') why.push('Übungsstrecke fällig seit ' + fmtDate(i.due));
+    if (i.state2 === 'none') why.push('Übung/Einsatz unter Atemschutz oder zweite Übungsstrecke fehlt'); else if (i.state2 === 'over') why.push('Übung/Einsatz unter Atemschutz oder zweite Übungsstrecke fällig seit ' + fmtDate(i.due2));
     var soon = [];
+    if (i.state2 === 'soon') soon.push('Übung oder zweite Strecke bis ' + fmtDate(i.due2));
     if (i.gstate === 'soon') soon.push('G26 bis ' + fmtDate(i.g26));
     if (i.state === 'soon') soon.push('Übungsstrecke bis ' + fmtDate(i.due));
-    var detail = why.length ? why.join(' · ') : ['G26 bis ' + fmtDate(i.g26), 'Übungsstrecke bis ' + fmtDate(i.due)].join(' · ');
+    var detail = why.length ? why.join(' · ') : ['G26 bis ' + fmtDate(i.g26), 'Übungsstrecke bis ' + fmtDate(i.due)].concat(d.agt_second ? ['Übung/2. Strecke bis ' + fmtDate(i.due2)] : []).join(' · ');
     return { ready: !why.length, soon: !why.length && soon.length > 0, detail: detail, info: i };
   }
   function agtChip(m) {
@@ -217,7 +219,7 @@
       ['train', 'Lehrgänge', [['courses', 'Lehrgänge']]],
       ['agt', 'Atemschutz', [['agt', 'Atemschutz']]],
       ['tech', 'Technik', [['vehicles', 'Fahrzeuge & Geräte']]],
-      ['duty', 'Dienste', [['duties', 'Jahresdienstplan'], ['uebungen', 'Übungen & Teilnahme'], ['board', 'Aushänge & Einladungen']]],
+      ['duty', 'Dienste', [['duties', 'Jahresdienstplan'], ['uebungen', 'Übungen & Teilnahme'], ['events', 'Veranstaltungen'], ['board', 'Aushänge & Einladungen']]],
       // Abfragen (Brandsicherheitswache, Grünanlagen, Volkstrauertag …) sind etwas Eigenes – nicht mit Übungen und Dienstabenden mischen
       ['asks', 'Abfragen', [['dutylists', 'Abfragen'], ['orders', 'Bestellkarten']]],
       ['reports', 'Meldungen', [['defects', 'Mängel'], ['ideas', 'Anregungen'], ['messages', 'Rückfragen']]],
@@ -256,11 +258,11 @@
     if (!d.me_member && ui.tab === 'overview') h += '<div class="ffl-msg warn">Dein eigenes Konto ist noch keinem Mitglied zugeordnet – deshalb kannst du ' + APP + ' nicht selbst nutzen. ' +
       'Öffne dein Profil unter <a href="#" data-go="members">Mitglieder</a> und klicke „Das bin ich“, oder lege dich auf der <a href="' + esc(d.link) + '" target="_blank" rel="noopener">Mitgliederseite</a> an.</div>';
 
-    if (ui.tab === 'overview') h += MYFUI.relBar(); // einmal je Version: „Neu: Wehrwerk x.y.z – Was ist neu?“
+    if (ui.tab === 'overview') h += MYFUI.relBar(); // einmal je Version: „Neu: SPIND x.y.z – Was ist neu?“
     // Zwei-Faktor ist Pflicht, aber noch nicht eingerichtet: erst einrichten, dann geht es weiter
     if (d.twofa && d.twofa.required && !d.twofa.on && !ui.twofaCodes) h += '<div class="ffl-msg warn" style="margin-top:14px"><b>Bitte zuerst die Zwei-Faktor-Anmeldung einrichten.</b> Für Verwaltungskonten ist sie Pflicht – das dauert eine Minute.</div>' + twofaBox();
     else if (ui.twofaCodes) h += twofaBox();
-    else h += ({ cd: tabCd, mail: tabMail, orders: tabOrders, rights: tabRights, security: tabSecurity, inbox: tabInbox, overview: tabOverview, courses: coursesSection, members: tabMembers, incidents: tabIncidents, clothing: tabClothing, defects: tabDefects, ideas: tabIdeas, agt: tabAgt, site: tabSite, briefings: tabBriefings, screen: tabScreen, audit: tabAudit, teams: tabTeams, messages: tabMessages, settings: tabSettings, start: tabStart, vehicles: tabVehicles, duties: function () { return '<div style="margin-top:12px">' + drillsPanel() + '</div>'; }, dutylists: function () { return tabDuties('duties'); }, uebungen: function () { return incidentList('uebung'); }, board: tabBoard, data: tabData })[ui.tab]();
+    else h += ({ cd: tabCd, mail: tabMail, orders: tabOrders, rights: tabRights, security: tabSecurity, inbox: tabInbox, overview: tabOverview, courses: coursesSection, members: tabMembers, incidents: tabIncidents, clothing: tabClothing, defects: tabDefects, ideas: tabIdeas, agt: tabAgt, site: tabSite, briefings: tabBriefings, screen: tabScreen, audit: tabAudit, teams: tabTeams, messages: tabMessages, settings: tabSettings, start: tabStart, vehicles: tabVehicles, duties: function () { return '<div style="margin-top:12px">' + drillsPanel() + '</div>'; }, dutylists: function () { return tabDuties('duties'); }, uebungen: function () { return incidentList('uebung'); }, board: tabBoard, events: tabEvents, data: tabData })[ui.tab]();
     h += MYFUI.foot(d.foot);
     MYFForm.paint(root, h);
     [].forEach.call(root.querySelectorAll('.ffl-nav .ffl-tabs, .ffl-nav .ffl-subnav'), function (b) { var c = b.querySelector('[aria-selected=true]'); if (c && b.scrollWidth > b.clientWidth) b.scrollLeft += c.getBoundingClientRect().left - b.getBoundingClientRect().left - (b.clientWidth - c.offsetWidth) / 2; }); // aktiver Reiter bleibt sichtbar
@@ -599,7 +601,7 @@
       '<button type="button" class="ffl-p" data-sub="plan">Zuteilung bearbeiten</button>',
       '<label class="ffl-switch"><input type="checkbox" data-set="published"><span></span>Zuteilung für Mitglieder freigeben</label><span class="ffl-mu">Schritt 5 – noch nicht sichtbar</span>');
     else H = hero('Schritt 6 von 6', mine ? 'Teilnahme bestätigen' : 'Lehrgangsjahr ' + ui.year + ' läuft', mine ? mine : completed, mine ? (mine === 1 ? 'Teilnahme offen – Lehrgang ist vorbei' : 'Teilnahmen offen – Lehrgänge sind vorbei') : (completed === 1 ? 'Teilnahme bestätigt' : 'Teilnahmen bestätigt') + ' · ' + assigned + ' zugeteilt',
-      mine ? 'Nach jedem Lehrgang hier „absolviert“ oder „nicht teilgenommen“ eintragen – das landet in der Ausbildung des Mitglieds und zählt für Stunden und Jahresbericht.' : 'Die Zuteilung ist freigegeben. Nach jedem Lehrgang die Teilnahme bestätigen – Wehrwerk erinnert hier, sobald ein Termin vorbei ist.',
+      mine ? 'Nach jedem Lehrgang hier „absolviert“ oder „nicht teilgenommen“ eintragen – das landet in der Ausbildung des Mitglieds und zählt für Stunden und Jahresbericht.' : 'Die Zuteilung ist freigegeben. Nach jedem Lehrgang die Teilnahme bestätigen – SPIND erinnert hier, sobald ein Termin vorbei ist.',
       (mine ? '<button type="button" class="ffl-p" data-sub="plan">Jetzt bestätigen</button>' : '<button type="button" data-sub="plan">Zuteilung & Teilnahme</button>') +
       (d.years.indexOf(ui.year + 1) < 0 ? '<button type="button" class="ffl-q" data-act="newyear">Nächstes Jahr vorbereiten</button>' : ''),
       '<label class="ffl-switch"><input type="checkbox" data-set="published" checked><span></span>Zuteilung für Mitglieder sichtbar</label>');
@@ -853,8 +855,12 @@
     var planned = log.filter(function (l) { return l.kind === 'strecke' && l.date > now; }).sort(function (a, b) { return a.date < b.date ? -1 : 1; })[0];
     var st = last('strecke'), due = st ? addDays(st.date, 365) : null;
     var state = !st ? 'none' : due < now ? 'over' : due < addDays(now, 60) ? 'soon' : 'ok';
+    // Zweiter Nachweis (wenn so eingestellt): Einsatzübung oder Einsatz unter Atemschutz – oder eine zweite Übungsstrecke – in den letzten 12 Monaten
+    var past = log.filter(function (l) { return l.date <= now; }), strs = past.filter(function (l) { return l.kind === 'strecke'; }), prax = past.filter(function (l) { return l.kind === 'uebung' || l.kind === 'einsatz'; })[0];
+    var second = [prax ? prax.date : '', strs[1] ? strs[1].date : ''].sort().pop(), due2 = second ? addDays(second, 365) : null;
+    var state2 = !d.agt_second ? 'ok' : !second ? 'none' : due2 < now ? 'over' : due2 < addDays(now, 60) ? 'soon' : 'ok';
     var g = m.g26_until, gstate = !g ? 'none' : g < now ? 'over' : g < addDays(now, 60) ? 'soon' : 'ok';
-    return { strecke: st, due: due, state: state, planned: planned, unterweisung: last('unterweisung'), g26: g, gstate: gstate, log: log };
+    return { strecke: st, due: due, state: state, second: second, secondKind: prax && prax.date === second ? prax.kind : 'strecke', due2: due2, state2: state2, planned: planned, unterweisung: last('unterweisung'), g26: g, gstate: gstate, log: log };
   }
   function dueTag(state, text) {
     return state === 'over' ? '<span class="ffl-tag err">' + text + '</span>' : state === 'soon' ? '<span class="ffl-tag warn">' + text + '</span>'
@@ -865,7 +871,7 @@
   // Spalten-Erkennung für Importe (Überschriften wie in Excel, Groß/Klein und Leerzeichen egal)
   var IMPORTS = {
     quals: { title: 'Ausbildung nachtragen (frühere Lehrgänge)', area: 'courses', cols: { last: ['nachname'], first: ['vorname'], name: ['name'], title: ['lehrgang', 'ausbildung', 'titel'], short: ['kurz', 'kürzel'], year: ['jahr'], date: ['datum', 'am', 'bis'], note: ['bemerkung', 'ort'] }, need: ['title'] },
-    g26: { title: 'Atemschutz: G26 & letzte Übungsstrecke', area: 'agt', cols: { last: ['nachname'], first: ['vorname'], name: ['name'], g26: ['g26', 'g26gültigbis', 'g26bis', 'untersuchung'], strecke: ['übungsstrecke', 'strecke', 'letzteübungsstrecke'] }, need: [] },
+    g26: { title: 'Atemschutz: G26, Übungsstrecken & Übungen (Jahresliste)', area: 'agt', cols: { last: ['nachname'], first: ['vorname'], name: ['name'], g26: ['g26', 'g26gültigbis', 'g26bis', 'untersuchung'], strecke: ['übungsstrecke', 'strecke', 'letzteübungsstrecke'], strecke1: ['strecke1', 'übungsstrecke1'], strecke2: ['strecke2', 'übungsstrecke2'], uebung: ['übungunteratemschutz', 'übung', 'übungfwdv7', 'einsatzübung', 'atemschutzübung', 'fwdv7'] }, need: [] },
     devices: { title: 'Atemschutzgeräte', area: 'agt', cols: { type: ['art', 'typ', 'geräteart'], nr: ['nr', 'nummer', 'inventarnr', 'inventarnummer'], serial: ['seriennummer', 'seriennr', 'sn'], maker: ['hersteller'], model: ['modell'], built: ['baujahr'], location: ['standort', 'fahrzeug'], test_due: ['prüffrist', 'tüv', 'nächsteprüfung'] }, need: ['type', 'nr'] },
     vehicles: { title: 'Fahrzeuge', area: 'vehicles', cols: { name: ['name', 'fahrzeug', 'bezeichnung'], plate: ['kennzeichen'], callsign: ['funkrufname', 'rufname'], unit: ['löschzug', 'einheit'], built: ['baujahr'] }, need: ['name'] },
     stock: { title: 'Kleidung: Ausstattung je Person', area: 'clothing', cols: { last: ['nachname'], first: ['vorname'], name: ['name'], item: ['teil', 'kleidungsstück', 'artikel'], size: ['größe'], qty: ['anzahl', 'menge'], issued: ['ausgegeben', 'ausgabe', 'datum'], serial: ['nr', 'seriennummer', 'inventarnr'] }, need: ['item'] }
@@ -885,7 +891,7 @@
     return rows.filter(function (r) { return r.some(function (x) { return String(x).trim(); }); });
   }
   function mapRows(set, table) {
-    var def = IMPORTS[set], head = (table[0] || []).map(function (h) { return String(h).toLowerCase().replace(/[\s.\-_]/g, ''); }), idx = {};
+    var def = IMPORTS[set], head = (table[0] || []).map(function (h) { return String(h).toLowerCase().replace(/[\s.\-_]/g, '').replace(/(.)(19|20)\d\d$/, '$1'); }), idx = {}; // Jahreszahl am Ende („Strecke 1 2026“) zählt nicht zur Spaltenbezeichnung
     Object.keys(def.cols).forEach(function (k) { var i = head.findIndex(function (h) { return def.cols[k].indexOf(h) >= 0; }); if (i >= 0) idx[k] = i; });
     return { idx: idx, rows: table.slice(1).map(function (r) { var o = {}; Object.keys(idx).forEach(function (k) { o[k] = (r[idx[k]] || '').trim(); }); return o; }) };
   }
@@ -915,8 +921,8 @@
     var rows = [
       ['Alarm', al.on ? 'aktiv' : 'aus', 'FE2 / aPager → Webhook → Einsatz wird angelegt', 'unten: Alarm-Schnittstelle', 'incidents'],
       ['Dienstplan', (d.drill_cal || {}).set ? ((d.drill_cal.cals || []).length + ((d.drill_cal.cals || []).length === 1 ? ' Kalender' : ' Kalender') + ', live') : 'kein Kalender', 'Kalender (iCal, z. B. Alamos) → Dienstplan, Kalender, Abo, Dashboard', 'Dienste → Jahresdienstplan', 'duties'],
-      ['Einsatzberichte', w.target === 'wehrwerk' ? APP : 'Einsatzverwaltung', w.target === 'wehrwerk' ? 'Einsatz → „Für die Website“ → Seite [wehrwerk_einsatzberichte] + /myf/v1/public/incidents' : 'Einsatzverwaltung ⇄ ' + APP + ' (Abgleich alle 5 Min.)', 'Einsätze → Website-Berichte', 'incidents'],
-      ['Schnellerfassung', w.ev ? 'verfügbar' : '—', 'WhatsApp-/Alarmtexte → Einsatzverwaltung', 'Seite [wehrwerk_einsatz]', 'incidents'],
+      ['Einsatzberichte', w.target === 'wehrwerk' ? APP : 'Einsatzverwaltung', w.target === 'wehrwerk' ? 'Einsatz → „Für die Website“ → Seite [spind_einsatzberichte] + /myf/v1/public/incidents' : 'Einsatzverwaltung ⇄ ' + APP + ' (Abgleich alle 5 Min.)', 'Einsätze → Website-Berichte', 'incidents'],
+      ['Schnellerfassung', w.ev ? 'verfügbar' : '—', 'WhatsApp-/Alarmtexte → Einsatzverwaltung', 'Seite [spind_einsatz]', 'incidents'],
       ['Termine', d.settings.screen_ical_set ? 'Kalender verbunden' : 'kein Kalender', 'iCal (z. B. Alamos) → Dashboard und Kalender-Import', 'Dashboard', 'screen'],
       ['Kalender-Abos', 'aktiv', APP + ' → persönliche iCal-Links der Mitglieder (Lehrgänge, Dienste, Übungsstrecke)', 'Mitglieder: Kalender', 'any'],
       ['Tabellen', 'aktiv', 'CSV/Excel ⇄ ' + APP + ' (Export aller Bereiche, Import mit Vorschau)', 'unten', 'any'],
@@ -1014,7 +1020,7 @@
       '<div class="ffl-row" style="margin-top:10px"><button type="button" data-act="bknow">Sicherung jetzt erstellen</button>' + (b.last_file ? '<a class="ffl-btn" href="' + esc(b.download) + '">↓ Letzte Sicherung</a>' : '') + '</div></div>' +
       '<div class="ffl-pbox"><div class="ffl-sh">Kopie im Gerätehaus</div><p class="ffl-mu" style="margin-top:0">Ein Rechner im Gerätehaus (Feuerwehr-Server, NAS) holt jede Nacht die verschlüsselte Datei ab – so liegt immer eine Kopie außerhalb des Webservers.</p>' +
       (b.pull_url ? '<label class="ffl-fl">Abruf-Link (geheim halten)</label>' + secretBox(b.pull_url, { what: 'Abruf-Link Sicherung' }) +
-        '<label class="ffl-fl" style="margin-top:10px">Befehl für den Server (täglich, z. B. 3:30 Uhr per Cron)</label>' + secretBox("curl -fsS -o /srv/sicherung/wehrwerk-$(date +%F).wwbk '" + b.pull_url + "'", { what: 'Abruf-Befehl Sicherung' }) +
+        '<label class="ffl-fl" style="margin-top:10px">Befehl für den Server (täglich, z. B. 3:30 Uhr per Cron)</label>' + secretBox("curl -fsS -o /srv/sicherung/spind-$(date +%F).wwbk '" + b.pull_url + "'", { what: 'Abruf-Befehl Sicherung' }) +
         '<div class="ffl-row" style="margin-top:8px"><button type="button" class="ffl-sm" data-act="bkpull">Neuen Link erzeugen</button><button type="button" class="ffl-sm ffl-q" data-act="bkpulloff">Abruf ausschalten</button></div>'
         : '<button type="button" data-act="bkpull">Abruf-Link einschalten</button>') + '</div></div>' +
       // Aufbewahrung und Speicherplatz: damit Archive und Sicherungsdateien den Server nicht vollaufen lassen
@@ -1027,7 +1033,7 @@
           '<div><label class="ffl-fl" for="ffl-bkw">Wöchentliche Sicherungen (Wochen)</label><input type="number" id="ffl-bkw" min="0" max="104" value="' + c.keep_weekly + '"></div>' +
           '<div><label class="ffl-fl" for="ffl-bkf">Sicherungsdateien behalten</label><input type="number" id="ffl-bkf" min="3" max="120" value="' + c.keep_files + '"></div>' +
           '<div><label class="ffl-fl" for="ffl-bkm">Speicher-Obergrenze (MB)</label><input type="number" id="ffl-bkm" min="20" max="20000" value="' + c.max_mb + '"></div></div>' +
-          '<p class="ffl-mu" style="margin:8px 0 0">Wird die Grenze erreicht, fallen zuerst die ältesten automatischen Sicherungen weg – die drei neuesten bleiben immer. Archive von Hand und „Vor dem …“-Archive löscht Wehrwerk nie selbst (unter Startklar & Neustart → Archiv einzeln löschbar).</p></div>';
+          '<p class="ffl-mu" style="margin:8px 0 0">Wird die Grenze erreicht, fallen zuerst die ältesten automatischen Sicherungen weg – die drei neuesten bleiben immer. Archive von Hand und „Vor dem …“-Archive löscht SPIND nie selbst (unter Startklar & Neustart → Archiv einzeln löschbar).</p></div>';
       })() +
       '<details class="ffl-pbox" style="margin-top:14px"><summary><b>Sicherung wiederherstellen</b> (z. B. nach einem Serverausfall)</summary><p class="ffl-mu">Der aktuelle Stand wird vorher archiviert. Protokoll bleibt vollständig.</p>' +
       '<div class="ffl-form2"><div><label class="ffl-fl">Sicherungsdatei (.wwbk)</label><input type="file" id="ffl-bkfile" accept=".wwbk"></div><div><label class="ffl-fl">Sicherungskennwort</label><input type="password" id="ffl-bkrpass" autocomplete="off"></div></div>' +
@@ -1272,7 +1278,7 @@
   function drillCalBox() {
     var c = d.drill_cal || {}, cals = c.cals || [], list = d.drills || [], nCal = list.filter(function (r) { return r.source === 'kalender'; }).length, nBoth = list.filter(function (r) { return r.source === 'beides'; }).length, dupes = list.filter(function (r) { return r.dupe_of; });
     var h = '<div class="ffl-pbox ffl-drcal"><div class="ffl-sh">Kalender als Grundlage<em>' + (cals.length ? (c.ok ? 'laufend abgeglichen' : (function (n) { return n > 1 ? n + ' Kalender gerade nicht erreichbar' : 'ein Kalender gerade nicht erreichbar'; })(cals.filter(function (x) { return x.err; }).length)) + (c.at ? ' · Stand ' + fmtDT(c.at).slice(-5) + ' Uhr' : '') : 'aus') + '</em></div>';
-    if (!cals.length) h += '<p class="ffl-mu" style="margin-top:0">Gibt es den Dienstplan schon als Kalender (z. B. in Alamos, mit Thema und Vorbereitern)? Dann hier den <b>öffentlichen iCal-Link</b> eintragen – Wehrwerk liest die Termine, zeigt sie den Mitgliedern, im Kalender-Abo und auf dem Dashboard und erkennt doppelt Eingetragenes. ' +
+    if (!cals.length) h += '<p class="ffl-mu" style="margin-top:0">Gibt es den Dienstplan schon als Kalender (z. B. in Alamos, mit Thema und Vorbereitern)? Dann hier den <b>öffentlichen iCal-Link</b> eintragen – SPIND liest die Termine, zeigt sie den Mitgliedern, im Kalender-Abo und auf dem Dashboard und erkennt doppelt Eingetragenes. ' +
       'Liegen Dienstabende und Lehrgänge in <b>verschiedenen Kalendern</b>, einfach mehrere verbinden.</p>';
     else h += '<div class="ffl-calconns">' + cals.map(function (k) {
       return '<div class="ffl-calconn"><div><input type="text" value="' + esc(k.label) + '" data-calname="' + k.i + '" aria-label="Bezeichnung" title="Bezeichnung ändern"><span class="ffl-mu">' + esc(k.host) + (k.screen ? ' · wie Dashboard' : '') + '</span></div>' +
@@ -1285,7 +1291,7 @@
     h += '<div class="ffl-caladd"><div class="ffl-fl">' + (cals.length ? 'Weiteren Kalender verbinden' : 'Kalender verbinden') + '</div><div class="ffl-row"><input type="text" id="ffl-drical-l" placeholder="Bezeichnung, z. B. Dienstabende" style="flex:0 1 220px;width:auto">' +
       '<input type="url" id="ffl-drical" placeholder="https://… oder webcal://…/cal.ics" style="flex:1 1 300px;width:auto"><button type="button" class="ffl-p" data-act="drical">Verbinden</button>' +
       (c.screen_set && !c.screen_used ? '<button type="button" class="ffl-q ffl-sm" data-act="drical" data-v="=screen" title="Denselben Kalender wie das Dashboard im Besprechungsraum verwenden">Dashboard-Kalender nehmen</button>' : '') + '</div></div>';
-    h += '<p class="ffl-mu" style="margin:10px 0 0">Die Termine sind <b>dynamisch</b>: Wehrwerk gleicht alle Kalender alle 15 Minuten ab. Ändert sich dort Datum, Uhrzeit, Thema oder wer verantwortlich ist, steht es danach überall so. Wird ein Termin gelöscht, verschwindet er bei den Mitgliedern. ' +
+    h += '<p class="ffl-mu" style="margin:10px 0 0">Die Termine sind <b>dynamisch</b>: SPIND gleicht alle Kalender alle 15 Minuten ab. Ändert sich dort Datum, Uhrzeit, Thema oder wer verantwortlich ist, steht es danach überall so. Wird ein Termin gelöscht, verschwindet er bei den Mitgliedern. ' +
       'Bei Lehrgängen bedeutet „Verantwortlich“ im Kalender: wer dabei ist. Die Links bleiben auf dem Server und erscheinen nirgends im Browser.</p>';
     return h + '</div>';
   }
@@ -1323,10 +1329,109 @@
             (multiUnit() ? '<td>' + (r.unit ? esc(unitShort(r.unit)) : 'alle') + '</td>' : '') + (calOn ? '<td>' + src + '</td>' : '') +
             '<td>' + (ab.length ? '<span title="' + esc(ab.map(function (a) { return a.name + (a.reason ? ' (' + a.reason + ')' : ''); }).join(', ')) + '">' + ab.length + '</span>' : '–') + '</td>' +
             '<td style="white-space:nowrap">' + (r.id ? '<button type="button" class="ffl-sm" data-act="drlist" data-id="' + r.id + '">Anwesenheitsliste</button> <button type="button" class="ffl-q ffl-sm" data-act="drdel" data-id="' + r.id + '" aria-label="Löschen" title="' + (r.source === 'beides' ? 'Nur die Zeile löschen – der Kalendertermin bleibt und taucht wieder auf' : 'Löschen') + '">✕</button>'
-              : '<button type="button" class="ffl-sm" data-act="dradopt" data-v="' + esc(r.cal_uid) + '" title="Nur nötig, wenn du den Termin in Wehrwerk ändern möchtest – sonst kommt alles automatisch aus dem Kalender">Bearbeiten</button>') + '</td></tr>';
+              : '<button type="button" class="ffl-sm" data-act="dradopt" data-v="' + esc(r.cal_uid) + '" title="Nur nötig, wenn du den Termin in SPIND ändern möchtest – sonst kommt alles automatisch aus dem Kalender">Bearbeiten</button>') + '</td></tr>';
         }).join('') + '</tbody></table></div></div>';
     });
     return h;
+  }
+  // ---- Veranstaltungen: besondere Termine hervorheben, öffentlich zeigen, mit dem Kalender abgleichen --------------
+  var EV_VIS_CHIP = { draft: ['st-warn', 'Entwurf'], members: ['st-no', 'Mitglieder'], 'public': ['st-ok', 'Öffentlich'] };
+  function evWhen(e) {
+    return fmtDate(e.date) + (e.end_date && e.end_date > e.date ? ' – ' + fmtDate(e.end_date) : '') + (e.time ? ', ' + esc(e.time) + (e.time_to && !(e.end_date > e.date) ? '–' + esc(e.time_to) : '') + ' Uhr' : '');
+  }
+  function evCopy(label, text) {
+    return '<div class="ffl-row" style="gap:8px;align-items:center;margin-top:6px"><code style="flex:1 1 260px;overflow-wrap:anywhere">' + esc(text) + '</code><button type="button" class="ffl-sm" data-act="evcopy" data-v="' + esc(text) + '">' + esc(label) + '</button></div>';
+  }
+  function tabEvents() {
+    var list = d.events || [], now = isoToday(), info = d.event_info || {};
+    if (ui.evEdit) return evForm(ui.evEdit === 'new' ? null : list.filter(function (e) { return e.id === ui.evEdit; })[0]);
+    var up = list.filter(function (e) { return (e.end_date || e.date) >= now; }), past = list.filter(function (e) { return (e.end_date || e.date) < now; }).reverse();
+    var h = '<div class="ffl-sec" style="margin-top:12px"><div class="ffl-sh">Veranstaltungen<em>' + up.length + ' kommende</em><button type="button" class="ffl-p ffl-sm" style="margin-left:auto" data-act="evnew">Neue Veranstaltung</button></div>' +
+      '<p class="ffl-mu" style="margin-top:0">Für alles, was die Öffentlichkeit sehen soll: Leistungsnachweis, Tag der Jugendfeuerwehr, Tag der offenen Tür, Lampionfest. Mit Beschreibung und Bild auf der Website; bei den Mitgliedern steht die Veranstaltung ganz normal im Kalender. ' +
+      'Internes gehört in den Dienstplan, nicht hierher. Jede Veranstaltung beginnt als <b>Entwurf</b> – sichtbar wird sie erst mit „Öffentlich“.</p>';
+    function rows(arr, off) {
+      return '<div class="ffl-scroll"><table class="ffl-table"><thead><tr><th>Wann</th><th>Veranstaltung</th><th>Sichtbar für</th><th>Kalender</th><th></th></tr></thead><tbody>' + arr.map(function (e) {
+        var v = EV_VIS_CHIP[e.visibility] || EV_VIS_CHIP.draft;
+        return '<tr' + (off ? ' class="is-off"' : '') + '><td style="white-space:nowrap"><b>' + evWhen(e) + '</b></td><td><b>' + esc(e.title) + '</b>' + (e.featured ? ' <span class="ffl-chip st-bad">hervorgehoben</span>' : '') + (e.cancelled ? ' <span class="ffl-chip st-warn">abgesagt</span>' : '') +
+          (e.place ? '<div class="ffl-mu">' + esc(e.place) + '</div>' : '') + (e.ask_id ? '<div class="ffl-mu">Abfrage: ' + esc(((d.duty_lists || []).filter(function (l) { return l.id === e.ask_id; })[0] || {}).title || 'nicht mehr vorhanden') + '</div>' : '') + '</td><td><span class="ffl-chip ' + v[0] + '">' + v[1] + '</span></td>' +
+          '<td>' + (e.cal === 'live' ? '<span class="ffl-chip st-ok" title="Datum und Uhrzeit kommen laufend aus dem Kalender">verknüpft · live</span>' : e.cal === 'gone' ? '<span class="ffl-chip st-bad" title="Der Termin steht nicht mehr im Kalender – abgesagt oder gelöscht? Die gespeicherten Angaben gelten weiter.">nicht mehr im Kalender</span>' : '<span class="ffl-mu">nur in SPIND</span>') + '</td>' +
+          '<td style="white-space:nowrap">' + (e.url ? '<a class="ffl-btn ffl-sm" href="' + esc(e.url) + '" target="_blank" rel="noopener">Ansehen</a> ' : '') + '<button type="button" class="ffl-sm" data-act="evedit" data-id="' + e.id + '">Bearbeiten</button></td></tr>';
+      }).join('') + '</tbody></table></div>';
+    }
+    h += up.length ? rows(up, false) : '<p class="ffl-mu">Noch keine kommende Veranstaltung.</p>';
+    h += '</div>';
+    var cand = d.event_cal || [];
+    if (cand.length) h += '<div class="ffl-sec"><div class="ffl-sh">Aus dem Kalender hervorheben<em>' + cand.length + ' Termine</em></div><p class="ffl-mu" style="margin-top:0">Steht der Termin schon im Kalender der Feuerwehr? Dann hier übernehmen: Datum und Uhrzeit bleiben mit dem Kalender verbunden und ändern sich mit ihm – du ergänzt nur Beschreibung, Bild und Sichtbarkeit.</p>' +
+      '<div class="ffl-row">' + sel(cand.map(function (c) { return [c.uid, fmtDate(c.date) + (c.time ? ' ' + c.time : '') + ' · ' + c.title]; }), '', 'id="ffl-evcal" style="flex:1 1 320px;width:auto"') + '<button type="button" class="ffl-p" data-act="evfromcal">Als Veranstaltung übernehmen</button></div></div>';
+    h += '<div class="ffl-sec"><div class="ffl-sh">Auf der Website einbinden</div><p class="ffl-mu" style="margin-top:0">Diese Bausteine in eine Seite einfügen (Block „Shortcode“). Gezeigt wird nur, was als <b>Öffentlich</b> freigegeben ist.</p>' +
+      '<div class="ffl-fl">Alle Veranstaltungen als Karten – mit Einzelansicht je Veranstaltung</div>' + evCopy('Kopieren', '[ww_veranstaltungen]') +
+      '<div class="ffl-fl" style="margin-top:10px">Nur die nächste hervorgehobene Veranstaltung, z. B. auf der Startseite (verschwindet von selbst, wenn nichts ansteht)</div>' + evCopy('Kopieren', '[ww_veranstaltung]') +
+      '<div class="ffl-fl" style="margin-top:10px">Terminliste mit Dienstabenden – hervorgehobene Veranstaltungen stehen automatisch mit drin</div>' + evCopy('Kopieren', '[ww_termine art="alle" titel="Termine"]') +
+      '<details style="margin-top:10px"><summary class="ffl-mu" style="cursor:pointer">Weitere Einstellungen der Bausteine</summary><p class="ffl-mu"><code>anzahl="6"</code> · <code>titel="…"</code> · <code>nur="hervorgehoben"</code> · <code>ansicht="liste"</code> · <code>abo="nein"</code> (ohne Kalender-Abo-Link) · ' +
+      '<code>[ww_veranstaltung id="12" ansicht="voll"]</code> zeigt eine bestimmte Veranstaltung mit ganzer Beschreibung · <code>[ww_termine veranstaltungen="nein"]</code> lässt sie aus der Terminliste weg.</p></details>' +
+      (info.page ? '<p class="ffl-mu" style="margin:10px 0 0">Seite mit den Veranstaltungen: <a href="' + esc(info.page) + '" target="_blank" rel="noopener">' + esc(info.page) + '</a></p>' : '<p class="ffl-msg warn" style="margin:10px 0 0">Noch keine Seite enthält <code>[ww_veranstaltungen]</code> – solange gibt es keinen Link „Mehr erfahren“ zur Einzelansicht.</p>') + '</div>';
+    h += '<div class="ffl-sec"><div class="ffl-sh">In andere Kalender übernehmen</div><p class="ffl-mu" style="margin-top:0">Öffentliches Kalender-Abo mit allen öffentlichen Veranstaltungen – zum Einbinden in den Kalender der Feuerwehr, der Gemeinde oder ins eigene Handy. Änderungen kommen dort automatisch an. Mitglieder bekommen alle für sie sichtbaren Veranstaltungen ohnehin über ihr persönliches Kalender-Abo.</p>' +
+      evCopy('Link kopieren', info.ics || '') + '<div class="ffl-fl" style="margin-top:10px">Für andere Programme (Daten als JSON)</div>' + evCopy('Link kopieren', info.api || '') + '</div>';
+    if (past.length) h += '<details class="ffl-sec"><summary class="ffl-sh" style="cursor:pointer">Vergangene<em>' + past.length + '</em></summary>' + rows(past, true) + '</details>';
+    return h;
+  }
+  function evForm(e) {
+    var pre = ui.evPre || {}, n = !e; e = e || { title: pre.title || '', date: pre.date || '', end_date: '', time: pre.time || '', time_to: '', place: pre.place || '', teaser: '', body: '', link: '', link_label: '', visibility: 'draft', featured: true, cancelled: false, cal_uid: pre.uid || '', cal: pre.uid ? 'live' : '', image: '' };
+    var live = e.cal === 'live', ro = live ? ' disabled title="kommt aus dem Kalender"' : '';
+    return '<div class="ffl-sec" style="margin-top:12px"><div class="ffl-sh">' + (n ? 'Neue Veranstaltung' : 'Veranstaltung bearbeiten') + '<button type="button" class="ffl-q ffl-sm" style="margin-left:auto" data-act="evcancel">← Zur Liste</button></div>' +
+      (live ? '<div class="ffl-msg ok">Mit dem Kalender verknüpft: Datum und Uhrzeit kommen von dort und ändern sich mit dem Kalender.' + (n ? '' : ' <button type="button" class="ffl-q ffl-sm" data-act="evunlink" data-id="' + e.id + '">Verknüpfung lösen</button>') + '</div>' : '') +
+      (e.cal === 'gone' ? '<div class="ffl-msg warn">Der verknüpfte Termin steht nicht mehr im Kalender. Wurde er abgesagt? Dann unten „Abgesagt“ ankreuzen – oder die Verknüpfung lösen und die Angaben hier pflegen. <button type="button" class="ffl-q ffl-sm" data-act="evunlink" data-id="' + e.id + '">Verknüpfung lösen</button></div>' : '') +
+      '<div class="ffl-form2"><div class="span2"><label class="ffl-fl" for="ffl-evtitle">Titel</label><input type="text" id="ffl-evtitle" maxlength="200" value="' + esc(e.title) + '" list="ffl-evtitle-l" placeholder="z. B. Tag der offenen Tür">' + sug('ffl-evtitle-l', ['Tag der offenen Tür', 'Leistungsnachweis', 'Tag der Jugendfeuerwehr', 'Abnahme der Jugendflamme', 'Lampionfest', 'Osterfeuer', 'Maibaumaufstellen', 'Jubiläum']) + '</div>' +
+      '<div><label class="ffl-fl" for="ffl-evdate">Datum</label><input type="date" id="ffl-evdate" value="' + esc(e.date) + '"' + ro + '></div>' +
+      '<div><label class="ffl-fl" for="ffl-evend">bis (nur bei mehreren Tagen)</label><input type="date" id="ffl-evend" value="' + esc(e.end_date && e.end_date > e.date ? e.end_date : '') + '"' + ro + '></div>' +
+      '<div><label class="ffl-fl" for="ffl-evtime">Beginn (leer = ganztägig)</label><input type="time" id="ffl-evtime" value="' + esc(e.time) + '"' + ro + '></div>' +
+      '<div><label class="ffl-fl" for="ffl-evtimeto">Ende</label><input type="time" id="ffl-evtimeto" value="' + esc(e.time_to) + '"' + ro + '></div>' +
+      '<div class="span2"><label class="ffl-fl" for="ffl-evplace">Ort</label><input type="text" id="ffl-evplace" maxlength="200" value="' + esc(e.place) + '" placeholder="z. B. Gerätehaus, Musterstraße 1"></div>' +
+      '<div class="span2"><label class="ffl-fl" for="ffl-evteaser">Kurztext (ein, zwei Sätze für Liste und Karte)</label><input type="text" id="ffl-evteaser" maxlength="300" value="' + esc(e.teaser) + '" placeholder="z. B. Fahrzeugschau, Vorführungen und Kinderprogramm für die ganze Familie."></div>' +
+      '<div class="span2"><label class="ffl-fl" for="ffl-evbody">Beschreibung (für die Einzelansicht; Absätze mit Leerzeile)</label><textarea id="ffl-evbody" rows="7" maxlength="8000">' + esc(e.body) + '</textarea></div>' +
+      '<div><label class="ffl-fl" for="ffl-evlink">Link (optional, z. B. Anmeldung oder Programm)</label><input type="url" id="ffl-evlink" maxlength="255" value="' + esc(e.link) + '" placeholder="https://…"></div>' +
+      '<div><label class="ffl-fl" for="ffl-evlinkl">Beschriftung des Links</label><input type="text" id="ffl-evlinkl" maxlength="60" value="' + esc(e.link_label) + '" placeholder="z. B. Zur Anmeldung"></div>' +
+      '<div class="span2"><label class="ffl-fl" for="ffl-evimg">Bild (JPG, PNG oder WebP, quer; optional)</label>' + (e.image ? '<div class="ffl-row" style="align-items:center;margin-bottom:6px"><img src="' + esc(e.image) + '" alt="" style="width:160px;height:90px;object-fit:cover"><label class="ffl-check"><input type="checkbox" id="ffl-evimgrm"> Bild entfernen</label></div>' : '') +
+      '<input type="file" id="ffl-evimg" accept="image/jpeg,image/png,image/webp"><p class="ffl-mu" style="margin:4px 0 0">Nur Bilder verwenden, die ihr veröffentlichen dürft (Urheberrecht, erkennbare Personen).</p></div>' +
+      '<div><label class="ffl-fl" for="ffl-evvis">Sichtbar für</label>' + sel(Object.keys(d.event_vis || {}).filter(function (k) { return k !== 'members' || e.visibility === 'members'; }).map(function (k) { return [k, d.event_vis[k]]; }), e.visibility, 'id="ffl-evvis"') +
+      '<p class="ffl-mu" style="margin:4px 0 0">Öffentlich = Website und öffentliches Kalender-Abo; bei den Mitgliedern steht sie dann normal im Kalender und in der App.</p></div>' +
+      '<div><div class="ffl-fl">Darstellung auf der Website</div><label class="ffl-check"><input type="checkbox" id="ffl-evfeat"' + (e.featured ? ' checked' : '') + '> Hervorheben (rot umrandet, „Besonderer Termin“, auch in der Terminliste)</label>' +
+      '<label class="ffl-check"><input type="checkbox" id="ffl-evoff"' + (e.cancelled ? ' checked' : '') + '> Abgesagt (bleibt sichtbar, deutlich gekennzeichnet)</label></div></div>' +
+      '<div style="margin-top:12px"><label class="ffl-fl" for="ffl-evask">Abfrage für die Mitglieder (optional, z. B. „Wer hilft beim Aufbau?“)</label>' + sel([['0', 'keine']].concat((d.duty_lists || []).filter(function (l) { return (l.area || 'duties') === 'duties' && (l.active || l.id === e.ask_id); }).map(function (l) { return [l.id, l.title]; })), e.ask_id || 0, 'id="ffl-evask"') +
+      '<p class="ffl-mu" style="margin:4px 0 0">Mitglieder sehen dann am Termin im Kalender einen Knopf zur Abfrage – sobald dort mindestens ein Termin zum Eintragen steht. Abfragen legst du unter <a href="#" data-go="dutylists">Abfragen</a> an; öffentlich erscheint davon nichts.</p></div>' +
+      (n ? '' : '<p class="ffl-mu" style="margin-top:10px">Zuletzt geändert ' + fmtDT(e.updated) + (e.updated_by ? ' von ' + esc(e.updated_by) : '') + ' · jede Änderung steht im Änderungsprotokoll.</p>') +
+      '<div class="ffl-savebar">' + (n ? '<span></span>' : '<span><button type="button" class="ffl-q ffl-sm" data-act="evdel" data-id="' + e.id + '">Veranstaltung löschen</button></span>') +
+      '<button type="button" class="ffl-q" data-act="evcancel">Abbrechen</button><button type="button" class="ffl-p" data-act="evsave" data-id="' + (e.id || 0) + '" data-v="' + esc(e.cal_uid || '') + '">Speichern</button></div></div>';
+  }
+  function eventClick(act, t, id) {
+    switch (act) {
+      case 'evnew': ui.evEdit = 'new'; ui.evPre = null; render(); return true;
+      case 'evedit': ui.evEdit = id; ui.evPre = null; render(); return true;
+      case 'evcancel': ui.evEdit = null; ui.evPre = null; render(); return true;
+      case 'evfromcal':
+        var c = (d.event_cal || []).filter(function (x) { return x.uid === val2('ffl-evcal'); })[0]; if (!c) return true;
+        ui.evPre = c; ui.evEdit = 'new'; render(); return true;
+      case 'evcopy':
+        var tx = t.getAttribute('data-v');
+        (navigator.clipboard ? navigator.clipboard.writeText(tx) : Promise.reject()).then(function () { flash('ok', 'Kopiert.'); }, function () { prompt('Kopieren:', tx); }); return true;
+      case 'evunlink': if (confirm('Verknüpfung mit dem Kalender lösen? Datum und Uhrzeit pflegst du dann hier; der Kalendertermin erscheint wieder als normaler Termin.')) post('event', evBody(id, ''), 'Verknüpfung gelöst.'); return true;
+      case 'evdel': if (confirm('Veranstaltung endgültig löschen? Sie verschwindet überall – auch von der Website und aus den Kalender-Abos.')) post('event/delete', { id: id }, 'Gelöscht.').then(function () { ui.evEdit = null; render(); }); return true;
+      case 'evsave':
+        var body = evBody(id, t.getAttribute('data-v'));
+        if (!body.title.trim()) return flash('err', 'Bitte einen Titel eingeben.'), true;
+        if (body.visibility === 'public' && !confirm('„' + body.title + '“ öffentlich zeigen? Titel, Termin, Ort, Texte und Bild sind dann für jeden auf der Website und im öffentlichen Kalender-Abo sichtbar.')) return true;
+        readFileData(document.getElementById('ffl-evimg')).then(function (img) {
+          if (img) body.image = img;
+          return post('event', body, 'Gespeichert.').then(function () { ui.evEdit = null; ui.evPre = null; render(); });
+        }).catch(function () {}); return true;
+    }
+    return false;
+  }
+  function evBody(id, uid) {
+    var rm = document.getElementById('ffl-evimgrm');
+    return { id: id || 0, cal_uid: uid || '', title: val2('ffl-evtitle'), date: val2('ffl-evdate'), end_date: val2('ffl-evend'), time: val2('ffl-evtime'), time_to: val2('ffl-evtimeto'), place: val2('ffl-evplace'),
+      teaser: val2('ffl-evteaser'), body: val2('ffl-evbody'), link: val2('ffl-evlink'), link_label: val2('ffl-evlinkl'), visibility: val2('ffl-evvis'), ask_id: +val2('ffl-evask') || 0,
+      featured: document.getElementById('ffl-evfeat').checked, cancelled: document.getElementById('ffl-evoff').checked, image_remove: !!(rm && rm.checked) };
   }
   function tabDuties(area) {
     area = area || 'duties';
@@ -1769,7 +1874,7 @@
   // ---- Atemschutz: Personen + Werkstatt -----------------------------------------
   function tabAgt() {
     ui.wsArea = 'agt';
-    var subs = d.can_agt ? [['people', 'Atemschutzgeräteträger'], ['strecke', 'Übungsstrecke'], ['devices', 'Werkstatt: Masken, PA, Flaschen'], ['due', 'Fälligkeiten'], ['rules', 'Einstellungen']]
+    var subs = d.can_agt ? [['people', 'Atemschutzgeräteträger'], ['year', 'Jahresnachweis'], ['strecke', 'Übungsstrecke'], ['devices', 'Werkstatt: Masken, PA, Flaschen'], ['due', 'Fälligkeiten'], ['rules', 'Einstellungen']]
       : (d.areas || []).indexOf('agt') >= 0 || (d.areas || []).indexOf('strecke') >= 0 ? [['strecke', 'Übungsstrecke']] : [];
     if (d.asu_can) subs.unshift(['asu', 'Überwachung' + ((d.asu_missing || []).length ? ' (' + d.asu_missing.length + ')' : '')]);
     // Leihkleidung direkt rechts neben der Werkstatt (gleiche Leute, gleicher Ablauf nach dem Einsatz)
@@ -1779,7 +1884,7 @@
     var nDue = d.can_agt ? wsDueList().filter(function (x) { return x.state !== 'ok'; }).length : 0;
     return '<div class="ffl-subtabs" style="margin-top:12px">' + subs.map(function (x) {
       return '<button type="button" data-act="asub" data-v="' + x[0] + '" aria-selected="' + (cur === x[0]) + '">' + x[1] + (x[0] === 'due' && nDue ? ' (' + nDue + ')' : '') + '</button>';
-    }).join('') + '</div>' + (cur === 'loan' ? tabLoans() : cur === 'asu' ? tabAsu() : cur === 'strecke' ? tabDuties('strecke') : cur === 'devices' ? (ui.dev ? wsDevice() : wsDevices()) : cur === 'due' ? wsDue() : cur === 'rules' ? wsRules() : tabAgtPeople());
+    }).join('') + '</div>' + (cur === 'loan' ? tabLoans() : cur === 'asu' ? tabAsu() : cur === 'strecke' ? tabDuties('strecke') : cur === 'devices' ? (ui.dev ? wsDevice() : wsDevices()) : cur === 'due' ? wsDue() : cur === 'rules' ? wsRules() : cur === 'year' ? tabAgtYear() : tabAgtPeople());
   }
   // ---- Unterweisungen (UVV & Co.): zu Jahresbeginn anlegen, Stand verfolgen, nach Liste abhaken, Liste drucken ----------
   function briefAud(v) {
@@ -1851,13 +1956,13 @@
       }).join('') + '</table></div>', true);
   }
 
-  // ---- Website im Wehrwerk-Design: Grunddaten, Seiten als Entwurf anlegen, Vorschau ------------------------------------
+  // ---- Website im SPIND-Design: Grunddaten, Seiten als Entwurf anlegen, Vorschau ------------------------------------
   function tabSite() {
     var S = d.site; if (!S) return '<p class="ffl-mu">Nur für die Verwaltung.</p>';
     var st = S.settings, made = S.pages.filter(function (p) { return p.id; }).length;
     function f(k, label, ph, type) { return '<div><label class="ffl-fl" for="ffl-ws-' + k + '">' + label + '</label><input type="' + (type || 'text') + '" id="ffl-ws-' + k + '" data-ws="' + k + '" value="' + esc(st[k] || '') + '" placeholder="' + esc(ph || '') + '"></div>'; }
-    var h = '<div class="ffl-sec"><div class="ffl-sh">Website im Wehrwerk-Design</div><p class="ffl-mu" style="margin-top:0">Neue Startseite und Unterseiten im gleichen Design wie die App – mit Live-Einsätzen, Zahlen, Neuigkeiten und Dienstabenden. ' +
-      'Die Seiten sind normale WordPress-Seiten mit der Vorlage „Wehrwerk-Website“: Texte und Bilder änderst du im WordPress-Editor (Bausteine wie <code>[ww_hero]</code>, <code>[ww_einsaetze]</code>, <code>[ww_kacheln]</code>).</p>' +
+    var h = '<div class="ffl-sec"><div class="ffl-sh">Website im SPIND-Design</div><p class="ffl-mu" style="margin-top:0">Neue Startseite und Unterseiten im gleichen Design wie die App – mit Live-Einsätzen, Zahlen, Neuigkeiten und Dienstabenden. ' +
+      'Die Seiten sind normale WordPress-Seiten mit der Vorlage „SPIND-Website“: Texte und Bilder änderst du im WordPress-Editor (Bausteine wie <code>[ww_hero]</code>, <code>[ww_einsaetze]</code>, <code>[ww_kacheln]</code>).</p>' +
       '<div class="ffl-msg">Angelegt wird alles als <b>Entwurf</b> – auf der Website ändert sich nichts, bis du eine Seite veröffentlichst. Bestehende Seiten werden nie überschrieben.</div>';
     h += '<div class="ffl-plist">' + S.pages.map(function (p) {
       var chip = !p.id ? '<span class="ffl-chip st-no">noch nicht angelegt</span>' : p.status === 'publish' ? '<span class="ffl-chip st-ok">online</span>' : '<span class="ffl-chip st-warn">Entwurf</span>';
@@ -1867,12 +1972,12 @@
     h += S.can_pages ? '<button type="button" class="ffl-p" data-act="wspages"' + (made === S.pages.length ? ' disabled' : '') + '>' + (made ? 'Fehlende Seiten als Entwurf anlegen' : 'Alle Seiten als Entwurf anlegen') + '</button>' + (S.pages.some(function (p) { return p.status === 'draft'; }) ? ' <button type="button" class="ffl-sm" data-act="wsrefresh" title="Überträgt die aktuellen Vorlagen (Texte, Bilder, Bausteine) auf alle Seiten im Entwurf – veröffentlichte Seiten bleiben unverändert, die alte Fassung bleibt als Revision erhalten">Entwürfe aktualisieren</button>' : '')
       : '<p class="ffl-mu">Seiten anlegen dürfen nur Website-Admins (WordPress-Recht „Seiten bearbeiten“).</p>';
     h += '<p class="ffl-mu" style="margin-top:10px"><b>Online stellen:</b> Seite in der Vorschau prüfen → im Editor „Veröffentlichen“. Die neue Startseite festlegen unter WordPress → Einstellungen → Lesen → „Eine statische Seite“. ' +
-      'Das Menü baut sich aus diesen Seiten; eigenes Menü möglich unter Design → Menüs → Position „Wehrwerk-Website: Hauptmenü“.</p></div>';
+      'Das Menü baut sich aus diesen Seiten; eigenes Menü möglich unter Design → Menüs → Position „SPIND-Website: Hauptmenü“.</p></div>';
     h += '<div class="ffl-sec"><div class="ffl-sh">Angaben für Kopf, Fuß und Zahlen</div><div class="ffl-form2">' +
       '<div class="span2"><label class="ffl-fl" for="ffl-ws-claim">Spruch auf der Startseite</label><input type="text" id="ffl-ws-claim" data-ws="claim" value="' + esc(st.claim) + '"></div>' +
       f('street', 'Straße (Gerätehaus)') + '<div class="ffl-form2" style="gap:8px">' + f('zip', 'PLZ') + f('city', 'Ort') + '</div>' + f('phone', 'Telefon', '+49 …', 'tel') + f('mail', 'E-Mail', 'info@…', 'email') +
       f('instagram', 'Instagram (Link)', 'https://instagram.com/…', 'url') + f('facebook', 'Facebook (Link)', 'https://facebook.com/…', 'url') + f('imprint', 'Impressum (Link)', '', 'url') + f('privacy', 'Datenschutz (Link)', '', 'url') +
-      f('founded', 'Gegründet (Jahr)', 'z. B. 1900') + f('members', 'Aktive Kräfte (leer = aus Wehrwerk zählen)') + f('vehicles', 'Einsatzfahrzeuge (leer = aus Wehrwerk zählen)') + f('drill_place', 'Ort der Übungsabende', 'z. B. Gerätehaus Musterstadt') +
+      f('founded', 'Gegründet (Jahr)', 'z. B. 1900') + f('members', 'Aktive Kräfte (leer = aus SPIND zählen)') + f('vehicles', 'Einsatzfahrzeuge (leer = aus SPIND zählen)') + f('drill_place', 'Ort der Übungsabende', 'z. B. Gerätehaus Musterstadt') +
       '</div><label class="ffl-check" style="margin-top:10px"><input type="checkbox" id="ffl-ws-drills"' + (st.drills_public ? ' checked' : '') + '> Nächste Dienstabende öffentlich zeigen (nur Datum, Uhrzeit, Einheit – keine Namen)</label>' +
       '<button type="button" class="ffl-p" style="margin-top:12px" data-act="wssave">Speichern</button></div>';
     // Instagram: Beiträge holt der Server, Bilder liegen auf der eigenen Website (Besucher laden nichts von Meta); der Schlüssel erscheint nie im Browser
@@ -2386,6 +2491,42 @@
     return false;
   }
 
+  // Jahresnachweis je Geräteträger – wie die Jahresliste auf Papier: G26, Übungsstrecken, Übungen und Einsätze unter Atemschutz
+  function agtYearRow(m, y) {
+    var log = d.agt_log.filter(function (l) { return l.member_id === m.id && l.date.slice(0, 4) === String(y) && l.date <= isoToday(); }).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+    var s = log.filter(function (l) { return l.kind === 'strecke'; }), u = log.filter(function (l) { return l.kind === 'uebung'; }), e = log.filter(function (l) { return l.kind === 'einsatz'; });
+    var g = m.g26_until, end = y + '-12-31', gOk = !!g && g >= (String(y) === isoToday().slice(0, 4) ? isoToday() : end);
+    var miss = []; if (!gOk) miss.push(g ? 'G26 abgelaufen' : 'G26 fehlt'); if (!s.length) miss.push('Übungsstrecke'); if (s.length < 2 && !u.length && !e.length) miss.push('Übung/Einsatz oder 2. Strecke');
+    return { s: s, u: u, e: e, g: g, gOk: gOk, miss: miss, ok: !miss.length };
+  }
+  function tabAgtYear() {
+    var y0 = +isoToday().slice(0, 4), y = ui.agtYear || y0, ys = [y0, y0 - 1, y0 - 2];
+    var agts = d.members.filter(function (m) { return m.active && m.agt; }), rows = {}; agts.forEach(function (m) { rows[m.id] = agtYearRow(m, y); });
+    var nOk = agts.filter(function (m) { return rows[m.id].ok; }).length;
+    function dates(a) { return a.map(function (l) { return '<span title="' + esc(l.note) + '">' + fmtDate(l.date) + '</span>'; }).join('<br>'); }
+    var h = '<div class="ffl-row" style="margin-top:12px"><div class="ffl-pills" role="group" aria-label="Jahr">' + ys.map(function (x) { return '<button type="button" data-act="agtyear" data-v="' + x + '" aria-pressed="' + (x === y) + '">' + x + '</button>'; }).join('') + '</div>' +
+      '<p class="ffl-mu" style="margin:0;flex:1 1 220px"><b>' + nOk + ' von ' + agts.length + '</b> haben ' + y + ' alle Nachweise.</p><button type="button" class="ffl-sm" data-act="areaprint" data-v="agtyear">Jahresnachweis drucken</button></div>' +
+      '<p class="ffl-mu">Jahr erfüllt = gültige G26, mindestens eine Übungsstrecke und dazu eine Übung oder ein Einsatz unter Atemschutz – oder eine zweite Übungsstrecke. Einsätze und Übungen kommen automatisch aus der Atemschutzüberwachung; alles andere trägst du unter „Atemschutzgeräteträger → Termin eintragen“ ein.</p>';
+    var L = MYFUI.lt(ui, 'agty', agts, { noun: 'Geräteträger', ph: 'Name suchen …', per: 60, text: function (m) { return m.name + ' ' + unitShort(m.unit); },
+      csv: { name: 'Atemschutz-Jahresnachweis-' + y, cols: [['Name', function (m) { return m.name; }], ['Einheit', function (m) { return unitShort(m.unit); }], ['G26 gültig bis', function (m) { return m.g26_until ? fmtDate(m.g26_until) : ''; }],
+        ['Strecke 1', function (m) { var r = rows[m.id]; return r.s[0] ? fmtDate(r.s[0].date) : ''; }], ['Strecke 2', function (m) { var r = rows[m.id]; return r.s.slice(1).map(function (l) { return fmtDate(l.date); }).join(', '); }],
+        ['Übung unter Atemschutz', function (m) { return rows[m.id].u.map(function (l) { return fmtDate(l.date); }).join(', '); }], ['Einsatz unter Atemschutz', function (m) { return rows[m.id].e.map(function (l) { return fmtDate(l.date); }).join(', '); }],
+        ['Jahr erfüllt', function (m) { var r = rows[m.id]; return r.ok ? 'ja' : 'fehlt: ' + r.miss.join(', '); }]] },
+      sorts: [['miss', 'fehlende zuerst', function (m) { return (rows[m.id].ok ? 1 : 0) + '|' + m.name; }, 1], ['name', 'Name A–Z', function (m) { return m.name; }, 1], ['g26', 'G26 läuft zuerst ab', function (m) { return m.g26_until || '0000'; }, 1], ['unit', 'Einheit', function (m) { return unitShort(m.unit) + '|' + m.name; }, 1]] });
+    h += L.bar + '<div class="ffl-scroll"><table class="ffl-table"><thead><tr><th>Name</th><th>Einheit</th><th>G26 gültig bis</th><th>Strecke 1</th><th>Strecke 2</th><th>Übung unter Atemschutz</th><th>Einsatz unter Atemschutz</th><th>' + y + '</th></tr></thead><tbody>';
+    L.rows.forEach(function (m) {
+      var r = rows[m.id], gi = agtInfo(m);
+      h += '<tr><td><a href="#" data-act="profile" data-id="' + m.id + '"><b>' + esc(m.name) + '</b></a></td><td>' + esc(unitShort(m.unit)) + '</td>' +
+        '<td>' + (r.g ? dueTag(gi.gstate, fmtDate(r.g)) : '<span class="ffl-tag err">fehlt</span>') + '</td><td>' + (r.s[0] ? dates([r.s[0]]) : '<span class="ffl-mu">–</span>') + '</td><td>' + (r.s.length > 1 ? dates(r.s.slice(1)) : '<span class="ffl-mu">–</span>') + '</td>' +
+        '<td>' + (r.u.length ? dates(r.u) : '<span class="ffl-mu">–</span>') + '</td><td>' + (r.e.length ? dates(r.e) : '<span class="ffl-mu">–</span>') + '</td>' +
+        '<td>' + (r.ok ? '<span class="ffl-chip st-ok">erfüllt</span>' : '<span class="ffl-chip st-bad" title="fehlt: ' + esc(r.miss.join(', ')) + '">fehlt: ' + esc(r.miss.join(', ')) + '</span>') + '</td></tr>';
+    });
+    h += '</tbody></table></div>' + L.pager;
+    return h + '<div class="ffl-pbox" style="margin-top:16px"><div class="ffl-sh" style="font-size:17px">Regel für „einsatzbereit“</div>' +
+      '<label class="ffl-check"><input type="checkbox" id="ffl-agtsecond"' + (d.agt_second ? ' checked' : '') + '> Zusätzlich zur Übungsstrecke eine Übung oder einen Einsatz unter Atemschutz – oder eine zweite Übungsstrecke – in den letzten 12 Monaten verlangen</label>' +
+      '<p class="ffl-mu" style="margin:6px 0 0">' + (d.agt_second ? 'Eingeschaltet: Einsatzbereit ist, wer den Lehrgang hat, eine gültige G26, eine Übungsstrecke und den zweiten Nachweis – jeweils in den letzten 12 Monaten.' : 'Ausgeschaltet: Für „einsatzbereit“ zählen Lehrgang, gültige G26 und eine Übungsstrecke in den letzten 12 Monaten. Die Jahresübersicht oben zeigt den zweiten Nachweis trotzdem.') +
+      ' Am besten erst einschalten, wenn die Nachweise des laufenden Jahres eingetragen oder importiert sind (Einstellungen → Daten &amp; Schnittstellen → Import „Atemschutz“).</p></div>';
+  }
   function tabAgtPeople() {
     var list = d.members.filter(function (m) { return m.active && (!ui.agtOnly || m.agt); });
     var agts = d.members.filter(function (m) { return m.active && m.agt; });
@@ -2405,7 +2546,7 @@
       '<button type="button" class="ffl-p" style="margin-left:auto" data-act="agtsave"' + (nSel ? '' : ' disabled') + '>Für ' + nSel + ' eintragen</button></div>' +
       '<p class="ffl-mu" style="margin:6px 0 0">Ein Datum in der Zukunft wird als „geplant“ angezeigt.</p></div>';
 
-    // Einsatzbereit nur mit Lehrgang + G26 + Übungsstrecke: fehlender Lehrgangs-Nachweis (z. B. vor Wehrwerk) mit einem Klick
+    // Einsatzbereit nur mit Lehrgang + G26 + Übungsstrecke: fehlender Lehrgangs-Nachweis (z. B. vor SPIND) mit einem Klick
     var noCourse = d.members.filter(function (m) { return m.active && m.agt && !m.agt_course; });
     if (noCourse.length) h += '<div class="ffl-msg warn" style="margin-top:12px"><b>Einsatzbereit gilt nur mit Lehrgang, gültiger G26 und Übungsstrecke (12 Monate).</b> ' +
       'Bei ' + noCourse.length + (noCourse.length === 1 ? ' Geräteträger' : ' Geräteträgern') + ' fehlt in ' + APP + ' der Nachweis des Lehrgangs: ' + esc(noCourse.slice(0, 8).map(function (m) { return m.name; }).join(', ')) + (noCourse.length > 8 ? ' …' : '') + '.' +
@@ -2677,8 +2818,8 @@
     var h = '<div class="ffl-sec"><div class="ffl-sh">Beförderung möglich<em>' + ready.length + '</em></div>' +
       (ready.length ? head + ready.map(function (p) { return row(p, true); }).join('') + '</tbody></table></div>' : '<p class="ffl-mu">Gerade niemand – die Erinnerung kommt automatisch (montags) ins Postfach aller, die den Bereich Mitglieder betreuen.</p>') + '</div>';
     if (missing.length) h += '<div class="ffl-sec"><div class="ffl-sh">Angaben fehlen<em>' + missing.length + '</em></div>' +
-      '<p class="ffl-mu" style="margin-top:0">Gelbe Felder antippen und direkt ergänzen: <b>„seit“</b> = seit wann jemand den jetzigen Dienstgrad hat (daraus berechnet Wehrwerk die Wartezeit), ' +
-      '<b>? Lehrgang</b> = der Nachweis fehlt in Wehrwerk (z. B. vor Wehrwerk absolviert) – Jahr eintragen genügt.</p>' + head + missing.map(function (p) { return row(p, true); }).join('') + '</tbody></table></div>' +
+      '<p class="ffl-mu" style="margin-top:0">Gelbe Felder antippen und direkt ergänzen: <b>„seit“</b> = seit wann jemand den jetzigen Dienstgrad hat (daraus berechnet SPIND die Wartezeit), ' +
+      '<b>? Lehrgang</b> = der Nachweis fehlt in SPIND (z. B. vor SPIND absolviert) – Jahr eintragen genügt.</p>' + head + missing.map(function (p) { return row(p, true); }).join('') + '</tbody></table></div>' +
       '<p class="ffl-mu">Lehrgänge werden aus „Ausbildung“ im Profil und absolvierten Lehrgängen erkannt. Fehlt nur der Nachweis, trotzdem befördern geht immer.</p></div>';
     if (soon.length) h += '<div class="ffl-sec"><div class="ffl-sh">In den nächsten 12 Monaten</div>' + head + soon.map(function (p) { return row(p, false); }).join('') + '</tbody></table></div></div>';
     var ret = d.retiring || [];
@@ -3112,7 +3253,7 @@
   }
 
   // ---- Bereiche: welche Reiter darf wer sehen ------------------------------------
-  var TAB_AREA = { briefings: 'members', site: 'full', overview: 'any', courses: 'courses', members: 'members', incidents: 'incidents', clothing: 'clothing', defects: 'defects', ideas: 'ideas',
+  var TAB_AREA = { briefings: 'members', site: 'full', events: 'full', overview: 'any', courses: 'courses', members: 'members', incidents: 'incidents', clothing: 'clothing', defects: 'defects', ideas: 'ideas',
     agt: 'agt', screen: 'screen', vehicles: 'vehicles', duties: 'duties', dutylists: 'duties', uebungen: 'incidents', board: 'board', orders: 'orders', messages: 'any', data: 'any', settings: 'full', rights: 'full', security: 'full', start: 'full', audit: 'full' };
   function allowedTab(t) {
     if (t === 'mail') return !!d.smtp; // nur Administratoren (Server schickt die Daten sonst gar nicht)
@@ -3160,7 +3301,7 @@
     var b = d.brand || {};
     function f(k, label, ph) { return '<div><label class="ffl-fl">' + label + '</label><input type="text" data-brand="' + k + '" value="' + esc(b[k] || '') + '" placeholder="' + esc(ph || '') + '"></div>'; }
     return '<div class="ffl-grid2" style="margin-top:14px"><div class="ffl-pbox"><div class="ffl-sh">Name & Organisation</div><div class="ffl-form2">' +
-      f('app', 'Name der App', 'Wehrwerk') + f('org', 'Organisation', 'Freiwillige Feuerwehr Musterstadt') + f('zip', 'PLZ', '12345') + f('place', 'Ort', 'Musterstadt') + '</div>' +
+      f('app', 'Name der App', 'SPIND') + f('org', 'Organisation', 'Freiwillige Feuerwehr Musterstadt') + f('zip', 'PLZ', '12345') + f('place', 'Ort', 'Musterstadt') + '</div>' +
       '<div class="ffl-form2">' + f('address', 'Anschrift Gerätehaus', 'Musterstraße 1') + f('phone', 'Telefon (für Briefkopf und Vorlagen)', '') + f('email', 'E-Mail (für Briefkopf und Vorlagen)', '') + f('website', 'Website (für „Neu auf …“)', 'feuerwehr-musterstadt.de') + f('qr_label', 'Beschriftung an QR-Codes', 'Meine Feuerwehr') + '</div>' +
       '<p class="ffl-mu">Der Name erscheint in Menü, E-Mails, Kalender und Ausdrucken. Organisation, PLZ und Ort stehen z. B. auf der Arbeitgeber-Bescheinigung.</p></div>' +
       '<div class="ffl-pbox"><div class="ffl-sh">Logo</div><div class="ffl-form2">' + f('line1', 'Zeile 1 (klein – leer lassen: Zeile 2 und Ort groß nebeneinander)', 'FREIWILLIGE') + f('line2', 'Zeile 2 (groß)', 'FEUERWEHR') +
@@ -3207,7 +3348,7 @@
       '<div><label class="ffl-fl" for="ffl-smtp-mode">Verschlüsselung und Port</label><select id="ffl-smtp-mode" data-smtp="mode"><option value="ssl:465"' + (m.secure !== 'tls' ? ' selected' : '') + '>SSL – Port 465</option><option value="tls:587"' + (m.secure === 'tls' ? ' selected' : '') + '>STARTTLS – Port 587</option></select></div>' +
       f('user', 'Benutzername', 'text', 'meist die E-Mail-Adresse', ' autocomplete="off"') +
       '<div><label class="ffl-fl" for="ffl-smtp-pass">Passwort</label><input type="password" id="ffl-smtp-pass" data-smtp="pass" autocomplete="new-password" placeholder="' + (m.pass_set ? 'gespeichert – leer lassen zum Behalten' : 'Passwort des Postfachs') + '"></div>' +
-      f('from', 'Absender-Adresse', 'email', 'das Postfach selbst, z. B. wehrwerk@feuerwehr-musterstadt.example') + f('name', 'Absender-Name', 'text', (d.brand || {}).org || '') + '</div>' +
+      f('from', 'Absender-Adresse', 'email', 'das Postfach selbst, z. B. spind@feuerwehr-musterstadt.example') + f('name', 'Absender-Name', 'text', (d.brand || {}).org || '') + '</div>' +
       '<p class="ffl-mu">Das Passwort wird verschlüsselt gespeichert, nie angezeigt und nicht protokolliert. Es gehört nicht in Sicherungen oder Exporte.</p>' +
       '<div class="ffl-row"><input type="email" id="ffl-smtp-to" aria-label="Empfänger der Testmail" placeholder="' + esc((d.who && d.who.email) || 'Empfänger der Testmail') + '" style="flex:1 1 220px;width:auto"><button type="button" data-act="smtptest">Testmail senden</button></div>' +
       '<p class="ffl-mu" style="margin:6px 0 0">Erst speichern, dann testen. Ohne Eingabe geht die Testmail an dein eigenes Konto.</p><div id="ffl-smtp-res">' + (ui.smtpRes || '') + '</div></div>';
@@ -3217,7 +3358,7 @@
     function ck(k, label) { return '<label class="ffl-check"><input type="checkbox" data-mnt="' + k + '"' + (m[k] ? ' checked' : '') + '> ' + label + '</label>'; }
     var stx = m.foreign ? '<div class="ffl-msg warn">In wp-content liegt schon eine andere maintenance.php (z. B. von einem anderen Plugin) – die wird nicht überschrieben.</div>'
       : !m.writable ? '<div class="ffl-msg warn">Der Ordner wp-content ist nicht beschreibbar – die Wartungsseite kann nicht angelegt werden (beim Hoster Schreibrechte prüfen).</div>'
-      : '<p class="ffl-mu" style="margin:0">' + (m.on ? (m.file ? '✓ Aktiv – erscheint automatisch, während WordPress, Plugins oder Wehrwerk aktualisiert werden.' : 'Wird beim Speichern angelegt.') : 'Aus – bei Updates erscheint die englische Standardmeldung von WordPress.') + '</p>';
+      : '<p class="ffl-mu" style="margin:0">' + (m.on ? (m.file ? '✓ Aktiv – erscheint automatisch, während WordPress, Plugins oder SPIND aktualisiert werden.' : 'Wird beim Speichern angelegt.') : 'Aus – bei Updates erscheint die englische Standardmeldung von WordPress.') + '</p>';
     return '<div class="ffl-pbox" style="margin-top:14px"><div class="ffl-sh">Wartungsseite<em>während Updates</em></div>' + stx +
       '<div class="ffl-row" style="margin:10px 0">' + ck('on', 'Eigene Wartungsseite verwenden') + ck('sos', 'Notruf 112 / Polizei 110 groß anzeigen') + ck('members', 'Hinweis für Mitglieder (Halle, Dashboards)') + '</div>' +
       '<div class="ffl-form2"><div class="span2"><label class="ffl-fl">Überschrift</label><input type="text" data-mnt="title" value="' + esc(m.title) + '"></div>' +
@@ -3552,7 +3693,7 @@
       [['einsatzverwaltung', 'Plugin „Einsatzverwaltung“' + (w.ev ? '' : ' (nicht installiert)')], ['wehrwerk', 'Direkt aus ' + esc(APP)]].map(function (x) {
         return '<button type="button" data-act="webtarget" data-v="' + x[0] + '" aria-pressed="' + (w.target === x[0]) + '"' + (w.can_mode && (x[0] !== 'einsatzverwaltung' || w.ev) ? '' : ' disabled') + '>' + x[1] + '</button>';
       }).join('') + '</div><p class="ffl-mu">Beide Wege nutzen dieselben Einsätze (Alarm, Schnellerfassung, von Hand). Bei „Direkt aus ' + esc(APP) + '“ zeigt die Seite mit ' +
-      '<code>[wehrwerk_einsatzberichte]</code> Jahre, Statistik und Einzelberichte – öffentlich nur Titel, Art, Ort ohne Hausnummer, Fahrzeuge, Zeiten, Zahl der Kräfte und euer Text. ' +
+      '<code>[spind_einsatzberichte]</code> Jahre, Statistik und Einzelberichte – öffentlich nur Titel, Art, Ort ohne Hausnummer, Fahrzeuge, Zeiten, Zahl der Kräfte und euer Text. ' +
       'Andere Werkzeuge können dieselben Angaben über <code>/wp-json/myf/v1/public/incidents?year=…</code> abholen.</p>' +
       (w.target === 'wehrwerk' ? (w.list_url ? '<div class="ffl-linkbox"><span style="flex:1">' + esc(w.list_url) + '</span><a class="ffl-sm ffl-btn" href="' + esc(w.list_url) + '" target="_blank" rel="noopener">Öffnen ↗</a></div>'
         : '<button type="button" class="ffl-p" data-act="weblistpage">Seite „Einsätze“ anlegen</button>') : '') + '</div>';
@@ -3572,7 +3713,7 @@
     var h = '<div class="ffl-grid2" style="margin-top:14px"><div class="ffl-pbox"><div class="ffl-sh">Schnellerfassung</div><p class="ffl-mu" style="margin-top:0">Alarm- oder WhatsApp-Meldungen einfügen, ' + esc(APP) + ' erkennt Nummer, Datum und Stichwort ' +
       'und legt die Berichte nacheinander an – ideal zum Nachtragen am Handy.</p>' +
       (w.url ? '<div class="ffl-linkbox"><span style="flex:1">' + esc(w.url) + '</span><a class="ffl-sm ffl-btn" href="' + esc(w.url) + '" target="_blank" rel="noopener">Öffnen ↗</a></div>'
-        : '<button type="button" class="ffl-p" data-act="webpage">Seite „Einsatz erfassen“ anlegen</button><p class="ffl-mu">Oder auf einer beliebigen Seite den Shortcode <code>[wehrwerk_einsatz]</code> einfügen.</p>') +
+        : '<button type="button" class="ffl-p" data-act="webpage">Seite „Einsatz erfassen“ anlegen</button><p class="ffl-mu">Oder auf einer beliebigen Seite den Shortcode <code>[spind_einsatz]</code> einfügen.</p>') +
       '<p class="ffl-mu">Die Seite ist nur nach Anmeldung nutzbar und für Suchmaschinen gesperrt.</p></div>';
     h += '<div class="ffl-pbox"><div class="ffl-sh">Fahrzeuge je Einheit</div><p class="ffl-mu" style="margin-top:0">Für die Schnellerfassung – Namen wie in der Einsatzverwaltung, mit Komma getrennt.</p><div>' + (w.units || []).map(function (u, i) {
       return '<div data-wu="' + esc(u.key) + '"><label class="ffl-fl">' + esc(u.label) + (i > 0 ? ' · Kürzel vor der Nummer <input type="text" data-wpre="1" value="' + esc(u.prefix) + '" style="width:60px;display:inline-block;margin-left:6px">' : '') + '</label>' +
@@ -3610,7 +3751,7 @@
       '<p class="ffl-mu" style="margin-top:0">Status 1–9 (FMS) erscheint in der Halle und auf dem Fernseher. Gleicher Schlüssel wie die Alarm-Schnittstelle' + (a.on ? '' : ' – die ist noch aus (Einstellungen → Daten & Schnittstellen)') + '.</p>' +
       (stUrl ? '<div class="ffl-fl">Adresse für Statusmeldungen (geheim halten!)</div>' + secretBox(stUrl, { what: 'Adresse Statusmeldungen' }) : '') +
       '<ol class="ffl-howto"><li>In FE2 für <b>Statusänderungen</b> eine HTTP-/Webhook-Ausgabe anlegen, Methode <b>POST</b>, Adresse wie oben.</li>' +
-      '<li>Inhalt z. B. <code>{"fahrzeug":"{Fahrzeugname}","status":"{Status}"}</code> – Wehrwerk erkennt auch <code>vehicle</code>, <code>callsign</code>, <code>address</code>, <code>fms</code>, <code>state</code>. Die genaue Platzhalter-Schreibweise zeigt die FE2-Vorschau.</li>' +
+      '<li>Inhalt z. B. <code>{"fahrzeug":"{Fahrzeugname}","status":"{Status}"}</code> – SPIND erkennt auch <code>vehicle</code>, <code>callsign</code>, <code>address</code>, <code>fms</code>, <code>state</code>. Die genaue Platzhalter-Schreibweise zeigt die FE2-Vorschau.</li>' +
       '<li>Der Name wird mit Name oder Funkrufname unter Technik → Fahrzeuge abgeglichen (Leerzeichen und Bindestriche egal).</li></ol>' +
       '<p class="ffl-mu">Status von Hand setzen (z. B. 6 = außer Dienst): Technik → Fahrzeuge → Fahrzeug öffnen.</p>' +
       // Empfangene Statusmeldungen: zeigt, ob FE2 wirklich liefert
@@ -3633,7 +3774,7 @@
       '<li>Alternativ <b>GET</b> mit Platzhaltern in der Adresse, z. B. <code>…&amp;keyword={keyword}&amp;address={address}</code> – die genaue Platzhalter-Schreibweise steht in der FE2-Vorschau.</li>' +
       '<li><b>aPager PRO</b> (auch von Alamos): unter „Webhook“ dieselbe Adresse eintragen – Titel und Text der Alarmierung werden als Stichwort und Meldung übernommen.</li>' +
       '<li>Einen Probealarm in FE2 auslösen und unten im <b>Alarm-Protokoll</b> nachsehen, welche Felder angekommen sind. Heißen sie anders, unten bei „Feldnamen“ eintragen.</li></ol>' +
-      '<p class="ffl-mu">Wehrwerk alarmiert nicht selbst – die Alarmierung bleibt bei FE2/Meldeempfänger. Mehrfach gesendete Alarme (z. B. Nachalarm) innerhalb von 15 Minuten werden zu einem Einsatz zusammengefasst; ' +
+      '<p class="ffl-mu">SPIND alarmiert nicht selbst – die Alarmierung bleibt bei FE2/Meldeempfänger. Mehrfach gesendete Alarme (z. B. Nachalarm) innerhalb von 15 Minuten werden zu einem Einsatz zusammengefasst; ' +
       'der spätere Einsatzbericht aus der Einsatzverwaltung wird automatisch zugeordnet.</p></div></div>';
     h += '<div class="ffl-pbox" style="margin-top:14px"><div class="ffl-sh">Optionen</div><div class="ffl-form4" data-alform="1">' +
       '<div><label class="ffl-fl">Alarm auf dem Dashboard (Minuten)</label><input type="number" data-al="screen_minutes" value="' + esc(a.screen_minutes) + '" min="0" max="600"></div>' +
@@ -3728,7 +3869,7 @@
       case 'inchint': try { localStorage.setItem('myf-inchint-' + t.getAttribute('data-v'), '1'); } catch (e) {} render(); return true;
       case 'aincpage': ui.incPage = +t.getAttribute('data-v') || 0; render(); return true;
       case 'aincext':
-        MYFUI.ask({ title: 'Bericht schon erfasst', text: 'Wo ist der Bericht? z. B. „auf Papier, Ordner Einsätze 2025“ oder „Altbestand vor Wehrwerk“. Der Einsatz zählt dann nicht mehr als offen – rückgängig machen geht jederzeit.', value: 'auf Papier ausgefüllt', required: 'Bitte kurz vermerken, wo der Bericht ist.', ok: 'Vermerken' }).then(function (ex) {
+        MYFUI.ask({ title: 'Bericht schon erfasst', text: 'Wo ist der Bericht? z. B. „auf Papier, Ordner Einsätze 2025“ oder „Altbestand vor SPIND“. Der Einsatz zählt dann nicht mehr als offen – rückgängig machen geht jederzeit.', value: 'auf Papier ausgefüllt', required: 'Bitte kurz vermerken, wo der Bericht ist.', ok: 'Vermerken' }).then(function (ex) {
           if (ex) post('incident/report/external', { id: id, note: ex }, 'Vermerkt: Bericht anderweitig erfasst.');
         }); return true;
       case 'aincreopen':
@@ -4250,6 +4391,7 @@
   var ACTIONS = {
     'me/need': 'Lehrgangswunsch', 'me/clothing': 'Kleidung gemeldet', 'me/clothing/withdraw': 'Kleidung zurückgezogen', 'me/idea': 'Anregung abgegeben',
     'me/ics/reset': 'Kalender-Link erneuert',
+    'admin/event': 'Veranstaltung gespeichert', 'admin/event/delete': 'Veranstaltung gelöscht',
     'admin/settings': 'Einstellungen', 'admin/member': 'Mitglied gespeichert', 'admin/member/delete': 'Mitglied gelöscht',
     'admin/member/invite': 'Einladung verschickt', 'admin/members/bulk': 'Mitglieder importiert',
     'admin/course': 'Lehrgang gespeichert', 'admin/course/delete': 'Lehrgang gelöscht', 'admin/courses/bulk': 'Lehrgänge importiert',
@@ -4336,7 +4478,7 @@
   function tabPrint() {
     // Nur Lehrgangs-Ausdrucke – Atemschutz-Übersicht und Kleidungs-Bestellliste liegen in ihren Bereichen
     var views = [['plan', 'Lehrgangsplanung (wie bisher)'], ['kreis', 'Meldung an den Kreis'], ['people', 'Wer hat was (pro Person)']];
-    if (ui.print === 'agt' || ui.print === 'clothing') ui.print = 'plan';
+    if (ui.print === 'agt' || ui.print === 'agtyear' || ui.print === 'clothing') ui.print = 'plan';
     var h = '<div class="ffl-pills" role="group" aria-label="Ansicht">' + views.map(function (v) {
       return '<button type="button" data-act="printview" data-v="' + v[0] + '" aria-pressed="' + (ui.print === v[0]) + '">' + v[1] + '</button>';
     }).join('') + '</div><div class="ffl-row" style="margin-top:10px"><label class="ffl-row ffl-mu"><input type="checkbox" id="ffl-onlyneeds"' + (ui.printOnlyNeeds ? ' checked' : '') + '> nur Lehrgänge mit Wünschen</label>' +
@@ -4352,6 +4494,16 @@
     var mem = by(d.members, 'id'), dates = group(d.dates, 'course_id'), dateById = by(d.dates, 'id');
     var needsBy = group(d.needs.filter(active), 'course_id');
 
+    if (ui.print === 'agtyear') {
+      var py = ui.agtYear || +isoToday().slice(0, 4), hy = printHead('Atemschutz – Jahresnachweis ' + py), pd = function (a) { return a.map(function (l) { return fmtDate(l.date); }).join(', '); };
+      hy += '<table><thead><tr><th>Name</th>' + (multiUnit() ? '<th>Einheit</th>' : '') + '<th>G26 gültig bis</th><th>Strecke 1</th><th>Strecke 2</th><th>Übung unter Atemschutz</th><th>Einsatz unter Atemschutz</th><th>' + py + '</th></tr></thead><tbody>';
+      d.members.filter(function (m) { return m.active && m.agt; }).forEach(function (m) {
+        var r = agtYearRow(m, py), red = ' style="color:#c00;font-weight:bold"';
+        hy += '<tr><td><b>' + esc(m.name) + '</b></td>' + (multiUnit() ? '<td>' + esc(unitShort(m.unit)) + '</td>' : '') + '<td' + (r.gOk ? '' : red) + '>' + (r.g ? fmtDate(r.g) : 'fehlt') + '</td><td>' + (r.s[0] ? fmtDate(r.s[0].date) : '') + '</td><td>' + pd(r.s.slice(1)) + '</td><td>' + pd(r.u) + '</td><td>' + pd(r.e) + '</td>' +
+          '<td' + (r.ok ? '' : red) + '>' + (r.ok ? 'erfüllt' : 'fehlt: ' + esc(r.miss.join(', '))) + '</td></tr>';
+      });
+      return hy + '</tbody></table><div class="pr-foot">Erfüllt = gültige G26, mindestens eine Übungsstrecke und dazu eine Übung oder ein Einsatz unter Atemschutz oder eine zweite Übungsstrecke · rot = fehlt</div>';
+    }
     if (ui.print === 'agt') {
       var ha = printHead('Atemschutzgeräteträger – Übersicht');
       ha += '<table><thead><tr><th>Name</th>' + (multiUnit() ? '<th>Einheit</th>' : '') + '<th>G26 gültig bis</th><th>Übungsstrecke zuletzt</th><th>nächste fällig</th><th>geplant</th><th>Unterweisung zuletzt</th></tr></thead><tbody>';
@@ -4515,6 +4667,7 @@
     if (t.id === 'ffl-importcat') { ui.importCat = t.value; return render(); }
     if (t.id === 'ffl-onlyneeds') { ui.printOnlyNeeds = t.checked; return render(); }
     if (t.id === 'ffl-agtonly') { ui.agtOnly = t.checked; return render(); }
+    if (t.id === 'ffl-agtsecond') return post('agt/rule', { second: t.checked }, t.checked ? 'Regel eingeschaltet: zweiter Nachweis nötig.' : 'Regel ausgeschaltet.');
     if (t.id === 'ffl-cfilter') { ui.cFilter = t.value; return render(); }
     // Beim Ankreuzen nur den Zähler auf dem Knopf aktualisieren (Liste und Scroll-Position bleiben)
     if (t.hasAttribute('data-tpl')) { ui.tplSel[t.getAttribute('data-tpl')] = t.checked; return countBtn('tpladd', ui.tplSel, ' übernehmen', ''); }
@@ -4678,7 +4831,7 @@
       resetYearUi(); return reload();
     }
     var act = t.getAttribute('data-act'), id = +t.getAttribute('data-id');
-    if (incidentAdminClick(act, t, id) || coreAdminClick(act, t, id) || workshopClick(act, t, id) || vehicleClick(act, t, id) || dutyBoardClick(act, t, id) || dataClick(act, t, id) || teamClick(act, t, id)) return;
+    if (incidentAdminClick(act, t, id) || eventClick(act, t, id) || coreAdminClick(act, t, id) || workshopClick(act, t, id) || vehicleClick(act, t, id) || dutyBoardClick(act, t, id) || dataClick(act, t, id) || teamClick(act, t, id)) return;
     switch (act) {
       case 'makecurrent':
         if (!confirm(ui.year + ' zum Abfragejahr machen? Mitglieder melden dann Bedarf für ' + ui.year + '. Die Daten von ' + d.settings.year + ' bleiben im Archiv.')) return;
@@ -4963,6 +5116,7 @@
         return post('agtlog/bulk', { date: document.getElementById('ffl-agtdate').value, kind: document.getElementById('ffl-agtkind').value, note: document.getElementById('ffl-agtnote').value, member_ids: mids })
           .then(function (r) { ui.agtSel = {}; flash('ok', 'Für ' + r.added + ' Personen eingetragen.'); });
       case 'agthist': ui.agtLogFor = ui.agtLogFor === id ? null : id; return render();
+      case 'agtyear': ui.agtYear = +t.getAttribute('data-v'); return render();
       case 'delagtlog': if (confirm('Eintrag löschen?')) post('agtlog/delete', { id: id }); return;
       case 'saveitems':
         return post('settings', { clothing_items: document.getElementById('ffl-citems').value.split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean) }, 'Liste gespeichert.');

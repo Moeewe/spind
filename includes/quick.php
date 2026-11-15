@@ -1,8 +1,8 @@
 <?php
 /**
  * Einsatzberichte für die Website (Plugin „Einsatzverwaltung“): Schnellerfassung aus Alarm-/WhatsApp-Meldungen
- * und Veröffentlichen direkt aus einem Wehrwerk-Einsatz.
- * Seite per Shortcode [wehrwerk_einsatz] (alter Name [ff_einsatz_erfassen] geht weiter).
+ * und Veröffentlichen direkt aus einem SPIND-Einsatz.
+ * Seite per Shortcode [spind_einsatz] (frühere Namen [wehrwerk_einsatz] und [ff_einsatz_erfassen] gehen weiter).
  */
 
 defined('ABSPATH') || exit;
@@ -92,7 +92,7 @@ function myf_quick_units() {
 
 function myf_quick_page_url() {
     global $wpdb;
-    $id = $wpdb->get_var("SELECT ID FROM {$wpdb->posts} WHERE post_type = 'page' AND post_status IN ('publish','private') AND (post_content LIKE '%[wehrwerk_einsatz%' OR post_content LIKE '%[ff_einsatz_erfassen%') LIMIT 1");
+    $id = $wpdb->get_var("SELECT ID FROM {$wpdb->posts} WHERE post_type = 'page' AND post_status IN ('publish','private') AND (post_content LIKE '%[spind_einsatz%' OR post_content LIKE '%[wehrwerk_einsatz%' OR post_content LIKE '%[ff_einsatz_erfassen%') LIMIT 1");
     return $id ? get_permalink((int) $id) : '';
 }
 
@@ -126,14 +126,15 @@ function myf_quick_shortcode() {
     myf_quick_enqueue();
     return myf_quick_markup();
 }
-add_shortcode('wehrwerk_einsatz', 'myf_quick_shortcode');
+add_shortcode('spind_einsatz', 'myf_quick_shortcode');
+add_shortcode('wehrwerk_einsatz', 'myf_quick_shortcode'); // früherer Name
 
 // Altes Plugin noch aktiv? Dann dessen Shortcode/Menü lassen und auf die Ablösung hinweisen
 add_action('plugins_loaded', function () {
     if (function_exists('ffe_markup')) {
         add_action('admin_notices', function () {
             if (!current_user_can('activate_plugins')) return;
-            echo '<div class="notice notice-info"><p><b>Wehrwerk:</b> Die Einsatz-Schnellerfassung ist jetzt in Wehrwerk enthalten. Das frühere Plugin „Einsatz-Schnellerfassung“ kann deaktiviert werden – die Seite mit [ff_einsatz_erfassen] funktioniert weiter.</p></div>';
+            echo '<div class="notice notice-info"><p><b>SPIND:</b> Die Einsatz-Schnellerfassung ist jetzt in SPIND enthalten. Das frühere Plugin „Einsatz-Schnellerfassung“ kann deaktiviert werden – die Seite mit [ff_einsatz_erfassen] funktioniert weiter.</p></div>';
         });
         return;
     }
@@ -152,7 +153,7 @@ add_action('plugins_loaded', function () {
 add_action('template_redirect', function () {
     if (!is_singular()) return;
     $c = (string) get_post_field('post_content', get_queried_object_id());
-    if (has_shortcode($c, 'wehrwerk_einsatz') || has_shortcode($c, 'ff_einsatz_erfassen')) { nocache_headers(); if (!defined('DONOTCACHEPAGE')) define('DONOTCACHEPAGE', true); }
+    if (has_shortcode($c, 'spind_einsatz') || has_shortcode($c, 'wehrwerk_einsatz') || has_shortcode($c, 'ff_einsatz_erfassen')) { nocache_headers(); if (!defined('DONOTCACHEPAGE')) define('DONOTCACHEPAGE', true); }
 });
 
 // Schnellerfassung: nach dem Anlegen eines Berichts (Einsatzverwaltung) „Besonderer Einsatz“, „Bericht enthält Bilder“
@@ -222,7 +223,7 @@ function myf_web_suggest($i) {
         'content' => implode("\n\n", $parts), 'from_report' => (bool) array_filter([$val('lage'), $val('bericht')]), 'scrubbed' => $n];
 }
 
-// Bericht für die Website aus einem Wehrwerk-Einsatz anlegen (Einsatzführung)
+// Bericht für die Website aus einem SPIND-Einsatz anlegen (Einsatzführung)
 add_action('rest_api_init', function () {
     register_rest_route('myf/v1', '/me/incident/websuggest', ['methods' => 'POST', 'permission_callback' => myf_perm('incident_manage'), 'callback' => function (WP_REST_Request $req) {
         global $wpdb;
@@ -271,7 +272,7 @@ add_action('rest_api_init', function () {
         }
         if ($req->get_param('create_list_page') && !myf_reports_page_url()) {
             if (!current_user_can('publish_pages')) return myf_err('Seiten anlegen dürfen nur Administratoren.', 403);
-            wp_insert_post(['post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Einsätze', 'post_name' => 'einsaetze', 'post_content' => '[wehrwerk_einsatzberichte]']);
+            wp_insert_post(['post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Einsätze', 'post_name' => 'einsaetze', 'post_content' => '[spind_einsatzberichte]']);
         }
         if ($req->has_param('mode')) {
             if (!current_user_can('manage_options')) return myf_err('Wer Website-Berichte schreiben darf, legen Administratoren fest.', 403);
@@ -283,7 +284,7 @@ add_action('rest_api_init', function () {
         // Seite für die Schnellerfassung anlegen (nicht in Suchmaschinen, siehe accounts.php)
         if ($req->get_param('create_page') && !myf_quick_page_url()) {
             if (!current_user_can('publish_pages')) return myf_err('Seiten anlegen dürfen nur Administratoren.', 403);
-            wp_insert_post(['post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Einsatz erfassen', 'post_name' => 'einsatz-erfassen', 'post_content' => '[wehrwerk_einsatz]']);
+            wp_insert_post(['post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Einsatz erfassen', 'post_name' => 'einsatz-erfassen', 'post_content' => '[spind_einsatz]']);
         }
         return ['ok' => true, 'url' => myf_quick_page_url()];
     }]);

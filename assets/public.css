@@ -1,4 +1,4 @@
-/* Öffentliche Einsatzberichte (Wehrwerk) – ruhig, passt sich der Schrift des Themes an */
+/* Öffentliche Einsatzberichte (SPIND) – ruhig, passt sich der Schrift des Themes an */
 .wwp { --wwp-red: #e30613; --wwp-ink: #111; --wwp-mu: #6b6b70; --wwp-line: #e3e3e3; max-width: 980px; margin: 0 auto; }
 .wwp a { text-decoration: none; color: inherit; }
 .wwp-years { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--wwp-line); margin-bottom: 18px; }

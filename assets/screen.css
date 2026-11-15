@@ -1,4 +1,4 @@
-/* Wehrwerk – Infoscreen (Fernseher im Gerätehaus).
+/* SPIND – Infoscreen (Fernseher im Gerätehaus).
    Eine Akzentfarbe (Feuerwehrrot), sonst Grautöne; Grün nur für „einsatzbereit“, Gelb nur für „Wichtig“.
    Größen mit clamp(): skaliert mit der Bildschirmbreite, bleibt aber auf kleinen und sehr großen Bildschirmen lesbar.
    Tagsüber hell, nachts dunkel (Sonnenauf-/-untergang am Gerätehaus), Hausschrift Barlow (lokal, OFL). */

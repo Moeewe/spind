@@ -12,7 +12,7 @@ function myf_audit_entity($path) {
         'admin/templates/seed' => 'courses',
         'admin/date' => 'dates', 'admin/date/delete' => 'dates', 'admin/date/tpl' => 'dates', 'admin/material' => 'materials', 'admin/material/delete' => 'materials', 'admin/date/complete' => 'dates',
         'admin/need' => 'needs', 'admin/need/delete' => 'needs', 'admin/qual' => 'quals', 'admin/qual/delete' => 'quals',
-        'admin/agtlog/bulk' => 'agt_log', 'admin/agtlog/delete' => 'agt_log',
+        'admin/agt/rule' => 'settings', 'admin/agtlog/bulk' => 'agt_log', 'admin/agtlog/delete' => 'agt_log',
         'admin/clothing' => 'clothing', 'admin/clothing/delete' => 'clothing', 'admin/idea' => 'ideas',
         'me/sizes' => 'members', 'me/name' => 'members', 'admin/member/sizes' => 'members', 'admin/member/traits' => 'members', 'me/traits' => 'members', 'me/booking/decide' => 'bookings',
         'admin/stock' => 'cloth_stock', 'admin/stock/delete' => 'cloth_stock',
@@ -30,7 +30,7 @@ function myf_audit_entity($path) {
         'admin/setup' => 'settings', 'admin/teams' => 'settings', 'admin/wsrules' => 'settings', 'admin/team/task' => 'team_tasks', 'admin/team/member' => 'members', 'admin/webreports' => 'settings', 'admin/ranks' => 'settings', 'admin/promote' => 'members', 'me/incident/web' => 'incidents', 'admin/incident/pub' => 'incidents', 'admin/drills' => 'drills', 'admin/incident/retention' => 'incidents', 'me/drill/absence' => 'drill_absence',
         'asu' => 'asu', 'asu/reopen' => 'asu', 'asu/file' => 'asu', 'admin/site' => 'settings', 'admin/site/pages' => 'settings', 'admin/site/instagram' => 'settings', 'admin/site/photos' => 'media', 'admin/briefing' => 'briefings', 'admin/briefing/ack' => 'briefings', 'admin/briefing/delete' => 'briefings', 'admin/member/history' => 'members', 'admin/member/history/delete' => 'members', 'admin/member/anonymize' => 'members', 'loan' => 'loans', 'loan/return' => 'loans', 'loan/setup' => 'settings', 'me/briefing' => 'briefings',
         'admin/locker' => 'lockers', 'admin/backup' => 'backup', 'me/2fa' => 'security', 'admin/secret' => 'security',
-        'me/notice' => 'notices', 'admin/notice' => 'notices', 'admin/notice/delete' => 'notices', 'admin/member/noticeright' => 'members',
+        'admin/event' => 'events', 'admin/event/delete' => 'events', 'me/notice' => 'notices', 'admin/notice' => 'notices', 'admin/notice/delete' => 'notices', 'admin/member/noticeright' => 'members',
     ];
     return $map[$path] ?? '';
 }

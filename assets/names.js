@@ -1,4 +1,4 @@
-/* Wehrwerk – Vor- und Nachname erkennen („Mustermann Max“, „Max Mustermann“, „ter Horst, Jan“ …).
+/* SPIND – Vor- und Nachname erkennen („Mustermann Max“, „Max Mustermann“, „ter Horst, Jan“ …).
    Reihenfolge der Hinweise: Komma > E-Mail-Adresse (vorname.nachname@…) > Liste häufiger Vornamen.
    Ohne sicheren Hinweis wird „Nachname Vorname“ angenommen (so stehen Namen meist in Listen) und als unsicher markiert. */
 (function () {

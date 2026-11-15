@@ -44,6 +44,12 @@ add_action('rest_api_init', function () {
     foreach (['agt' => 'myf_api_admin_agt', 'agtlog/bulk' => 'myf_api_admin_agtlog_bulk', 'agtlog/delete' => 'myf_api_admin_agtlog_delete'] as $path => $cb) {
         register_rest_route($ns, '/admin/' . $path, ['methods' => 'POST', 'permission_callback' => 'myf_can_agt', 'callback' => $cb]);
     }
+    // Regel für „einsatzbereit“: zweiter Nachweis in 12 Monaten nötig (ja/nein) – pflegen die Atemschutz-Zuständigen
+    register_rest_route($ns, '/admin/agt/rule', ['methods' => 'POST', 'permission_callback' => 'myf_can_agt', 'callback' => function (WP_REST_Request $req) {
+        $s = myf_settings(); $s['agt_second'] = (bool) $req->get_param('second');
+        update_option('myf_settings', $s);
+        return ['ok' => true, 'second' => $s['agt_second']];
+    }]);
 });
 
 function myf_settings_admin() {
@@ -91,7 +97,7 @@ function myf_api_admin_state(WP_REST_Request $req) {
         'brand' => myf_brand(),
         'mail_from' => myf_mail_from(), 'invite_preview' => ['subject' => myf_invite_subject(), 'text' => myf_invite_text('Max', 'max.mustermann', '[persönlicher Link zum Passwort-Festlegen]')],
         'depts' => MYF_DEPTS, 'retire_age' => myf_retire_age(),
-        'cats' => MYF_CATS, 'units' => myf_units(), 'idea_to' => myf_idea_to(), 'agt_kinds' => MYF_AGT_KINDS, 'clothing_kinds' => MYF_CLOTHING_KINDS,
+        'cats' => MYF_CATS, 'units' => myf_units(), 'idea_to' => myf_idea_to(), 'agt_kinds' => MYF_AGT_KINDS, 'agt_second' => !empty(myf_settings()['agt_second']), 'clothing_kinds' => MYF_CLOTHING_KINDS,
         'can_agt' => myf_can_agt(),
         'me_member' => ($mm = myf_me()) ? (int) $mm->id : null,
         'can_audit' => current_user_can('manage_options'),
@@ -166,7 +172,7 @@ function myf_api_admin_member_pwlink(WP_REST_Request $req) {
         'url' => network_site_url('wp-login.php?action=rp&key=' . $key . '&login=' . rawurlencode($u->user_login), 'login')];
 }
 
-// Datensicherung: alle Wehrwerk-Tabellen und Einstellungen als JSON (nur Administratoren)
+// Datensicherung: alle SPIND-Tabellen und Einstellungen als JSON (nur Administratoren)
 function myf_api_admin_backup() {
     global $wpdb;
     $out = ['plugin' => 'myfeuerwehr', 'version' => MYF_VERSION, 'created' => current_time('c'), 'settings' => myf_settings_safe(), 'tables' => []];
@@ -756,7 +762,9 @@ function myf_api_admin_agtlog_bulk(WP_REST_Request $req) {
     $note = sanitize_text_field((string) $req->get_param('note'));
     $n = 0;
     foreach (array_filter(array_map('intval', (array) $req->get_param('member_ids'))) as $mid) {
-        $wpdb->insert(myf_t('agt_log'), ['member_id' => $mid, 'date' => $date, 'kind' => $kind, 'note' => $note]);
+        // Derselbe Nachweis am selben Tag nicht doppelt (z. B. zweimal auf „eintragen“ getippt)
+        if ($wpdb->get_var($wpdb->prepare('SELECT id FROM ' . myf_t('agt_log') . ' WHERE member_id = %d AND kind = %s AND date = %s AND note = %s', $mid, $kind, $date, $note))) continue;
+        $wpdb->insert(myf_t('agt_log'), ['member_id' => $mid, 'date' => $date, 'kind' => $kind, 'note' => $note, 'by_name' => myf_actor()]);
         $n++;
     }
     return ['added' => $n];

@@ -1,10 +1,10 @@
-=== Wehrwerk ===
+=== SPIND ===
 Contributors:
 Tags: feuerwehr, fire department, mitgliederbereich, einsatz, verein
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 0.15.0
+Stable tag: 0.16.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,11 +12,11 @@ Mitgliederbereich und Verwaltung für Freiwillige Feuerwehren: Einsätze, Atemsc
 
 == Description ==
 
-**Von der Freiwilligen Feuerwehr für Freiwillige Feuerwehren.** Wehrwerk macht aus einer WordPress-Website ein Portal für die eigene Wehr. Mitglieder melden sich an und erledigen am Handy, was sonst auf Zetteln, in Tabellen und in Chatgruppen liegt. Die Führung und die Fachwarte verwalten ihre Bereiche in derselben Oberfläche.
+**Von der Freiwilligen Feuerwehr für Freiwillige Feuerwehren.** SPIND macht aus einer WordPress-Website ein Portal für die eigene Wehr. Mitglieder melden sich an und erledigen am Handy, was sonst auf Zetteln, in Tabellen und in Chatgruppen liegt. Die Führung und die Fachwarte verwalten ihre Bereiche in derselben Oberfläche.
 
-Wehrwerk ist kostenlos, quelloffen (GPL) und ehrenamtlich entwickelt. Es ist eine Beta-Version (0.x): Die Funktionen laufen im Alltag einer Feuerwehr, werden aber noch erweitert.
+SPIND ist kostenlos, quelloffen (GPL) und ehrenamtlich entwickelt. Es ist eine Beta-Version (0.x): Die Funktionen laufen im Alltag einer Feuerwehr, werden aber noch erweitert.
 
-*English summary:* Wehrwerk turns a WordPress site into a member portal and back office for volunteer fire departments (incident attendance and reports, breathing apparatus workshop, clothing store and lockers, vehicles, training courses, duty rosters, dashboards for the station). The interface is currently German only.
+*English summary:* SPIND turns a WordPress site into a member portal and back office for volunteer fire departments (incident attendance and reports, breathing apparatus workshop, clothing store and lockers, vehicles, training courses, duty rosters, dashboards for the station). The interface is currently German only.
 
 = Funktionen =
 
@@ -32,15 +32,15 @@ Wehrwerk ist kostenlos, quelloffen (GPL) und ehrenamtlich entwickelt. Es ist ein
 
 = Einrichtung =
 
-Nach der Aktivierung führt eine Ersteinrichtung durch Name, Ort, Einheiten und Logo. Wehrwerk bringt keine Daten einer bestimmten Feuerwehr mit. Der Mitgliederbereich erscheint auf einer Seite mit dem Shortcode `[myfeuerwehr]`.
+Nach der Aktivierung führt eine Ersteinrichtung durch Name, Ort, Einheiten und Logo. SPIND bringt keine Daten einer bestimmten Feuerwehr mit. Der Mitgliederbereich erscheint auf einer Seite mit dem Shortcode `[myfeuerwehr]`.
 
 = Mitmachen =
 
-Tester, Ideen und Code sind willkommen: [github.com/Moeewe/wehrwerk](https://github.com/Moeewe/wehrwerk).
+Tester, Ideen und Code sind willkommen: [github.com/Moeewe/spind](https://github.com/Moeewe/spind).
 
 == Externe Dienste ==
 
-Wehrwerk ruft externe Dienste nur ab, wenn die jeweilige Funktion eingeschaltet ist. Es werden dabei keine Mitgliederdaten übertragen.
+SPIND ruft externe Dienste nur ab, wenn die jeweilige Funktion eingeschaltet ist. Es werden dabei keine Mitgliederdaten übertragen.
 
 * **Bright Sky (Wetterdaten des Deutschen Wetterdienstes)** – für das Wetter auf dem Dashboard. Übertragen werden die Koordinaten des Gerätehauses. Anbieter: [brightsky.dev](https://brightsky.dev), [Hinweise des Anbieters](https://brightsky.dev/docs/).
 * **Warnungen des Bundes (NINA, warnung.bund.de)** – für amtliche Warnungen auf dem Dashboard. Übertragen wird der Amtliche Regionalschlüssel des Kreises. Anbieter: Bundesamt für Bevölkerungsschutz und Katastrophenhilfe, [warnung.bund.de](https://warnung.bund.de), [Datenschutz](https://warnung.bund.de/datenschutz).
@@ -51,21 +51,21 @@ Wehrwerk ruft externe Dienste nur ab, wenn die jeweilige Funktion eingeschaltet 
 == Installation ==
 
 1. Plugin installieren und aktivieren.
-2. Im WordPress-Menü „Wehrwerk“ öffnen und der Ersteinrichtung folgen (Name der Feuerwehr, Ort, Einheiten).
-3. Eine Seite mit dem Shortcode `[myfeuerwehr]` anlegen – das ist der Mitgliederbereich.
+2. Im WordPress-Menü „SPIND“ öffnen und der Ersteinrichtung folgen (Name der Feuerwehr, Ort, Einheiten).
+3. Eine Seite mit dem Shortcode `[spind]` anlegen – das ist der Mitgliederbereich.
 4. Mitglieder anlegen oder importieren und einladen.
 
 Zum Ausprobieren gibt es einen Demo-Modus mit Beispieldaten. Sie liegen in eigenen Tabellen und mischen sich nicht mit echten Daten.
 
 == Frequently Asked Questions ==
 
-= Für wen ist Wehrwerk gedacht? =
+= Für wen ist SPIND gedacht? =
 
 Für Freiwillige Feuerwehren im deutschsprachigen Raum. Begriffe, Dienstgrade und Lehrgänge orientieren sich an Nordrhein-Westfalen und lassen sich anpassen.
 
-= Was kostet Wehrwerk? =
+= Was kostet SPIND? =
 
-Nichts. Wehrwerk ist freie Software unter der GPL und wird ehrenamtlich entwickelt.
+Nichts. SPIND ist freie Software unter der GPL und wird ehrenamtlich entwickelt.
 
 = Wo liegen die Daten? =
 
@@ -73,25 +73,31 @@ Ausschließlich in der Datenbank der eigenen WordPress-Website. Es gibt keinen z
 
 = Gehen bei einem Update Daten verloren? =
 
-Nein. Updates erweitern die Tabellen, löschen aber keine Daten. Auch beim Deaktivieren und Löschen des Plugins bleiben die Daten in der Datenbank. Eine Sicherung vor Updates ist trotzdem sinnvoll und in Wehrwerk eingebaut.
+Nein. Updates erweitern die Tabellen, löschen aber keine Daten. Auch beim Deaktivieren und Löschen des Plugins bleiben die Daten in der Datenbank. Eine Sicherung vor Updates ist trotzdem sinnvoll und in SPIND eingebaut.
 
 = Brauche ich das Plugin „Einsatzverwaltung“? =
 
-Nein. Ist es installiert, übernimmt Wehrwerk die dort veröffentlichten Einsätze und kann Berichte dorthin übergeben.
+Nein. Ist es installiert, übernimmt SPIND die dort veröffentlichten Einsätze und kann Berichte dorthin übergeben.
 
 = Gibt es Hosting oder Hilfe bei der Einrichtung? =
 
 Hosting und Einrichtung sind auf Anfrage möglich: [parametricsolutions.de](https://parametricsolutions.de).
 
-= Ist Wehrwerk fertig? =
+= Ist SPIND fertig? =
 
-Wehrwerk ist eine Beta-Version (0.x). Version 1.0.0 erscheint, wenn die ersten Wehren produktiv damit arbeiten und die Tests durch sind. Rückmeldungen helfen dabei.
+SPIND ist eine Beta-Version (0.x). Version 1.0.0 erscheint, wenn die ersten Wehren produktiv damit arbeiten und die Tests durch sind. Rückmeldungen helfen dabei.
 
 == Changelog ==
 
+= 0.16.0 =
+* Neuer Name: SPIND (früher Wehrwerk). Bisherige Bausteine gelten weiter.
+* Neu: Veranstaltungen – besondere Termine mit Beschreibung und Bild, als Entwurf, für Mitglieder oder öffentlich.
+* Neue Bausteine [ww_veranstaltungen] und [ww_veranstaltung]; [ww_termine] hebt besondere Termine hervor.
+* Abgleich mit dem verbundenen Kalender und öffentliches Kalender-Abo der Veranstaltungen.
+
 = 0.15.0 =
-* Neu: Geräte sicher mit der Wehrwerk-App verbinden – ohne dass die App ein Passwort erfährt.
-* Neutraler Kern: Wehrwerk startet ohne Vorgaben einer bestimmten Feuerwehr.
+* Neu: Geräte sicher mit der SPIND-App verbinden – ohne dass die App ein Passwort erfährt.
+* Neutraler Kern: SPIND startet ohne Vorgaben einer bestimmten Feuerwehr.
 * Neutrales Logo und neutrale Vorlagen; Lehrgangsvorlagen ohne Nummern, Orte und Kosten.
 * Lizenztext und Beschreibung für das WordPress-Pluginverzeichnis.
 
@@ -104,6 +110,9 @@ Wehrwerk ist eine Beta-Version (0.x). Version 1.0.0 erscheint, wenn die ersten W
 Alle Versionen stehen in der Datei CHANGELOG.md.
 
 == Upgrade Notice ==
+
+= 0.16.0 =
+Keine Änderung an gespeicherten Daten. Es kommt eine neue Tabelle für Veranstaltungen dazu.
 
 = 0.15.0 =
 Keine Änderung an gespeicherten Daten. Neue Installationen starten neutral.

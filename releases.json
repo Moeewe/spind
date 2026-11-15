@@ -1,11 +1,30 @@
 [
   {
+    "version": "0.16.0",
+    "date": "2026-11-15",
+    "title": "Neuer Name SPIND, Veranstaltungen für die Website, Atemschutz-Jahresnachweis",
+    "items": [
+      "Neuer Name: Die Software heißt jetzt SPIND (früher Wehrwerk). An euren Daten, Einstellungen und Seiten ändert sich nichts. Die bisherigen Bausteine auf euren Seiten gelten weiter; neu heißen sie [spind], [spind_einsatz] und [spind_einsatzberichte]. Der Name, den eure Mitglieder sehen, bleibt wie unter „Einstellungen → Organisation“ eingetragen.",
+      "Neu unter „Dienste → Veranstaltungen“ (nur für die Verwaltung): Termine für die Öffentlichkeit wie Leistungsnachweis, Tag der Jugendfeuerwehr, Tag der offenen Tür oder Lampionfest – mit Kurztext, Beschreibung, Bild, Ort und Link. Internes gehört weiter in den Dienstplan.",
+      "Jede Veranstaltung beginnt als Entwurf und wird erst mit „Öffentlich“ sichtbar. Vor dem Veröffentlichen fragt SPIND nach.",
+      "Neue Bausteine für die Website: [ww_veranstaltungen] zeigt alle öffentlichen Veranstaltungen als Karten mit Einzelansicht, [ww_veranstaltung] die nächste hervorgehobene, zum Beispiel auf der Startseite. Die Einzelansicht hat einen Knopf „In meinen Kalender“ und Angaben für Suchmaschinen.",
+      "[ww_termine] hebt hervorgehobene Veranstaltungen rot umrandet als „Besonderer Termin“ hervor. Mit veranstaltungen=\"nein\" bleiben sie dort weg.",
+      "Bei den Mitgliedern stehen öffentliche Veranstaltungen ganz normal im Kalender, in der App und im persönlichen Kalender-Abo – ohne besondere Hervorhebung.",
+      "Eine Veranstaltung lässt sich mit einer Abfrage verknüpfen („Wer hilft beim Aufbau?“). Mitglieder sehen dann am Termin einen Knopf zur Abfrage; öffentlich erscheint davon nichts.",
+      "Abgleich mit dem Kalender der Feuerwehr: Ein Termin aus dem verbundenen Kalender lässt sich als Veranstaltung übernehmen. Datum und Uhrzeit kommen weiter aus dem Kalender; der Termin erscheint überall nur einmal. Verschwindet er aus dem Kalender, bleibt die Veranstaltung und die Verwaltung sieht einen Hinweis.",
+      "Öffentliches Kalender-Abo nur mit öffentlichen Veranstaltungen, zum Einbinden in andere Kalender. Abgesagte Veranstaltungen bleiben sichtbar und sind deutlich gekennzeichnet.",
+      "Atemschutz: neuer Reiter „Jahresnachweis“ mit G26, Übungsstrecken, Übungen und Einsätzen unter Atemschutz je Geräteträger, zum Drucken und als CSV. Der Import liest Jahreslisten mit „Strecke 1“, „Strecke 2“ und „Übung“, auch mit mehreren Terminen in einer Zelle.",
+      "Atemschutz: Auf Wunsch gilt „einsatzbereit“ nur mit einem zweiten Nachweis in 12 Monaten (Übung oder Einsatz unter Atemschutz oder eine zweite Übungsstrecke). Die Regel ist zunächst ausgeschaltet und lässt sich unter „Jahresnachweis“ einschalten.",
+      "Anlegen, Ändern und Löschen stehen im Änderungsprotokoll. Bestehende Daten bleiben unverändert; beim Update kommt nur eine neue Tabelle dazu."
+    ]
+  },
+  {
     "version": "0.15.0",
     "date": "2026-11-15",
     "title": "App-Anmeldung und neutraler Kern für die Veröffentlichung",
     "items": [
-      "Neu: Geräte lassen sich sicher mit der Wehrwerk-App (iPhone, iPad, Mac) verbinden. Man meldet sich wie gewohnt im Browser an und bestätigt das Gerät; die App erfährt kein Passwort. Die Verbindung gilt nur für den Mitgliederbereich, nie für die Verwaltung, lässt sich je Gerät trennen und endet bei Austritt, Sperre oder Passwortwechsel.",
-      "Wehrwerk startet auf einer neuen Website jetzt vollständig neutral: ohne Ortsnamen, ohne Koordinaten, ohne Fahrzeug- und Einheitenlisten einer bestimmten Feuerwehr. Alles wird in der Ersteinrichtung eingetragen.",
+      "Neu: Geräte lassen sich sicher mit der SPIND-App (iPhone, iPad, Mac) verbinden. Man meldet sich wie gewohnt im Browser an und bestätigt das Gerät; die App erfährt kein Passwort. Die Verbindung gilt nur für den Mitgliederbereich, nie für die Verwaltung, lässt sich je Gerät trennen und endet bei Austritt, Sperre oder Passwortwechsel.",
+      "SPIND startet auf einer neuen Website jetzt vollständig neutral: ohne Ortsnamen, ohne Koordinaten, ohne Fahrzeug- und Einheitenlisten einer bestimmten Feuerwehr. Alles wird in der Ersteinrichtung eingetragen.",
       "Örtliche Vorgaben einer Feuerwehr liegen in einem eigenen Ordner und sind nicht Teil des öffentlichen Pakets. Bestehende Installationen arbeiten unverändert weiter, gespeicherte Daten und Einstellungen bleiben, wie sie sind.",
       "Das mitgelieferte Logo und die Vorlagen (Präsentationen, Briefkopf, Protokoll …) zeigen „Freiwillige Feuerwehr“ ohne Ortszeile. Mit eigenen Angaben unter „Einstellungen → Organisation“ entsteht daraus wie bisher das eigene Logo.",
       "Die Lehrgangsvorlagen enthalten keine Nummern, Orte und Kosten eines bestimmten Kreises mehr. Diese Angaben lassen sich ergänzen oder aus der Bedarfsabfrage des Kreises übernehmen.",
@@ -17,7 +36,7 @@
     "date": "2026-11-14",
     "title": "/wp-json/ kann nicht mehr verschwinden",
     "items": [
-      "Die Regeln für die Website-Schnittstelle /wp-json/ werden jetzt an drei Stellen geschützt: beim Neuaufbau der Permalinks, beim Speichern in die Datenbank und bei jeder Anfrage. Schreibt ein anderes Plugin die Regeln ohne /wp-json/, ergänzt Wehrwerk sie sofort. Die Website fällt dadurch nicht mehr aus, auch nicht für eine Stunde.",
+      "Die Regeln für die Website-Schnittstelle /wp-json/ werden jetzt an drei Stellen geschützt: beim Neuaufbau der Permalinks, beim Speichern in die Datenbank und bei jeder Anfrage. Schreibt ein anderes Plugin die Regeln ohne /wp-json/, ergänzt SPIND sie sofort. Die Website fällt dadurch nicht mehr aus, auch nicht für eine Stunde.",
       "Jede Reparatur steht im Änderungsprotokoll (Bereich „permalinks“), wenn möglich mit dem Plugin, das sie ausgelöst hat."
     ]
   },
@@ -26,8 +45,8 @@
     "date": "2026-11-14",
     "title": "Website-Schnittstelle repariert sich selbst",
     "items": [
-      "Fehlt in WordPress die Permalink-Regel für /wp-json/, antwortet die ganze Schnittstelle mit „Seite nicht gefunden“ (404). Dann klappt das Veröffentlichen von Einsätzen und Beiträgen nicht, Wehrwerk meldet ohne Anmeldung „Seite existiert nicht“ und der Cookie-Banner kann keine Zustimmung speichern.",
-      "Wehrwerk prüft das jetzt höchstens einmal pro Stunde und baut die Regeln bei Bedarf selbst neu auf. Die Reparatur steht im Änderungsprotokoll."
+      "Fehlt in WordPress die Permalink-Regel für /wp-json/, antwortet die ganze Schnittstelle mit „Seite nicht gefunden“ (404). Dann klappt das Veröffentlichen von Einsätzen und Beiträgen nicht, SPIND meldet ohne Anmeldung „Seite existiert nicht“ und der Cookie-Banner kann keine Zustimmung speichern.",
+      "SPIND prüft das jetzt höchstens einmal pro Stunde und baut die Regeln bei Bedarf selbst neu auf. Die Reparatur steht im Änderungsprotokoll."
     ]
   },
   {
@@ -226,7 +245,7 @@
     "items": [
       "Einsatzseite, „Bericht & Ausdrucke“: alle Kacheln gleich aufgebaut – Name, eckige Status-Marke in den Systemfarben (Bernstein „zu tun“, Grün „abgeschlossen“, Blau „Entwurf“), eine Zeile Stand, unten die Knöpfe: erst „Ansehen / PDF“, rechts die Hauptaktion in Rot.",
       "Bescheinigungen Arbeitgeber: statt rundem „1 neu“ jetzt die Marke „1 angefragt“; der Balken ist Bernstein (Achtung) statt Rot (Fehler). „Drucken“ erscheint erst, wenn die Teilnahme bestätigt ist; „Verdienstausfall“ führt zur Übersicht.",
-      "Plugin heißt in WordPress jetzt schlicht „Wehrwerk“ (ohne „vormals MyFeuerwehr“), mit kurzer Beschreibung. Shortcodes und Einstellungen bleiben unverändert."
+      "Plugin heißt in WordPress jetzt schlicht „SPIND“ (ohne „vormals MyFeuerwehr“), mit kurzer Beschreibung. Shortcodes und Einstellungen bleiben unverändert."
     ]
   },
   {
@@ -249,7 +268,7 @@
     "title": "Eigene Wartungsseite, Dashboards kommen von selbst zurück",
     "items": [
       "Während Updates zeigt die Website statt „Briefly unavailable for scheduled maintenance“ eine eigene Seite der Feuerwehr: auf Deutsch, mit Logo, groß „Im Notfall immer 112“, Polizei 110 und Anschrift des Gerätehauses. Sie lädt sich von selbst neu, sobald die Seite wieder da ist.",
-      "Die Wartungsseite liegt als WordPress-Vorlage (wp-content/maintenance.php) außerhalb des Plugins und funktioniert deshalb auch, während Wehrwerk selbst aktualisiert wird. Eine schon vorhandene fremde Vorlage wird nicht überschrieben; beim Deaktivieren des Plugins wird unsere entfernt.",
+      "Die Wartungsseite liegt als WordPress-Vorlage (wp-content/maintenance.php) außerhalb des Plugins und funktioniert deshalb auch, während SPIND selbst aktualisiert wird. Eine schon vorhandene fremde Vorlage wird nicht überschrieben; beim Deaktivieren des Plugins wird unsere entfernt.",
       "Besprechungsraum und Halle laden nach einem Update nur dann neu, wenn die Seite wieder erreichbar ist – sie bleiben nicht mehr auf einer Wartungs- oder Fehlerseite hängen und müssen nicht von Hand neu geladen werden.",
       "Halle: Was während einer Wartung oder eines Updates eingetragen wird, bleibt auf dem Tablet und wird danach automatisch übertragen (vorher konnte ein Eintrag in diesem Moment als „abgelehnt“ verloren gehen).",
       "Einsatzseite: „… möchte ausgetragen werden“ und angefragte Bescheinigungen stehen jetzt oben im Abschnitt „Beteiligte“ – dort, wo die Beteiligung bearbeitet wird."
@@ -263,7 +282,7 @@
       "Erledigt einer aus dem Team einen Vorgang, verschwindet die Benachrichtigung bei allen anderen – sie steht dann unter „Erledigt“ mit dem Hinweis „vom Team erledigt“. Das gilt für: „… war doch nicht dabei“, Bescheinigungen für den Arbeitgeber, Fahrzeug-Anfragen, Rückfragen, neue Mängel (sobald in Bearbeitung), Kleidermeldungen und Anregungen.",
       "„… war doch nicht dabei“: „Entscheiden“ springt auf der Einsatzseite direkt zur Anfrage und hebt sie kurz hervor. Offene Anfragen (Austragen, Bescheinigungen) stehen jetzt oben, über den Fahrzeugzeiten.",
       "Das Anklicken allein hakt eine Entscheidung nicht mehr ab – sie bleibt offen, bis jemand „Austragen“ oder „Bleibt drin“ gewählt bzw. die Bescheinigung gedruckt hat.",
-      "Ist der Vorgang schon erledigt, sagt Wehrwerk das beim Anklicken, statt eine leere Einsatzseite zu zeigen.",
+      "Ist der Vorgang schon erledigt, sagt SPIND das beim Anklicken, statt eine leere Einsatzseite zu zeigen.",
       "Fragt dieselbe Person später erneut an, kommt auch wieder eine neue Benachrichtigung."
     ]
   },
@@ -293,7 +312,7 @@
     "date": "2026-10-28",
     "title": "Beta: Druckvorschau, Verdienstausfall neu gedacht, Zwei-Faktor im Profil",
     "items": [
-      "Neues Versionsschema: Wehrwerk ist ab jetzt Beta (0.x). Die 1.0.0 erscheint mit dem produktiven Einsatz und nach den ersten Tests. Frühere interne Stände hießen 3.x.",
+      "Neues Versionsschema: SPIND ist ab jetzt Beta (0.x). Die 1.0.0 erscheint mit dem produktiven Einsatz und nach den ersten Tests. Frühere interne Stände hießen 3.x.",
       "Version und „Was ist neu?“ stehen unten in der Fußzeile von Mitgliederbereich und Verwaltung.",
       "Druckvorschau: Jeder Ausdruck öffnet sich erst als A4-Blatt (Bescheinigungen, Listen, Dienstplan, Fahrtenbuch, Jahresbericht …) – dann „PDF / Drucken“.",
       "Verdienstausfall: Die Feuerwehr bestätigt, druckt und lässt unterschreiben, dann wird die Bescheinigung dem Mitglied ausgehändigt (Ausgabeliste mit Empfangsquittung). Der Arbeitgeber beantragt die Erstattung bei der Gemeinde.",

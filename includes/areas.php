@@ -34,7 +34,7 @@ function myf_route_area($route) {
         'member/traits' => 'members', 'trait' => 'members', 'trait/delete' => 'members', 'member/noticeright' => 'screen',
         'member/sizes' => 'clothing', 'stock' => 'clothing', 'stock/delete' => 'clothing', 'clothitem' => 'clothing', 'clothitem/delete' => 'clothing',
         'clothing' => 'clothing', 'clothing/delete' => 'clothing', 'idea' => 'ideas', 'idea/delete' => 'ideas',
-        'agt' => 'agt', 'agtlog/bulk' => 'agt', 'agtlog/delete' => 'agt',
+        'agt' => 'agt', 'agt/rule' => 'agt', 'agtlog/bulk' => 'agt', 'agtlog/delete' => 'agt',
         'defect' => 'defects', 'defect/delete' => 'defects', 'notice' => 'screen', 'notice/delete' => 'screen',
         'incident' => 'incidents', 'cert/list' => 'incidents', 'cert/handover' => 'incidents', 'incident/report' => 'incidents', 'incident/report/reopen' => 'incidents', 'incident/report/external' => 'incidents', 'incident/part' => 'incidents', 'incident/cert' => 'incidents', 'incident/delete' => 'incidents', 'incident/pub' => 'incidents', 'incident/retention' => 'incidents',
         'audit' => 'full', 'audit/verify' => 'full', 'backup' => 'full', 'restore' => 'full', 'export' => 'any', 'import' => 'any', 'import/ics' => 'incidents', 'alarm' => 'incidents', 'hall' => 'screen', 'demo' => 'demo', 'locate' => 'any', 'setup' => 'full',

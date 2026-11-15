@@ -1,7 +1,7 @@
-/* Wehrwerk – Dashboard im Besprechungsraum: lädt jede Minute neu, Uhr läuft sekundengenau, Beiträge wechseln, Seite lädt alle 6 Stunden komplett neu. */
+/* SPIND – Dashboard im Besprechungsraum: lädt jede Minute neu, Uhr läuft sekundengenau, Beiträge wechseln, Seite lädt alle 6 Stunden komplett neu. */
 (function () {
   'use strict';
-  var APP = (window.MYFS && MYFS.app) || 'Wehrwerk';
+  var APP = (window.MYFS && MYFS.app) || 'SPIND';
   var ORG = (window.MYFS && MYFS.org) || 'Freiwillige Feuerwehr';
   var root = document.getElementById('scr');
   // In der Fahrzeughalle wird das Dashboard in die Hallenseite eingesetzt und bei einem Alarm wieder entfernt: Ziel-Element jedes Mal neu suchen

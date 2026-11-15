@@ -32,12 +32,21 @@ add_action('admin_init', function () {
     exit;
 });
 // Die schwarze WordPress-Leiste nur für Leute, die an der Website arbeiten (Beiträge/Seiten). Mitglieder und reine
-// Wehrwerk-Verwaltung (Führung, Gerätewarte …) sehen sie nicht – Website-Admins nutzen dafür ein zweites Konto.
+// SPIND-Verwaltung (Führung, Gerätewarte …) sehen sie nicht – Website-Admins nutzen dafür ein zweites Konto.
 add_filter('show_admin_bar', function ($show) { return current_user_can('edit_posts') ? $show : false; });
 add_filter('login_redirect', function ($to, $requested, $user) {
     if (!($user instanceof WP_User) || !myf_is_member_only($user)) return $to;
     // Ziel innerhalb des Portals behalten (z. B. ?mangel=HLF vom QR-Code)
     $req = $requested && strpos($requested, '/') === 0 ? home_url($requested) : (string) $requested;
+    // App verbinden: zurück zur Bestätigungsseite (/?myf_app=link&challenge=…), sonst wartet die App vergeblich.
+    // Nur die eigene Startseite und nur genau dieser Aufruf – kein offenes Weiterleiten.
+    if ($req) {
+        $u = wp_parse_url($req); $h = wp_parse_url(home_url('/')); $q = [];
+        parse_str((string) ($u['query'] ?? ''), $q);
+        if (($q['myf_app'] ?? '') === 'link' && strtolower((string) ($u['host'] ?? '')) === strtolower((string) ($h['host'] ?? ''))
+            && (int) ($u['port'] ?? 0) === (int) ($h['port'] ?? 0)
+            && untrailingslashit((string) ($u['path'] ?? '')) === untrailingslashit((string) ($h['path'] ?? ''))) return $req;
+    }
     $page = myf_member_page_url();
     return $req && strpos($req, strtok($page, '?')) === 0 ? $req : $page;
 }, 10, 3);
@@ -222,12 +231,12 @@ add_shortcode('myfeuerwehr', function () {
 function myf_is_portal_page() {
     if (!is_singular()) return false;
     $c = (string) get_post_field('post_content', get_queried_object_id());
-    return has_shortcode($c, 'myfeuerwehr') || has_shortcode($c, 'wehrwerk');
+    return has_shortcode($c, 'myfeuerwehr') || has_shortcode($c, 'spind') || has_shortcode($c, 'wehrwerk');
 }
 function myf_is_private_page() {
     if (!is_singular()) return false;
     $c = (string) get_post_field('post_content', get_queried_object_id());
-    foreach (['myfeuerwehr', 'wehrwerk', 'wehrwerk_einsatz', 'ff_einsatz_erfassen'] as $sc) if (has_shortcode($c, $sc)) return true;
+    foreach (['myfeuerwehr', 'spind', 'wehrwerk', 'spind_einsatz', 'wehrwerk_einsatz', 'ff_einsatz_erfassen'] as $sc) if (has_shortcode($c, $sc)) return true;
     return false;
 }
 add_filter('wp_robots', function ($robots) {

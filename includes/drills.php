@@ -40,7 +40,7 @@ function myf_drill_out($r) {
 function myf_drill_files() { return array_values((array) (myf_settings()['drill_files'] ?? [])); }
 
 // ---- Dienstplan-Kalender (iCal, z. B. Alamos-Kalender): Termine mit Thema und Verantwortlichen kommen von dort,
-// ohne dass jemand sie in Wehrwerk abtippt. Von Hand Eingetragenes bleibt; gleiche Termine werden erkannt und zusammengeführt.
+// ohne dass jemand sie in SPIND abtippt. Von Hand Eingetragenes bleibt; gleiche Termine werden erkannt und zusammengeführt.
 // Mehrere Kalender für den Dienstplan (z. B. „Dienstabende“ und „Lehrgänge“ aus verschiedenen Alamos-Kalendern)
 function myf_drill_icals() {
     $s = myf_settings();

@@ -1,8 +1,8 @@
 <?php
 /**
- * Website im Wehrwerk-Design: eigene Seitenvorlage (Kopf, Menü, Fuß) und Bausteine als Shortcodes.
+ * Website im SPIND-Design: eigene Seitenvorlage (Kopf, Menü, Fuß) und Bausteine als Shortcodes.
  * Die Seiten sind normale WordPress-Seiten – Texte und Bilder bleiben im Editor änderbar. Live-Daten (Einsätze, Zahlen,
- * Neuigkeiten, Dienstabende) kommen aus Einsatzverwaltung, Beiträgen und Wehrwerk. Öffentlich wird nur, was ohnehin
+ * Neuigkeiten, Dienstabende) kommen aus Einsatzverwaltung, Beiträgen und SPIND. Öffentlich wird nur, was ohnehin
  * öffentlich ist: Einsatztitel/-art/Fahrzeuge der Website, Beiträge, Anzahlen, Dienstabend-Termine (ohne Namen).
  * „Seiten als Entwurf anlegen“ (Verwaltung → Einstellungen → Website) baut alle Seiten mit den bisherigen Texten auf – nichts wird überschrieben.
  */
@@ -30,7 +30,7 @@ function myf_site_link($key, $fallback = '') {
 function myf_site_is() { return is_singular('page') && get_page_template_slug() === MYF_SITE_TPL; }
 
 // Vorlage im Seiten-Editor anbieten und ausliefern
-add_filter('theme_page_templates', function ($t) { $t[MYF_SITE_TPL] = 'Wehrwerk-Website'; return $t; });
+add_filter('theme_page_templates', function ($t) { $t[MYF_SITE_TPL] = 'SPIND-Website'; return $t; });
 add_filter('template_include', function ($tpl) { return myf_site_is() ? MYF_DIR . 'includes/site-template.php' : $tpl; }, 99);
 // Auf diesen Seiten nur eigene Gestaltung: Theme-, Elementor- und Slider-Styles weglassen (Cookie-Banner & Co. bleiben)
 add_action('wp_enqueue_scripts', function () {
@@ -46,9 +46,9 @@ add_action('wp_print_styles', function () {
         if (preg_match('#/themes/|elementor|revslider|razzi|wp-block-library|global-styles|classic-theme#i', $src . ' ' . $h)) wp_dequeue_style($h);
     }
 }, 100);
-add_action('after_setup_theme', function () { register_nav_menus(['myf_site' => 'Wehrwerk-Website: Hauptmenü']); }, 20);
+add_action('after_setup_theme', function () { register_nav_menus(['myf_site' => 'SPIND-Website: Hauptmenü']); }, 20);
 
-// Menü: eigenes WordPress-Menü (Design → Menüs → „Wehrwerk-Website: Hauptmenü“), sonst aus den angelegten Seiten
+// Menü: eigenes WordPress-Menü (Design → Menüs → „SPIND-Website: Hauptmenü“), sonst aus den angelegten Seiten
 function myf_site_nav() {
     $loc = get_nav_menu_locations();
     if (!empty($loc['myf_site']) && ($items = wp_get_nav_menu_items($loc['myf_site']))) {
@@ -129,7 +129,7 @@ add_shortcode('ww_zahlen', function ($a) {
         }, $tiles)) . '</div></div></section>';
 });
 
-// Einsätze aus der Einsatzverwaltung (sonst aus Wehrwerk): kurze Liste oder ganzes Jahr nach Monaten
+// Einsätze aus der Einsatzverwaltung (sonst aus SPIND): kurze Liste oder ganzes Jahr nach Monaten
 function myf_site_incidents($year, $limit) {
     $out = [];
     if (post_type_exists('einsatz')) {
@@ -234,12 +234,12 @@ add_shortcode('ww_personen', function ($a, $c = '') {
     return $h . '</div></div></section>';
 });
 
-// Nächste Dienstabende (aus dem Wehrwerk-Dienstplan; öffentlich nur Datum, Uhrzeit, Einheit, Ort – Thema nur, wenn eingestellt)
+// Nächste Dienstabende (aus dem SPIND-Dienstplan; öffentlich nur Datum, Uhrzeit, Einheit, Ort – Thema nur, wenn eingestellt)
 add_shortcode('ww_termine', function ($a) {
     // art: „dienst“ (nur Dienst-/Übungsabende) oder „alle“ (dazu besondere Termine wie Versammlung, Volkstrauertag – Lehrgänge bleiben intern)
     // titel="" lässt die Überschrift weg, hinweis="nein" den Satz „Interessiert? …“ – praktisch auf vorhandenen Theme-Seiten
     // ohne="Begriff, Begriff": weitere Termine nicht öffentlich zeigen (zusätzlich zu den internen Standardbegriffen und allem mit „intern“ im Kalender)
-    $a = shortcode_atts(['anzahl' => 4, 'titel' => 'Nächste Dienstabende', 'thema' => '', 'art' => 'dienst', 'hinweis' => 'ja', 'ohne' => ''], $a);
+    $a = shortcode_atts(['anzahl' => 4, 'titel' => 'Nächste Dienstabende', 'thema' => '', 'art' => 'dienst', 'hinweis' => 'ja', 'ohne' => '', 'veranstaltungen' => 'ja'], $a);
     $ohne = array_filter(array_map(function ($w) { return preg_quote(trim($w), '/'); }, explode(',', (string) $a['ohne'])), 'strlen');
     $internRe = '/intern|fortbildung|stabsarbeit|atemschutz|besprechung|sitzung|weihnachtsfeier|kameradschaft|grillabend|familienabend|helferfest|ausflug|jahresabschluss' . ($ohne ? '|' . implode('|', $ohne) : '') . '/iu';
     $kinds = $a['art'] === 'alle' ? ['dienst', 'termin'] : ['dienst'];
@@ -248,21 +248,31 @@ add_shortcode('ww_termine', function ($a) {
     $rows = $s['drills_public'] && function_exists('myf_drills_upcoming') ? array_map(function ($x) use ($s) {
             // Ort: nur das Ortsfeld aus dem Kalender (nie die Beschreibung – die kann Internes enthalten), sonst der eingestellte Treffpunkt
             $place = trim((string) ($x['place'] ?? ''));
-            return (object) ['date' => $x['date'], 'time_from' => (string) ($x['time'] ?? ''), 'time_to' => (string) ($x['time_to'] ?? ''), 'title' => (string) $x['title'], 'unit' => (string) ($x['unit'] ?? ''), 'place' => $place !== '' ? $place : (string) $s['drill_place']];
+            return (object) ['date' => $x['date'], 'time_from' => (string) ($x['time'] ?? ''), 'time_to' => (string) ($x['time_to'] ?? ''), 'title' => (string) $x['title'], 'unit' => (string) ($x['unit'] ?? ''), 'place' => $place !== '' ? $place : (string) $s['drill_place'], 'cal_uid' => (string) ($x['cal_uid'] ?? '')];
         },
         array_slice(array_values(array_filter(myf_drills_upcoming(60, $kinds), function ($x) use ($internRe) {
             // Öffentlich nur echte Übungs-/Dienstabende (keine Übungsstrecke, Fortbildung o. Ä.); bei „alle“ zusätzlich besondere Termine
             if (preg_match('/\bintern\b/iu', (string) ($x['note'] ?? ''))) return false; // im Kalender als „intern“ markiert
             return ($x['cal_kind'] ?? 'dienst') === 'termin' ? !preg_match($internRe, $x['title'])
                 : (empty($x['cal_kind']) || preg_match('/übungsabend|uebungsabend|dienstabend|übungsdienst|^dienst\b|^übung\b/iu', $x['title']));
-        })), 0, max(1, min(24, (int) $a['anzahl'])))) : [];
+        })), 0, 60)) : [];
+    // Veranstaltungen: hervorgehobene immer, weitere öffentliche bei art="alle"; ein verknüpfter Kalendertermin erscheint nur einmal
+    if ($a['veranstaltungen'] !== 'nein' && function_exists('myf_events') && !myf_demo_ctx()) {
+        $evs = array_values(array_filter(myf_events('public'), function ($o) use ($a) { return $o['featured'] || $a['art'] === 'alle'; }));
+        $linked = array_flip(array_filter(array_column(myf_events('members'), 'cal_uid')));
+        $rows = array_values(array_filter($rows, function ($r) use ($linked) { return $r->cal_uid === '' || !isset($linked[$r->cal_uid]); }));
+        foreach ($evs as $o) $rows[] = (object) ['date' => $o['date'], 'time_from' => $o['time'], 'time_to' => $o['time_to'], 'title' => ($o['cancelled'] ? 'Abgesagt: ' : '') . $o['title'], 'unit' => '', 'place' => $o['place'], 'cal_uid' => '', 'event' => $o];
+        usort($rows, function ($x, $y) { return strcmp($x->date . $x->time_from, $y->date . $y->time_from); });
+    }
+    $rows = array_slice($rows, 0, max(1, min(24, (int) $a['anzahl'])));
     $own = function_exists('myf_site_is') && myf_site_is();
     $h = ($own ? '<section class="ws-sec"><div class="ws-wrap">' : myf_ww_termine_css() . '<div class="ww-termine">') . ($a['titel'] !== '' ? '<h2 class="ws-h"><span>' . esc_html($a['titel']) . '</span></h2>' : '');
     if ($rows) {
         $h .= '<div class="ws-dates">' . implode('', array_map(function ($r) use ($a, $units) {
             $ts = strtotime($r->date);
-            return '<div class="ws-date"><time datetime="' . esc_attr($r->date) . '"><b>' . date_i18n('d', $ts) . '</b><small>' . date_i18n('M', $ts) . '</small></time><span><b>' . esc_html($a['thema'] || $a['art'] === 'alle' ? $r->title : 'Übungsabend' . ($r->unit && isset($units[$r->unit]) ? ' ' . $units[$r->unit] : '')) . '</b>' .
-                '<small>' . date_i18n('l', $ts) . ($r->time_from ? ', ' . (substr($r->time_to, 0, 5) === '23:59' || $r->time_to === '' ? 'ab ' . esc_html(substr($r->time_from, 0, 5)) : esc_html(substr($r->time_from, 0, 5)) . '–' . esc_html(substr($r->time_to, 0, 5))) . ' Uhr' : '') . ($r->place !== '' ? ' · ' . esc_html($r->place) : '') . '</small></span></div>';
+            $ev = $r->event ?? null; $top = $ev && $ev['featured']; $tag = $ev && $ev['url'] ? 'a' : 'div';
+            return '<' . $tag . ' class="ws-date' . ($top ? ' is-top' : '') . '"' . ($tag === 'a' ? ' href="' . esc_url($ev['url']) . '"' : '') . '><time datetime="' . esc_attr($r->date) . '"><b>' . date_i18n('d', $ts) . '</b><small>' . date_i18n('M', $ts) . '</small></time><span>' . ($top ? '<em class="ws-date-tag">Besonderer Termin</em>' : '') . '<b>' . esc_html($ev || $a['thema'] || $a['art'] === 'alle' ? $r->title : 'Übungsabend' . ($r->unit && isset($units[$r->unit]) ? ' ' . $units[$r->unit] : '')) . '</b>' .
+                '<small>' . date_i18n('l', $ts) . ($r->time_from ? ', ' . (substr($r->time_to, 0, 5) === '23:59' || $r->time_to === '' ? 'ab ' . esc_html(substr($r->time_from, 0, 5)) : esc_html(substr($r->time_from, 0, 5)) . '–' . esc_html(substr($r->time_to, 0, 5))) . ' Uhr' : '') . ($r->place !== '' ? ' · ' . esc_html($r->place) : '') . '</small></span></' . $tag . '>';
         }, $rows)) . '</div>';
     } else $h .= '<p class="ws-mu">Die nächsten Termine stehen bald hier.</p>';
     if ($a['hinweis'] !== 'nein') $h .= '<p class="ws-mu" style="margin-top:14px">Interessiert? Komm einfach zu einem Übungsabend – gern ein paar Minuten früher.</p>';
@@ -274,8 +284,9 @@ function myf_ww_termine_css() {
     return '<style>.ww-termine{margin:12px 0 24px}.ww-termine .ws-h{margin:0 0 14px}.ww-termine .ws-dates{display:grid;gap:10px}'
         . '.ww-termine .ws-date{display:grid;grid-template-columns:64px minmax(0,1fr);gap:14px;align-items:center;padding:12px;border:1px solid rgba(127,127,127,.3)}'
         . '.ww-termine .ws-date time{background:#e30613;color:#fff;text-align:center;padding:8px 4px;line-height:1}.ww-termine .ws-date time b{display:block;font-size:28px;font-weight:800}'
-        . '.ww-termine .ws-date time small{display:block;font-weight:700;text-transform:uppercase;font-size:13px;margin-top:3px}.ww-termine .ws-date span b{display:block;font-size:17px;line-height:1.25}'
-        . '.ww-termine .ws-date span small{display:block;opacity:.75;margin-top:2px}.ww-termine .ws-mu{opacity:.75}</style>';
+        . '.ww-termine .ws-date time small{display:block;font-weight:700;text-transform:uppercase;font-size:13px;margin-top:3px}.ww-termine .ws-date span b{display:block;font-size:17px;line-height:1.25;font-weight:800}'
+        . '.ww-termine .ws-date span small{display:block;opacity:.75;margin-top:2px}.ww-termine .ws-mu{opacity:.75}'
+        . '.ww-termine a.ws-date{color:inherit;text-decoration:none}.ww-termine .ws-date.is-top{border:2px solid #e30613}.ww-termine .ws-date-tag{display:block;font-style:normal;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#e30613}</style>';
 }
 
 // Rotes Band zum Mitmachen

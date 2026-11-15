@@ -214,7 +214,7 @@ function myf_ical_rrule(DateTimeImmutable $start, $rule, DateTimeImmutable $from
     return $res;
 }
 
-// Einsatz-Statistik je Jahr aus allen Quellen: Einsatzverwaltung, Wehrwerk-Einsätze (Alarm, von Hand) und von Hand gepflegte Jahreszahlen
+// Einsatz-Statistik je Jahr aus allen Quellen: Einsatzverwaltung, SPIND-Einsätze (Alarm, von Hand) und von Hand gepflegte Jahreszahlen
 function myf_incident_cat($text) {
     return preg_match('/brand|feuer|bma|rauch|kamin/i', $text) ? 'brand' : (preg_match('/vu\b|verkehr|unfall/i', $text) ? 'vu' : (preg_match('/fehl/i', $text) ? 'fehl' : 'th'));
 }
@@ -245,7 +245,7 @@ function myf_screen_post_sql($tt, $alias = 'p') {
 function myf_incident_stats($n = 5) {
     global $wpdb;
     $unit = function_exists('myf_screen_unit') ? myf_screen_unit() : '';
-    // Schlüssel enthält Anzahl und letzte Nummer der Wehrwerk-Einsätze: neue oder gelöschte Einsätze erscheinen sofort
+    // Schlüssel enthält Anzahl und letzte Nummer der SPIND-Einsätze: neue oder gelöschte Einsätze erscheinen sofort
     $sig = (string) $wpdb->get_var('SELECT CONCAT(COUNT(*), \'-\', IFNULL(MAX(id), 0)) FROM ' . myf_t('incidents') . " WHERE kind = 'einsatz'");
     $ck = 'myf_stats4_' . (int) get_option('myf_stats_ver', 1) . '_' . $n . '_' . $unit . '_' . md5($sig) . (myf_demo_ctx() ? '_demo' : '');
     if (is_array($c = get_transient($ck))) return $c;
@@ -283,7 +283,7 @@ function myf_incident_stats($n = 5) {
             $years[$y]['cats'][myf_incident_cat($p->post_title . ' ' . (is_wp_error($types) ? '' : implode(' ', $types)))] += $w;
         }
     }
-    // Einsätze aus Wehrwerk (Alarm, von Hand) – nur die Einheit der Dashboards (ohne Einheit: alle)
+    // Einsätze aus SPIND (Alarm, von Hand) – nur die Einheit der Dashboards (ohne Einheit: alle)
     $usql = $unit === '' ? '' : $wpdb->prepare(" AND (unit = %s OR unit = '')", $unit);
     // (übernommene Website-Berichte haben ihre Nummer schon oben beigesteuert)
     foreach ($wpdb->get_results($wpdb->prepare('SELECT nr, start FROM ' . myf_t('incidents') . " WHERE kind = 'einsatz' AND source <> 'test' AND post_id IS NULL AND nr <> '' AND start >= %s$usql", $from)) as $i) $noteNr($i->nr, $i->start);
@@ -355,7 +355,7 @@ function myf_api_screen(WP_REST_Request $req) {
         'qr_label' => $b['qr_label'], 'website' => $b['website'] ?: (string) wp_parse_url(home_url(), PHP_URL_HOST), 'place' => $b['place'], 'stats' => myf_incident_stats(5),
         'legal' => myf_legal_links(), 'credits' => ['Wetter: Deutscher Wetterdienst (über Bright Sky)', 'Warnungen: BBK / Warn-App NINA']];
 
-    // Einsätze dieses Jahr und letzte Einsätze: Website (Einsatzverwaltung) und Wehrwerk (Alarm, von Hand, noch ohne Bericht) zusammen –
+    // Einsätze dieses Jahr und letzte Einsätze: Website (Einsatzverwaltung) und SPIND (Alarm, von Hand, noch ohne Bericht) zusammen –
     // gemeinsame Einsätze (gleiche Alarmzeit, z. B. 26/2026 und A07/2026) zählen einmal; im Demo-Bestand nur Demo-Einsätze
     $out['incidents'] = (int) ($out['stats'][$year]['total'] ?? 0);
     $out['incidents_by_month'] = $out['stats'][$year]['months'] ?? array_fill(0, 12, 0);

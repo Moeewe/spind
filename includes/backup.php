@@ -32,7 +32,7 @@ function myf_bk_usage() {
     global $wpdb;
     $tb = myf_t('archive'); $db = 0; $n = 0;
     if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $tb))) { $r = $wpdb->get_row("SELECT COUNT(*) AS n, COALESCE(SUM(LENGTH(data)), 0) AS b FROM `$tb`"); $db = (int) $r->b; $n = (int) $r->n; }
-    $files = 0; foreach (glob(myf_bk_dir() . '/wehrwerk-*.wwbk') ?: [] as $f) $files += (int) @filesize($f);
+    $files = 0; foreach (glob(myf_bk_dir() . '/*.wwbk') ?: [] as $f) $files += (int) @filesize($f);
     return ['db' => $db, 'files' => $files, 'archives' => $n];
 }
 // Aufräumen nach den Einstellungen: tägliche + wöchentliche automatische Archive, Dateien, dann die Speichergrenze.
@@ -47,7 +47,7 @@ function myf_bk_prune() {
         $weekly = (int) date('w', strtotime($a->created)) === 0 && $age <= $c['keep_weekly'] * 7;
         if ($k >= $c['keep_daily'] && !$weekly) $wpdb->delete($tb, ['id' => (int) $a->id]);
     }
-    $files = glob(myf_bk_dir() . '/wehrwerk-*.wwbk') ?: []; rsort($files);
+    $files = glob(myf_bk_dir() . '/*.wwbk') ?: []; rsort($files);
     foreach (array_slice($files, $c['keep_files']) as $f) @unlink($f);
     // Speichergrenze: älteste automatische Archive zuerst
     $max = $c['max_mb'] * MB_IN_BYTES;
@@ -56,7 +56,7 @@ function myf_bk_prune() {
         $left = $wpdb->get_results($wpdb->prepare("SELECT id, LENGTH(data) AS b FROM `$tb` WHERE label = %s ORDER BY created DESC", 'Automatische Sicherung'));
         $total = $u['db'] + $u['files'];
         foreach (array_reverse(array_slice($left, 3)) as $a) { if ($total <= $max) break; $wpdb->delete($tb, ['id' => (int) $a->id]); $total -= (int) $a->b; }
-        $files = glob(myf_bk_dir() . '/wehrwerk-*.wwbk') ?: []; rsort($files);
+        $files = glob(myf_bk_dir() . '/*.wwbk') ?: []; rsort($files);
         foreach (array_reverse(array_slice($files, 3)) as $f) { if ($total <= $max) break; $total -= (int) @filesize($f); @unlink($f); }
     }
 }
@@ -113,7 +113,7 @@ function myf_bk_run($label = 'Automatische Sicherung') {
     if ($j && myf_bk_key()) {
         $j['tables'] = array_combine(array_map(function ($k) { return 'ffl_' . $k; }, array_keys($j['tables'])), array_values($j['tables']));
         $bin = myf_bk_encrypt(wp_json_encode($j));
-        $name = 'wehrwerk-' . current_time('Y-m-d') . '.wwbk';
+        $name = 'spind-' . current_time('Y-m-d') . '.wwbk';
         if ($bin && @file_put_contents(myf_bk_dir() . '/' . $name, $bin) !== false) { $o['last_file'] = $name; $o['last_size'] = strlen($bin); }
     }
     myf_bk_save($o);
@@ -193,6 +193,6 @@ add_filter('myf_admin_state', function ($d) {
     $d['backup'] = ['pass_set' => $o['pass_set'] ?? '', 'last' => $o['last'] ?? '', 'last_file' => $o['last_file'] ?? '', 'last_size' => (int) ($o['last_size'] ?? 0),
         'download' => add_query_arg('myf_backup', 'latest', home_url('/')), 'pull_url' => !empty($o['pull']) ? add_query_arg('myf_backup', $o['pull'], home_url('/')) : '', 'dir_custom' => defined('MYF_BACKUP_DIR') && MYF_BACKUP_DIR,
         'conf' => myf_bk_conf(), 'usage' => myf_bk_usage(),
-        'files' => array_map('basename', array_slice((function () { $f = glob(myf_bk_dir() . '/wehrwerk-*.wwbk') ?: []; rsort($f); return $f; })(), 0, 14))];
+        'files' => array_map('basename', array_slice((function () { $f = glob(myf_bk_dir() . '/*.wwbk') ?: []; rsort($f); return $f; })(), 0, 14))];
     return $d;
 }, 45);

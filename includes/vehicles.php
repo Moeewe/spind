@@ -97,7 +97,7 @@ function myf_vehicle_ext_events($vid, $url = null) {
     if ($url === '' || !function_exists('myf_ical_parse')) return [];
     $ck = 'myf_vical_' . (int) $vid . '_' . md5($url);
     if (is_array($c = get_transient($ck))) return $c;
-    $res = wp_remote_get(preg_replace('#^webcal://#i', 'https://', $url), ['timeout' => 8, 'user-agent' => 'Wehrwerk']);
+    $res = wp_remote_get(preg_replace('#^webcal://#i', 'https://', $url), ['timeout' => 8, 'user-agent' => 'SPIND']);
     $out = [];
     if (!is_wp_error($res) && wp_remote_retrieve_response_code($res) === 200) {
         // Alles in Ortszeit als 'Y-m-d H:i:s' (wie die Buchungen in der Datenbank); myf_ical_parse liefert ISO-Zeiten in der WP-Zeitzone, ganztägig = Datum inklusiv

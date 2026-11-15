@@ -1,20 +1,20 @@
 <?php
 /**
- * Öffentliche Einsatzberichte direkt aus Wehrwerk (wie das Plugin „Einsatzverwaltung“): Liste je Jahr mit Statistik,
+ * Öffentliche Einsatzberichte direkt aus SPIND (wie das Plugin „Einsatzverwaltung“): Liste je Jahr mit Statistik,
  * Einzelbericht, Schnittstelle /myf/v1/public/incidents. Öffentlich sind NUR die eigens freigegebenen Angaben
  * (Titel, Art, Ort ohne Hausnummer, Fahrzeuge, Text, Zeiten, Zahl der Kräfte) – nie der interne Bericht.
- * Shortcode [wehrwerk_einsatzberichte]. Woher die Einsätze kommen (Alarm, Einsatzverwaltung, Schnellerfassung, von Hand) ist egal.
+ * Shortcode [spind_einsatzberichte] (früher [wehrwerk_einsatzberichte], gilt weiter). Woher die Einsätze kommen (Alarm, Einsatzverwaltung, Schnellerfassung, von Hand) ist egal.
  */
 
 defined('ABSPATH') || exit;
 
 function myf_reports_page_url() {
     global $wpdb;
-    $id = $wpdb->get_var("SELECT ID FROM {$wpdb->posts} WHERE post_type = 'page' AND post_status = 'publish' AND post_content LIKE '%[wehrwerk_einsatzberichte%' LIMIT 1");
+    $id = $wpdb->get_var("SELECT ID FROM {$wpdb->posts} WHERE post_type = 'page' AND post_status = 'publish' AND (post_content LIKE '%[spind_einsatzberichte%' OR post_content LIKE '%[wehrwerk_einsatzberichte%') LIMIT 1");
     return $id ? get_permalink((int) $id) : '';
 }
 
-// Website-Status eines Einsatzes: eigener Bericht (Wehrwerk) oder Beitrag der Einsatzverwaltung
+// Website-Status eines Einsatzes: eigener Bericht (SPIND) oder Beitrag der Einsatzverwaltung
 function myf_incident_web($i) {
     if (!empty($i->pub_status)) {
         $u = myf_reports_page_url();
@@ -84,7 +84,7 @@ add_action('rest_api_init', function () {
     }]);
 });
 
-add_shortcode('wehrwerk_einsatzberichte', function ($atts) {
+function myf_reports_shortcode($atts) {
     wp_enqueue_style('myf-public', MYF_URL . 'assets/public.css', [], MYF_ASSET_VER);
     global $wpdb;
     $cats = MYF_INCIDENT_CATS;
@@ -121,4 +121,6 @@ add_shortcode('wehrwerk_einsatzberichte', function ($atts) {
             '<span class="t"><b>' . esc_html($i->pub_title) . '</b><small>' . esc_html(implode(' · ', array_filter([$i->nr ? 'Nr. ' . $i->nr : '', $i->pub_type ?: ($cats[$i->category] ?? ''), $i->pub_place]))) . '</small></span><i class="c-' . esc_attr($i->category) . '"></i></a></li>';
     }, $list)) . '</ol></div>';
     return $h;
-});
+}
+add_shortcode('spind_einsatzberichte', 'myf_reports_shortcode');
+add_shortcode('wehrwerk_einsatzberichte', 'myf_reports_shortcode'); // früherer Name

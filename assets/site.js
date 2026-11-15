@@ -1,4 +1,4 @@
-/* Wehrwerk-Website: Menü am Handy, Untermenüs, Kopfzeile beim Scrollen */
+/* SPIND-Website: Menü am Handy, Untermenüs, Kopfzeile beim Scrollen */
 (function () {
   'use strict';
   var top = document.getElementById('ws-top'), nav = document.getElementById('ws-nav'), burger = document.querySelector('.ws-burger');

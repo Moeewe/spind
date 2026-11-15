@@ -1,4 +1,4 @@
-/* Wehrwerk – Terminal in der Fahrzeughalle (Tablet/Rechner, Touch).
+/* SPIND – Terminal in der Fahrzeughalle (Tablet/Rechner, Touch).
    Gleiche Gestaltung wie das Dashboard: Barlow, eine Akzentfarbe Rot, Grün nur für „eingetragen“ / „frei“.
    Große Flächen zum Antippen (mind. 56 px), funktioniert im Hoch- und Querformat. */
 @font-face { font-family: "Barlow"; font-weight: 400; font-display: swap; src: url("fonts/Barlow-Regular.woff2") format("woff2"); }

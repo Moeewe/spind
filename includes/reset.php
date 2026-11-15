@@ -1,7 +1,7 @@
 <?php
 /**
  * Archiv, Zurücksetzen und „Startklar“:
- * - Archiv: vollständige Kopie aller Wehrwerk-Daten (ohne Protokoll) in der Datenbank – vor jedem Zurücksetzen und vor
+ * - Archiv: vollständige Kopie aller SPIND-Daten (ohne Protokoll) in der Datenbank – vor jedem Zurücksetzen und vor
  *   jedem Einspielen einer Sicherung automatisch. Archive werden nicht gelöscht, sind herunterladbar und wieder einspielbar.
  * - Zurücksetzen: ausgewählte Bereiche leeren (Neustart), Einstellungen, Aussehen, Funktionen/Rechte, Vorlagen und das
  *   Protokoll bleiben. Jeder Schritt steht im Protokoll.
@@ -30,13 +30,13 @@ const MYF_RESET_GROUPS = [
     'courses' => ['Lehrgänge: Jahre, Wünsche, Termine (Vorlagen bleiben)', ['courses' => 'year <> 0', 'dates' => '', 'needs' => '']],
     'agt' => ['Atemschutz & Werkstätten: Geräte, Prüfungen, Nachweise', ['devices' => '', 'device_checks' => '', 'agt_log' => '']],
     'vehicles' => ['Fahrzeuge, Fristen, Verlauf, Fahrtenbuch, Buchungen, Status', ['vehicles' => '', 'vehicle_tasks' => '', 'vehicle_log' => '', 'trips' => '', 'bookings' => '']],
-    'duties' => ['Dienstplan, „Wer hat Zeit?“, Aushänge & Einladungen', ['drills' => '', 'drill_absence' => '', 'duty_lists' => '', 'duty_slots' => '', 'duty_assign' => '', 'board' => '', 'board_rsvp' => '']],
+    'duties' => ['Dienstplan, Veranstaltungen, „Wer hat Zeit?“, Aushänge & Einladungen', ['drills' => '', 'events' => '', 'drill_absence' => '', 'duty_lists' => '', 'duty_slots' => '', 'duty_assign' => '', 'board' => '', 'board_rsvp' => '']],
     'reports' => ['Mängel, Anregungen, Kleiderkammer (Meldungen und Bestand), Hinweise, Team-Aufgaben', ['defects' => '', 'ideas' => '', 'clothing' => '', 'cloth_stock' => '', 'notices' => '', 'team_tasks' => '', 'loans' => '', 'lockers' => '', 'locker_log' => '']],
     'orders' => ['Bestellrunden und Bestellungen (Karten bleiben)', ['order_rounds' => '', 'order_items' => '']],
     'notifications' => ['Benachrichtigungen (Postfach)', ['notifications' => '']],
 ];
 
-// Alle Wehrwerk-Tabellen dieses Bestands (ohne Protokoll und Archiv)
+// Alle SPIND-Tabellen dieses Bestands (ohne Protokoll und Archiv)
 function myf_data_tables() {
     global $wpdb;
     $pre = myf_t(''); $out = [];

@@ -1,5 +1,5 @@
-/* Wehrwerk – Einsatz-Schnellerfassung: Alarm-/WhatsApp-Meldungen erkennen und als Einsatzberichte (Einsatzverwaltung) anlegen.
-   Einheiten, Nummern-Kürzel und Fahrzeuge kommen aus den Wehrwerk-Einstellungen. */
+/* SPIND – Einsatz-Schnellerfassung: Alarm-/WhatsApp-Meldungen erkennen und als Einsatzberichte (Einsatzverwaltung) anlegen.
+   Einheiten, Nummern-Kürzel und Fahrzeuge kommen aus den SPIND-Einstellungen. */
 (function () {
   'use strict';
 
@@ -8,7 +8,7 @@
     api: '/wp-json/',                 // gleiche Domain wie die Seite
     adminUrl: '/wp-admin/',
     ajaxUrl: '/wp-admin/admin-ajax.php',
-    // Eigene Fahrzeuge je Einheit (Namen exakt wie in der Einsatzverwaltung) – kommen aus Wehrwerk
+    // Eigene Fahrzeuge je Einheit (Namen exakt wie in der Einsatzverwaltung) – kommen aus SPIND
     vehicles: {},
     units: [],
     place: '',

@@ -266,7 +266,7 @@ function myf_incident_lead($i) {
 }
 // „Bericht offen“ – eine Regel für Verwaltung, Mitgliederbereich und Startseite: Einsatz (kein Test), nicht abgeschlossen
 // (auch nicht „anderweitig erfasst“), ab dem ersten Bericht im System, höchstens 60 Tage zurück; ohne jeden Bericht nur die letzten 3 Tage.
-// So tauchen Altbestände aus der Zeit vor Wehrwerk nicht als offen auf.
+// So tauchen Altbestände aus der Zeit vor SPIND nicht als offen auf.
 // Nachbereitung: je Einsatz der letzten 60 Tage, was noch fehlt – Bericht, Bestätigung der Beteiligten, Fahrtenbuch je eingesetztem Fahrzeug,
 // Atemschutzüberwachung (wenn AGT dabei), Leihkleidung zurück. Eine Zeile pro Einsatz, nur Einsätze mit offenen Punkten.
 function myf_followup() {
@@ -493,7 +493,7 @@ function myf_part_fields(WP_REST_Request $req) {
 }
 
 // Fortlaufende Nummern je Art und Einheit, im Format der Schnellerfassung: „07/2026“, zweite Einheit „A07/2026“,
-// Übungen eigene Reihe mit „Ü“ („Ü03/2026“, „ÜA03/2026“). Gezählt aus Wehrwerk und (bei Einsätzen) der Einsatzverwaltung.
+// Übungen eigene Reihe mit „Ü“ („Ü03/2026“, „ÜA03/2026“). Gezählt aus SPIND und (bei Einsätzen) der Einsatzverwaltung.
 function myf_nr_prefix($kind, $unit) {
     $p = '';
     if (function_exists('myf_quick_units')) foreach (myf_quick_units() as $u) if ($u['key'] === $unit) $p = (string) $u['prefix'];
@@ -772,7 +772,7 @@ add_action('rest_api_init', function () {
             $wpdb->update(myf_t('incidents'), ['report_closed' => null, 'report_closed_by' => '', 'report_ext' => ''], ['id' => $id]);
             return ['id' => $id];
         }]);
-        // Kein Bericht in Wehrwerk nötig (auf Papier ausgefüllt, Altbestand …): mit Vermerk abschließen – zählt nicht mehr als offen
+        // Kein Bericht in SPIND nötig (auf Papier ausgefüllt, Altbestand …): mit Vermerk abschließen – zählt nicht mehr als offen
         register_rest_route($ns, "/$pre/incident/report/external", ['methods' => 'POST', 'permission_callback' => $pre === 'admin' ? $perm : 'myf_report_perm', 'callback' => function (WP_REST_Request $req) {
             global $wpdb;
             $id = (int) $req->get_param('id'); $note = trim(sanitize_text_field((string) $req->get_param('note')));

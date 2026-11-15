@@ -13,7 +13,7 @@ function myf_brand() {
     if (($b['color'] ?? '') === '#e30620') $b['color'] = '#e30613'; // früheres Standard-Rot → Rot der NRW-Kampagne
     // Neutrale Vorgaben; ein Zusatz mit örtlichen Vorgaben (Ordner local/) kann sie über den Filter ersetzen
     return wp_parse_args($b, (array) apply_filters('myf_brand_defaults', [
-        'app' => 'Wehrwerk', 'org' => 'Freiwillige Feuerwehr', 'place' => '', 'zip' => '', 'address' => '', 'phone' => '', 'email' => '',
+        'app' => 'SPIND', 'org' => 'Freiwillige Feuerwehr', 'place' => '', 'zip' => '', 'address' => '', 'phone' => '', 'email' => '',
         'line1' => 'FREIWILLIGE', 'line2' => 'FEUERWEHR', 'line3' => '', 'color' => '#e30613', 'logo_custom' => '',
         // Beschriftung neben QR-Codes (Dashboard, Aushänge) – für alle verständlich, unabhängig vom App-Namen
         'qr_label' => 'Meine Feuerwehr', 'website' => '', 'setup' => 0,
@@ -83,7 +83,7 @@ function myf_brand_save($in) {
     if (isset($in['color']) && preg_match('/^#[0-9a-f]{6}$/i', $in['color'])) $b['color'] = $in['color'];
     if (array_key_exists('logo_custom', $in) && $in['logo_custom'] === '') $b['logo_custom'] = '';
     if (!empty($in['logo_upload'])) { $u = myf_save_photo($in['logo_upload'], 'logo-'); if ($u) $b['logo_custom'] = $u; }
-    if ($b['app'] === '') $b['app'] = 'Wehrwerk';
+    if ($b['app'] === '') $b['app'] = 'SPIND';
     if ($b['qr_label'] === '') $b['qr_label'] = 'Meine Feuerwehr';
     $b['website'] = preg_replace('#^https?://|/$#', '', $b['website']);
     if (!empty($in['setup'])) $b['setup'] = 1;

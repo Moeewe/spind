@@ -24,7 +24,7 @@ function myf_api_vehicle_ics(WP_REST_Request $req) {
     $v = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . myf_t('vehicles') . ' WHERE id = %d AND active = 1', $vid));
     if (!$v || !function_exists('myf_vehicle_ics_token') || !hash_equals(myf_vehicle_ics_token($vid), (string) $req->get_param('t'))) return myf_err('Ungültiger Kalender-Link.', 403);
     $host = wp_parse_url(home_url(), PHP_URL_HOST); $stamp = gmdate('Ymd\THis\Z');
-    $out = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Wehrwerk//Fahrzeugkalender//DE\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\n" . 'X-WR-CALNAME:' . myf_ics_text($v->name . ' – Belegung') . "\r\nX-WR-TIMEZONE:Europe/Berlin\r\nREFRESH-INTERVAL;VALUE=DURATION:PT1H\r\n";
+    $out = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//SPIND//Fahrzeugkalender//DE\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\n" . 'X-WR-CALNAME:' . myf_ics_text($v->name . ' – Belegung') . "\r\nX-WR-TIMEZONE:Europe/Berlin\r\nREFRESH-INTERVAL;VALUE=DURATION:PT1H\r\n";
     $from = date('Y-m-d', current_time('timestamp') - 180 * DAY_IN_SECONDS);
     foreach ($wpdb->get_results($wpdb->prepare('SELECT b.*, m.name AS mname FROM ' . myf_t('bookings') . ' b LEFT JOIN ' . myf_t('members') . " m ON m.id = b.member_id WHERE b.vehicle_id = %d AND b.status = 'approved' AND b.end >= %s ORDER BY b.start", $vid, $from)) as $b) {
         $out .= "BEGIN:VEVENT\r\nUID:vb" . $b->id . '@' . $host . "\r\nDTSTAMP:$stamp\r\nDTSTART;TZID=Europe/Berlin:" . date('Ymd\THis', strtotime($b->start)) . "\r\nDTEND;TZID=Europe/Berlin:" . date('Ymd\THis', strtotime($b->end)) . "\r\n"
@@ -72,7 +72,7 @@ function myf_api_ics(WP_REST_Request $req) {
     // Weitere Termine aus anderen Bereichen (Dienste, Fahrzeug, …); mit Uhrzeit: 'time' => 'HH:MM', 'endtime'
     $events = apply_filters('myf_ics_events', $events, $m, $all);
     $host = wp_parse_url(home_url(), PHP_URL_HOST);
-    $out = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Wehrwerk//Feuerwehr-Portal//DE\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\n"
+    $out = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//SPIND//Feuerwehr-Portal//DE\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\n"
         . 'X-WR-CALNAME:' . myf_ics_text($all ? myf_brand()['org'] . ' – Termine' : myf_brand()['app'] . ' – meine Termine') . "\r\n"
         . "X-WR-TIMEZONE:Europe/Berlin\r\nREFRESH-INTERVAL;VALUE=DURATION:PT6H\r\n";
     $stamp = gmdate('Ymd\THis\Z');

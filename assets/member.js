@@ -1,8 +1,8 @@
-/* Wehrwerk – Mitgliederseite (angemeldet mit eigenem Konto) */
+/* SPIND – Mitgliederseite (angemeldet mit eigenem Konto) */
 (function () {
   'use strict';
   var ORG = ((window.MYF && MYF.org) || {}).name || 'Freiwillige Feuerwehr';
-  var APP = (window.MYF && MYF.app) || 'Wehrwerk';
+  var APP = (window.MYF && MYF.app) || 'SPIND';
 
   var root = document.getElementById('ffl');
   if (root && window.MYFForm) MYFForm.track(root);
@@ -524,6 +524,19 @@
     return { start: r.date, end: multi ? r.end_date : r.date, time: r.time, time_to: multi ? '' : r.time_to, title: r.title, tag: DKIND[r.cal_kind] || 'Dienst',
       lines: [topic, r.lead ? (r.cal_kind === 'lehrgang' ? 'Dabei: ' : 'Verantwortlich: ') + r.lead : '', r.note].filter(Boolean), drill: r };
   }
+  // Veranstaltung als Kalendereintrag: Kurztext sofort, Beschreibung und Links zum Aufklappen
+  function eventEv(x) {
+    var more = (x.body ? '<p style="white-space:pre-line;margin:6px 0">' + esc(x.body) + '</p>' : '') +
+      '<div class="ffl-row" style="gap:8px;flex-wrap:wrap">' + (x.link ? '<a class="ffl-btn ffl-sm" href="' + esc(x.link) + '" target="_blank" rel="noopener">' + esc(x.link_label || 'Mehr dazu') + '</a>' : '') +
+      (x.url ? '<a class="ffl-btn ffl-sm" href="' + esc(x.url) + '" target="_blank" rel="noopener">Auf der Website</a>' : '') + '</div>';
+    var ask = x.ask_id && !x.cancelled ? (d.duty_lists || []).filter(function (l) { return l.id === x.ask_id; })[0] : null;
+    // Knopf nur, wenn in der Abfrage auch etwas offen ist (sonst führt er ins Leere)
+    if (ask && !(d.duty_slots || []).some(function (s) { return s.list_id === ask.id && (!s.date || s.date >= today()); })) ask = null;
+    return { start: x.date, end: x.end_date || x.date, time: x.time, time_to: x.end_date > x.date ? '' : x.time_to, title: (x.cancelled ? 'Abgesagt: ' : '') + x.title, tag: 'Veranstaltung',
+      lines: [x.place, x.teaser].filter(Boolean), forAll: true,
+      html: (ask ? '<div style="margin-top:6px"><button type="button" class="ffl-sm ffl-p" data-tab="asks">Wer hilft? Zur Abfrage „' + esc(ask.title) + '“</button></div>' : '') +
+        (x.body || x.link || x.url ? '<details class="ffl-evmore"><summary>Mehr dazu</summary>' + more + '</details>' : '') };
+  }
   function evList(ev, opt) {
     opt = opt || {}; var month = opt.noMonth ? 'x' : '', h = '';
     ev.forEach(function (e) {
@@ -536,7 +549,7 @@
         '<div class="ffl-day">' + p[2] + '.' + p[1] + '.<small>' + wd + (multi ? ' – ' + dShort(e.end) : '') + '</small>' + (e.time ? '<small>' + esc(e.time) + (e.time_to ? '–' + esc(e.time_to) : '') + ' Uhr</small>' : '') + '</div>' +
         '<div class="ffl-evbody">' + (e.tag ? '<span class="ffl-evtag">' + esc(e.tag) + '</span>' : '') + '<b>' + esc(e.title) + (e.short ? ' (' + esc(e.short) + ')' : '') + '</b>' +
         (e.lines || []).map(function (l) { return '<div class="ffl-mu">' + esc(l) + '</div>'; }).join('') +
-        (e.mine && e.dabei ? '<div class="ffl-evme">du bist dabei</div>' : '') + (off ? '<span class="ffl-chip st-no">abgemeldet</span>' : '') + '</div>' +
+        (e.html || '') + (e.mine && e.dabei ? '<div class="ffl-evme">du bist dabei</div>' : '') + (off ? '<span class="ffl-chip st-no">abgemeldet</span>' : '') + '</div>' +
         (act || (e.go ? '<span class="ffl-evgo" aria-hidden="true">›</span>' : '')) + '</div>';
     });
     return h;
@@ -552,7 +565,9 @@
     });
     if (d.agt) d.agt.log.forEach(function (l) { if (l.kind === 'strecke' && l.date >= today()) ev.push({ start: l.date, end: l.date, title: 'Atemschutz-Übungsstrecke', tag: 'Atemschutz', lines: [l.note].filter(Boolean), mine: true, dabei: true, go: 'agt' }); });
     // Dienstplan (gilt für alle): erscheint auch unter „Meine Termine“, aber ohne gelbe Hervorhebung
-    (d.drills || []).forEach(function (r) { var e = drillEv(r); e.go = 'duties'; e.forAll = true; e.drill = null; if ((d.drill_absent || []).indexOf(r.id) < 0) ev.push(e); });
+    (d.drills || []).forEach(function (r) { if (r.event_id) return; var e = drillEv(r); e.go = 'duties'; e.forAll = true; e.drill = null; if ((d.drill_absent || []).indexOf(r.id) < 0) ev.push(e); });
+    // Veranstaltungen: stehen ganz normal im Kalender (hervorgehoben werden sie nur auf der öffentlichen Website)
+    (d.events || []).forEach(function (x) { ev.push(eventEv(x)); });
     myDuties().forEach(function (x) { if (x.date) ev.push({ start: x.date, end: x.date, time: x.time || '', title: (((d.duty_lists || []).filter(function (l) { return l.id === x.list_id; })[0] || {}).title || x.label), tag: 'Zugesagt', lines: [x.note].filter(Boolean), mine: true, dabei: true, go: 'duties' }); });
     if (st.calMine) ev = ev.filter(function (e) { return e.mine || e.forAll; });
     ev.sort(function (a, b) { return a.start < b.start ? -1 : 1; });
@@ -774,7 +789,7 @@
   // ---- Einsatzführung: Liste, Detail, Bericht --------------------------------------
   function vIncidentList() {
     var M = d.manage, parts = M.participation;
-    // Tipp für die Einsatzführung: Wehrwerk als App auf den Startbildschirm (einmal, wegklickbar)
+    // Tipp für die Einsatzführung: SPIND als App auf den Startbildschirm (einmal, wegklickbar)
     var tip = load('hometip') !== '1' && !(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ? '<div class="ffl-msg ffl-hometip"><b>Tipp:</b> ' +
       (/iPhone|iPad/.test(navigator.userAgent) ? 'In Safari „Teilen“ → „Zum Home-Bildschirm“ – dann ist der Einsatzbericht nach jedem Einsatz nur einen Tipp entfernt.' : 'Im Browser-Menü „Zum Startbildschirm hinzufügen“ – dann ist der Einsatzbericht nach jedem Einsatz nur einen Tipp entfernt.') +
       ' <button type="button" class="ffl-q ffl-sm" data-act="hometip">Ausblenden</button></div>' : '';
@@ -1213,7 +1228,7 @@
           .then(function () { note('ok', 'Einsatzbericht abgeschlossen und gesperrt.'); return incidentClick('repview', t, id); }, function (err) { note('err', err.message); });
         return true;
       case 'repext':
-        MYFUI.ask({ title: 'Bericht schon erfasst', text: 'Wo ist der Bericht? z. B. „auf Papier, Ordner Einsätze 2025“ oder „Altbestand vor Wehrwerk“. Der Einsatz zählt dann nicht mehr als offen – rückgängig machen geht jederzeit.', value: 'auf Papier ausgefüllt', required: 'Bitte kurz vermerken, wo der Bericht ist.', ok: 'Vermerken' }).then(function (en) {
+        MYFUI.ask({ title: 'Bericht schon erfasst', text: 'Wo ist der Bericht? z. B. „auf Papier, Ordner Einsätze 2025“ oder „Altbestand vor SPIND“. Der Einsatz zählt dann nicht mehr als offen – rückgängig machen geht jederzeit.', value: 'auf Papier ausgefüllt', required: 'Bitte kurz vermerken, wo der Bericht ist.', ok: 'Vermerken' }).then(function (en) {
           if (!en) return;
           api('POST', 'me/incident/report/external', { id: id, note: en }).then(function () { return reload(); }).then(function () { note('ok', 'Vermerkt: Bericht anderweitig erfasst.'); }, function (err) { note('err', err.message); });
         });
@@ -1607,7 +1622,7 @@
   // anmeldet, braucht sie nicht – sie schützt die Anmeldung mit Passwort.
   function twofaRows() {
     var t = d.twofa || {}, pk = (d.passkeys || []).length;
-    var h = '<div class="ffl-prow is-static"><span><b>Zwei-Faktor-Anmeldung</b><small>' + (t.on ? 'aktiv – beim Anmelden mit Passwort fragt ' + esc(MYF.app || 'Wehrwerk') + ' zusätzlich einen Code aus der App · ' + t.left + ' Notfall-Codes übrig'
+    var h = '<div class="ffl-prow is-static"><span><b>Zwei-Faktor-Anmeldung</b><small>' + (t.on ? 'aktiv – beim Anmelden mit Passwort fragt ' + esc(MYF.app || 'SPIND') + ' zusätzlich einen Code aus der App · ' + t.left + ' Notfall-Codes übrig'
       : pk ? 'Mit Passkey brauchst du sie nicht. Nur wenn du dich auch mit Passwort anmeldest, schützt ein Code aus einer App zusätzlich.' : 'Zusätzlich zum Passwort ein Code aus einer App am Handy – ein erratenes Passwort reicht dann nicht.' + (t.required ? ' Für dein Konto Pflicht.' : '')) + '</small></span>' +
       (st.twofa || st.twofaCodes ? '' : t.on ? '<button type="button" class="ffl-sm" data-act="m2faman">Verwalten</button>' : '<button type="button" class="ffl-sm' + (pk ? '' : ' ffl-p') + '" data-act="m2fastart">Einrichten</button>') + '</div>';
     if (st.twofaCodes) return h + '<div class="ffl-pbox ffl-2fabox"><div class="ffl-msg ok"><b>Eingerichtet.</b> Diese Notfall-Codes ausdrucken oder sicher notieren – jeder gilt einmal, falls das Handy fehlt:</div>' +
@@ -1855,7 +1870,7 @@
         }).join('') + '</ul></div>';
       }).join('') : '<p class="ffl-mu">Nichts gefunden.</p>');
   }
-  // Meine Ausbildung: absolvierte Lehrgänge (Wehrwerk) und Nachweise (Ausbildung). Mitglieder tragen nicht selbst ein,
+  // Meine Ausbildung: absolvierte Lehrgänge (SPIND) und Nachweise (Ausbildung). Mitglieder tragen nicht selbst ein,
   // sondern bitten um Nachtrag – die Lehrgangsverwaltung prüft und trägt ein.
   function myTraining() {
     return d.needs.filter(function (n) { return n.status === 'completed'; }).map(function (n) {
@@ -2007,7 +2022,7 @@
       '<div><label class="ffl-fl" for="myf-bplace">Geburtsort</label><input type="text" id="myf-bplace" value="' + esc(d.personal.birth_place) + '" autocapitalize="words" enterkeyhint="next"></div>' +
       '<div><label class="ffl-fl" for="myf-street">Straße, Hausnummer</label><input type="text" id="myf-street" value="' + esc(d.personal.street) + '" autocomplete="street-address" autocapitalize="words" enterkeyhint="next" placeholder="z. B. Hauptstr. 1"></div>' +
       '<div><label class="ffl-fl" for="myf-phone">Handy (optional)</label><input type="tel" id="myf-phone" value="' + esc(d.personal.phone) + '" autocomplete="tel" inputmode="tel" enterkeyhint="done" placeholder="z. B. 0171 1234567"></div>' +
-      '</form><p class="ffl-mu">Geburtsdatum, -ort und Anschrift brauchen wir nur für die Bescheinigung an deinen Arbeitgeber (anderer Wohnort: Anschrift mit PLZ und Ort). Sehen kann sie nur die Einsatzführung und die Verwaltung.' + (d.review_years ? ' Einsatzberichte mit persönlichen Angaben legt Wehrwerk nach ' + d.review_years + ' Jahren der Einsatzführung zur Prüfung vor – weiter aufbewahren oder Personenangaben schwärzen; nichts wird stillschweigend gelöscht.' : '') + '</p></div>';
+      '</form><p class="ffl-mu">Geburtsdatum, -ort und Anschrift brauchen wir nur für die Bescheinigung an deinen Arbeitgeber (anderer Wohnort: Anschrift mit PLZ und Ort). Sehen kann sie nur die Einsatzführung und die Verwaltung.' + (d.review_years ? ' Einsatzberichte mit persönlichen Angaben legt SPIND nach ' + d.review_years + ' Jahren der Einsatzführung zur Prüfung vor – weiter aufbewahren oder Personenangaben schwärzen; nichts wird stillschweigend gelöscht.' : '') + '</p></div>';
     out.data = h;
     // Merkmale & Fähigkeiten: selbst aktuell halten. Funktionen (und alles, woran Rechte hängen) setzt die Verwaltung.
     var mine = {}; (d.traits || []).forEach(function (t) { mine[t.id] = 1; });

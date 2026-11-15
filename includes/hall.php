@@ -372,7 +372,7 @@ add_action('rest_api_init', function () {
     // Fahrzeugstatus von außen (Alamos FE2 o. ä.) – gleicher Schlüssel wie die Alarm-Schnittstelle
     register_rest_route($ns, '/status', ['methods' => ['GET', 'POST'], 'permission_callback' => '__return_true', 'callback' => function (WP_REST_Request $req) {
         $a = function_exists('myf_alarm_settings') ? myf_alarm_settings() : ['on' => false, 'key' => ''];
-        $key = (string) ($req->get_param('key') ?: $req->get_header('x-wehrwerk-key'));
+        $key = (string) ($req->get_param('key') ?: ($req->get_header('x-spind-key') ?: $req->get_header('x-wehrwerk-key')));
         if (!$a['on'] || $a['key'] === '' || !hash_equals($a['key'], $key)) return new WP_Error('myf_status', 'Nicht freigegeben.', ['status' => 403]);
         $rk = 'myf_status_rate_' . current_time('YmdH'); $n = (int) get_transient($rk);
         if ($n > 1200) return new WP_Error('myf_status', 'Zu viele Anfragen.', ['status' => 429]);

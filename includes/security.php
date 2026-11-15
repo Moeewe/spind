@@ -64,7 +64,7 @@ add_action('rest_api_init', function () {
     register_rest_route('myf/v1', '/admin/incident/report', ['methods' => 'GET', 'permission_callback' => 'myf_route_perm', 'callback' => $get]);
 });
 
-// Aufbewahrung: nichts wird automatisch gelöscht. Nach der Prüffrist (Jahre) legt Wehrwerk die Berichte zur Prüfung vor;
+// Aufbewahrung: nichts wird automatisch gelöscht. Nach der Prüffrist (Jahre) legt SPIND die Berichte zur Prüfung vor;
 // die Einsatzführung entscheidet je Bericht: weiter aufbewahren (bis, mit Grund) oder Personenangaben schwärzen.
 function myf_report_review_years() { return max(1, min(30, (int) (myf_settings()['report_review'] ?? 10))); }
 function myf_sensitive_fields() {
@@ -159,7 +159,7 @@ add_action('template_redirect', function () {
 // XML-RPC: alte Schnittstelle, beliebt für Passwort-Raten – abschaltbar
 add_filter('xmlrpc_enabled', function ($on) { return empty(myf_settings()['sec_xmlrpc_off'] ?? true) ? $on : false; });
 
-// ---- Sicherheits-Header auf allen Wehrwerk-Seiten und -Antworten ----------------------------------------------
+// ---- Sicherheits-Header auf allen SPIND-Seiten und -Antworten ----------------------------------------------
 function myf_sec_headers() {
     if (headers_sent()) return;
     header('X-Content-Type-Options: nosniff');
@@ -185,7 +185,7 @@ function myf_security_check() {
     $add = function ($ok, $title, $fix) use (&$c) { $c[] = ['ok' => (bool) $ok, 'title' => $title, 'fix' => $fix]; };
     $add(is_ssl() || strpos(home_url(), 'https://') === 0, 'Verbindung verschlüsselt (https)', 'Beim Hoster ein SSL-Zertifikat (z. B. Let’s Encrypt) aktivieren und die Website-Adresse auf https umstellen.');
     $add(defined('AUTH_KEY') && AUTH_KEY && strpos(AUTH_KEY, 'put your unique') === false, 'Geheime Schlüssel in der wp-config.php', 'Neue Schlüssel unter https://api.wordpress.org/secret-key/1.1/salt/ erzeugen und in die wp-config.php eintragen.');
-    $add(defined('MYF_DATA_KEY'), 'Eigener Wehrwerk-Datenschlüssel', 'Optional, aber empfohlen: in der wp-config.php define(\'MYF_DATA_KEY\', \'…langer Zufallstext…\'); – vor dem Eintragen eine Sicherung machen. Berichte werden schon jetzt verschlüsselt (mit den WordPress-Schlüsseln).');
+    $add(defined('MYF_DATA_KEY'), 'Eigener SPIND-Datenschlüssel', 'Optional, aber empfohlen: in der wp-config.php define(\'MYF_DATA_KEY\', \'…langer Zufallstext…\'); – vor dem Eintragen eine Sicherung machen. Berichte werden schon jetzt verschlüsselt (mit den WordPress-Schlüsseln).');
     $add(defined('DISALLOW_FILE_EDIT') && DISALLOW_FILE_EDIT, 'Datei-Editor im WordPress-Menü aus', 'In der wp-config.php: define(\'DISALLOW_FILE_EDIT\', true);');
     $add(!(defined('WP_DEBUG_DISPLAY') ? WP_DEBUG_DISPLAY : (defined('WP_DEBUG') && WP_DEBUG)), 'Keine Fehlermeldungen auf der Website', 'In der wp-config.php WP_DEBUG auf false setzen.');
     $twofa = false;
@@ -193,14 +193,14 @@ function myf_security_check() {
     $add($twofa, 'Zwei-Faktor-Anmeldung für Administratoren', 'Plugin „Two Factor“ (vom WordPress-Team) installieren und für alle Administratoren und die Einsatzführung einschalten.');
     $add(!get_user_by('login', 'admin'), 'Kein Konto mit dem Namen „admin“', 'Ein neues Administratorkonto mit eigenem Namen anlegen und „admin“ löschen (Inhalte übertragen).');
     $admins = count(get_users(['role' => 'administrator', 'fields' => 'ID']));
-    $add($admins <= 3, 'Wenige Administratoren (' . $admins . ')', 'Nur so viele Administratoren wie nötig – Unter-Admins bekommen in Wehrwerk nur ihren Bereich.');
+    $add($admins <= 3, 'Wenige Administratoren (' . $admins . ')', 'Nur so viele Administratoren wie nötig – Unter-Admins bekommen in SPIND nur ihren Bereich.');
     $core = get_site_transient('update_core');
     $upd = $core && !empty($core->updates) && ($core->updates[0]->response ?? '') === 'upgrade';
     $add(!$upd, 'WordPress aktuell', 'WordPress unter „Dashboard → Aktualisierungen“ auf den neuesten Stand bringen (vorher sichern).');
     $plugins = get_site_transient('update_plugins');
     $n = $plugins && !empty($plugins->response) ? count($plugins->response) : 0;
     $add($n === 0, $n ? $n . ' Plugins mit Aktualisierung' : 'Plugins aktuell', 'Plugins aktualisieren – veraltete Plugins sind der häufigste Einfallsweg.');
-    $add(!empty(myf_settings()['sec_hide_users'] ?? true), 'Benutzernamen nicht öffentlich abrufbar', 'In Wehrwerk eingeschaltet lassen.');
+    $add(!empty(myf_settings()['sec_hide_users'] ?? true), 'Benutzernamen nicht öffentlich abrufbar', 'In SPIND eingeschaltet lassen.');
     $add(!empty(myf_settings()['sec_xmlrpc_off'] ?? true), 'XML-RPC (Passwort-Raten) abgeschaltet', 'Einschalten, wenn keine App/kein Dienst XML-RPC braucht.');
     $add((function_exists('myf_2fa_on') && myf_2fa_on(get_current_user_id())) || (function_exists('myf_pk_authed') && myf_pk_authed()), 'Zwei-Faktor-Anmeldung für dein Konto (Code-App oder Passkey)', 'Oben bei deinem Namen → „Anmeldung absichern“ einrichten (Code-App am Handy).');
     $add(!empty(myf_settings()['sec_2fa_admin']), 'Zwei-Faktor Pflicht für Verwaltungskonten', 'Einschalten, sobald alle Verwalter sie eingerichtet haben.');

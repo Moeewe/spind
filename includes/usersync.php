@@ -1,9 +1,9 @@
 <?php
 /**
- * WordPress-Benutzer mit der Rolle „Feuerwehr-Mitglied“ ↔ Wehrwerk-Mitglied.
+ * WordPress-Benutzer mit der Rolle „Feuerwehr-Mitglied“ ↔ SPIND-Mitglied.
  * Wer in WordPress (Benutzer → Neu hinzufügen oder Rolle ändern) die Rolle bekommt, wird mit einem Mitglied ohne Konto
  * gleichen Namens verknüpft – sonst als neues Mitglied angelegt. Die Verwaltung bekommt eine Nachricht.
- * Erst am Ende der Anfrage, damit Einladungen aus Wehrwerk (die das Konto selbst zuordnen) kein doppeltes Mitglied erzeugen.
+ * Erst am Ende der Anfrage, damit Einladungen aus SPIND (die das Konto selbst zuordnen) kein doppeltes Mitglied erzeugen.
  */
 
 defined('ABSPATH') || exit;
