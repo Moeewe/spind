@@ -4,7 +4,7 @@ Tags: feuerwehr, fire department, mitgliederbereich, einsatz, verein
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 0.16.0
+Stable tag: 0.16.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -89,6 +89,9 @@ SPIND ist eine Beta-Version (0.x). Version 1.0.0 erscheint, wenn die ersten Wehr
 
 == Changelog ==
 
+= 0.16.1 =
+* Atemschutz: Jahresnachweis mit Druck und Export, Import der Jahresliste, gleiche Regel für „einsatzbereit“ in Verwaltung, Mitgliederbereich und App.
+
 = 0.16.0 =
 * Neuer Name: SPIND (früher Wehrwerk). Bisherige Bausteine gelten weiter.
 * Neu: Veranstaltungen – besondere Termine mit Beschreibung und Bild, als Entwurf, für Mitglieder oder öffentlich.
@@ -110,6 +113,9 @@ SPIND ist eine Beta-Version (0.x). Version 1.0.0 erscheint, wenn die ersten Wehr
 Alle Versionen stehen in der Datei CHANGELOG.md.
 
 == Upgrade Notice ==
+
+= 0.16.1 =
+Keine Änderung an gespeicherten Daten.
 
 = 0.16.0 =
 Keine Änderung an gespeicherten Daten. Es kommt eine neue Tabelle für Veranstaltungen dazu.

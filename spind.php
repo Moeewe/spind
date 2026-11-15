@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SPIND
  * Description: Feuerwehr-Portal: Mitgliederbereich und Verwaltung für Einsätze, Berichte, Lehrgänge, Atemschutz, Fahrzeuge, Dienste und Dashboards.
- * Version: 0.16.0
+ * Version: 0.16.1
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Plugin URI: https://github.com/Moeewe/spind
@@ -40,7 +40,7 @@ add_action('admin_notices', function () {
         . '<a href="' . esc_url(add_query_arg('spind_ok', 1)) . '">Hinweis ausblenden</a></p></div>';
 });
 
-define('MYF_VERSION', '0.16.0');
+define('MYF_VERSION', '0.16.1');
 // Beta bis zum produktiven Einsatz (dann 1.0.0); Versionshinweise in releases.json
 define('MYF_CHANNEL', 'Beta');
 // Version der Dateien (JS/CSS): ändert sich mit jeder neuen Datei – so laden Browser, Fernseher und der Offline-Speicher

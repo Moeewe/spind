@@ -2,6 +2,16 @@
 
 Beta (0.x) bis zum produktiven Einsatz. Version 1.0.0 erscheint, wenn SPIND produktiv läuft, auf GitHub veröffentlicht ist und die ersten Tests durch sind.
 
+## 0.16.1 – 15.11.2026
+
+**Atemschutz: Jahresnachweis fertig, gleiche Regel überall**
+
+- Mitgliederbereich: „Atemschutz einsatzbereit“ richtet sich jetzt nach derselben Regel wie die Verwaltung und die App. Ist der zweite Nachweis eingeschaltet, zählt dort auch eine Übung oder ein Einsatz unter Atemschutz oder eine zweite Übungsstrecke in den letzten 12 Monaten. Fehlt er, steht das mit Grund im Atemschutz-Bereich, als Aufgabe auf der Startseite und auf der Atemschutz-Karte.
+- Jahresnachweis (Atemschutz → Jahresnachweis): je Geräteträger G26, Strecke 1 und 2, Übungen und Einsätze unter Atemschutz und ob das Jahr erfüllt ist. Mit Druckvorschau und Excel-Export.
+- Import der Jahresliste: Spalten wie „Strecke 1 2026“, „Strecke 2“ und „Übung FwDV 7“ werden erkannt, auch mehrere Termine in einer Zelle. Ein Zusatz wie „25min“ wird Notiz. Schon vorhandene Nachweise werden nicht doppelt angelegt, unmögliche Daten übergangen.
+- „Termin eintragen“ bei den Geräteträgern: Wer denselben Nachweis versehentlich zweimal speichert, bekommt ihn nur einmal. Jeder Eintrag zeigt, wer ihn gemacht hat.
+- Die Regel „zweiter Nachweis“ ist zunächst aus. Einschalten können sie die Atemschutz-Zuständigen unter „Jahresnachweis“; die Änderung steht im Änderungsprotokoll.
+
 ## 0.16.0 – 15.11.2026
 
 **Neuer Name SPIND, Veranstaltungen für die Website, Atemschutz-Jahresnachweis**

@@ -208,8 +208,16 @@
     if (!d.agt) return null;
     var now = today(), last = d.agt.log.filter(function (l) { return l.kind === 'strecke' && l.date <= now; })[0];
     var due = last ? addDays(last.date, 365) : null;
-    return { last: last, due: due, over: !due || due < now, soon: due && due >= now && due < addDays(now, 60) };
+    // Zweiter Nachweis (wenn die Wehr es so eingestellt hat): Übung oder Einsatz unter Atemschutz oder eine zweite
+    // Übungsstrecke in den letzten 12 Monaten – dieselbe Regel wie in der Verwaltung und in der App
+    var past = d.agt.log.filter(function (l) { return l.date <= now; }), strs = past.filter(function (l) { return l.kind === 'strecke'; });
+    var prax = past.filter(function (l) { return l.kind === 'uebung' || l.kind === 'einsatz'; })[0];
+    var sec = [prax ? prax.date : '', strs[1] ? strs[1].date : ''].sort().pop(), due2 = sec ? addDays(sec, 365) : null, need = !!d.agt.second;
+    return { last: last, due: due, over: !due || due < now, soon: due && due >= now && due < addDays(now, 60),
+      need: need, sec: sec, due2: due2, over2: need && (!due2 || due2 < now), soon2: need && !!due2 && due2 >= now && due2 < addDays(now, 60) };
   }
+  // Einsatzbereit unter Atemschutz: Lehrgang, gültige G26, Übungsstrecke – und ggf. der zweite Nachweis
+  function agtReady(s) { var a = d.agt; return !!a && a.course !== false && !!a.g26_until && a.g26_until >= today() && !!s.last && !s.over && !s.over2; }
   // Bestellrunden: Der Name kommt vom Konto, der Preis von der Karte; das Geld wird am Abend eingesammelt
   function eur(c) { return (c / 100).toFixed(2).replace('.', ',') + ' €'; }
   function vOrders() {
@@ -412,6 +420,7 @@
     });
     if (s.open && can('courses') && !cur.length) item(s.deadline ? 'bis ' + dShort(s.deadline) : '', 'Lehrgangswünsche für ' + s.year + ' eintragen', '<button type="button" class="ffl-sm" data-go="courses">Lehrgänge ansehen</button>');
     if (agt && (agt.over || agt.soon)) item(agt.due ? dShort(agt.due) : '', 'Atemschutz-Übungsstrecke ' + (agt.over ? '<b style="color:var(--red-tx)">ist fällig</b>' : 'wird fällig'), '<button type="button" class="ffl-sm" data-go="agt">Details</button>');
+    if (agt && !agt.over && (agt.over2 || agt.soon2)) item(agt.due2 ? dShort(agt.due2) : '', 'Atemschutz: Übung oder Einsatz unter Atemschutz oder zweite Übungsstrecke ' + (agt.over2 ? '<b style="color:var(--red-tx)">' + (agt.sec ? 'ist fällig' : 'fehlt') + '</b>' : 'wird fällig'), '<button type="button" class="ffl-sm" data-go="agt">Details</button>');
     (d.orders || []).forEach(function (r) {
       if (r.open) item(dShort(r.deadline.slice(0, 10)), '<b>' + esc(r.title) + ':</b> ' + (r.mine.length ? 'bestellt, ändern bis ' : 'bestellen bis ') + esc(r.deadline.slice(11, 16)) + ' Uhr', '<button type="button" class="ffl-sm ffl-p" data-go="orders">' + (r.mine.length ? 'Ansehen' : 'Bestellen') + '</button>');
       if (r.owner && !r.open && !r.ordered && (r.items || []).length) item('', '<b>' + esc(r.title) + ':</b> Bestellung aufgeben', '<button type="button" class="ffl-sm ffl-p" data-go="orders">Ansehen</button>', true);
@@ -437,8 +446,8 @@
     h += card('incidents', 'Meine Einsätze ' + year, '<span class="ffl-big">' + myYear + '</span>' + (myYear === 1 ? 'Einsatz' : 'Einsätze') + ' (ohne Übungen)');
     h += card('courses', 'Lehrgänge', mine.length ? '<span class="ffl-big ffl-big-sm">' + esc(range(mine[0].dt)) + '</span>' + esc(mine[0].n.short || mine[0].n.title) : '<span class="ffl-big">' + cur.length + '</span>' + (s.open ? 'Wünsche ' + s.year + ' – jetzt eintragen' : 'Wünsche ' + s.year + ' · ' + (s.published ? 'Zuteilung ist da' : 'Eintragen beendet')), s.open && !cur.length ? 'is-alert' : '');
     // Kachel zeigt, was zuerst fällig wird: G26 oder Übungsstrecke
-    if (agt) { var g26u = d.agt.g26_until || '', g26x = g26u && g26u < today(), g26f = g26u && !g26x && (!agt.due || g26u < agt.due) && !agt.over;
-      h += card('agt', 'Atemschutz', '<span class="ffl-big ffl-big-sm"' + (agt.over || g26x ? ' style="color:var(--red-tx)"' : '') + '>' + (g26x ? 'abgelaufen' : agt.over ? 'fällig' : g26f ? 'bis ' + fmtDate(g26u) : agt.due ? 'bis ' + fmtDate(agt.due) : '–') + '</span>' + (g26x || g26f ? 'G26-Untersuchung' : 'Übungsstrecke'), agt.over || g26x ? 'is-alert' : ''); }
+    if (agt) { var g26u = d.agt.g26_until || '', g26x = g26u && g26u < today(), g26f = g26u && !g26x && (!agt.due || g26u < agt.due) && !agt.over, o2 = agt.over2 && !agt.over && !g26x;
+      h += card('agt', 'Atemschutz', '<span class="ffl-big ffl-big-sm"' + (agt.over || g26x || o2 ? ' style="color:var(--red-tx)"' : '') + '>' + (g26x ? 'abgelaufen' : agt.over || o2 ? 'fällig' : g26f ? 'bis ' + fmtDate(g26u) : agt.due ? 'bis ' + fmtDate(agt.due) : '–') + '</span>' + (g26x || g26f ? 'G26-Untersuchung' : o2 ? 'Übung oder 2. Strecke' : 'Übungsstrecke'), agt.over || g26x || o2 ? 'is-alert' : ''); }
     var myDef = (d.defects || []).filter(function (x) { return x.status === 'new' || x.status === 'progress'; }).length;
     h += card('defects', 'Etwas melden', '<span class="ffl-big ffl-big-sm">Mangel · Idee</span>' + (myDef ? myDef + ' deiner Meldungen offen' : 'kaputt, fehlt, Vorschlag'));
     return h + '</div></div>';
@@ -1816,10 +1825,11 @@
     var planned = a.log.filter(function (l) { return l.date > now && l.kind === 'strecke'; });
     var past = a.log.filter(function (l) { return l.date <= now; });
     // Zusammenfassung oben: einsatzbereit oder was fehlt; eingeteilte Übungsstrecke aus dem Plan
-    var g26ok = a.g26_until && a.g26_until >= now, ready = a.course !== false && g26ok && s.last && !s.over; // Lehrgang + G26 + Übungsstrecke
+    var g26ok = a.g26_until && a.g26_until >= now, ready = agtReady(s); // Lehrgang + G26 + Übungsstrecke (+ zweiter Nachweis, falls eingestellt)
     var myStr = myDuties().filter(function (x) { return ((d.duty_lists || []).filter(function (l) { return l.id === x.list_id; })[0] || {}).area === 'strecke'; })[0];
-    var h = '<div class="ffl-agtbar ' + (ready ? (s.soon ? 'warn' : 'ok') : 'bad') + '" style="margin-top:6px"><b>' + (ready ? '✓ Atemschutz einsatzbereit' : '✕ Atemschutz nicht einsatzbereit') + '</b><span>' +
-      esc([a.course === false ? 'Lehrgang Atemschutzgeräteträger nicht nachgewiesen' : '', !g26ok ? (a.g26_until ? 'G26 abgelaufen seit ' + fmtDate(a.g26_until) + ' – nicht atemschutztauglich, kein Einsatz unter Atemschutz bis zur neuen Untersuchung' : 'G26 fehlt – ohne gültige G26 kein Einsatz unter Atemschutz') : '', !s.last ? 'noch keine Übungsstrecke' : s.over ? 'Übungsstrecke fällig' : s.soon ? 'Übungsstrecke bald fällig' : ''].filter(Boolean).join(' · ')) + '</span></div>';
+    var h = '<div class="ffl-agtbar ' + (ready ? (s.soon || s.soon2 ? 'warn' : 'ok') : 'bad') + '" style="margin-top:6px"><b>' + (ready ? '✓ Atemschutz einsatzbereit' : '✕ Atemschutz nicht einsatzbereit') + '</b><span>' +
+      esc([a.course === false ? 'Lehrgang Atemschutzgeräteträger nicht nachgewiesen' : '', !g26ok ? (a.g26_until ? 'G26 abgelaufen seit ' + fmtDate(a.g26_until) + ' – nicht atemschutztauglich, kein Einsatz unter Atemschutz bis zur neuen Untersuchung' : 'G26 fehlt – ohne gültige G26 kein Einsatz unter Atemschutz') : '', !s.last ? 'noch keine Übungsstrecke' : s.over ? 'Übungsstrecke fällig' : s.soon ? 'Übungsstrecke bald fällig' : '',
+        s.over2 ? (s.sec ? 'Übung oder Einsatz unter Atemschutz oder zweite Übungsstrecke fällig seit ' + fmtDate(s.due2) : 'Übung oder Einsatz unter Atemschutz oder zweite Übungsstrecke fehlt') : s.soon2 ? 'Übung oder zweite Übungsstrecke bis ' + fmtDate(s.due2) : ''].filter(Boolean).join(' · ')) + '</span></div>';
     // G26 abgelaufen oder bald fällig: der Betriebsarzt steht direkt hier – mit Telefon und Website zum Antippen
     var g26soon = !g26ok || (a.g26_until && a.g26_until < addDays(now, 60)), docShown = false;
     if (g26soon && a.doctor) { h += doctorCard(a.doctor); docShown = true; }
@@ -1900,7 +1910,7 @@
     var cnt = function (k) { return d.my_participation.filter(function (p) { var i = all.filter(function (x) { return x.id === p.incident_id; })[0]; return i && +i.start.slice(0, 4) === year && (k === 'uebung' ? i.kind === 'uebung' : i.kind !== 'uebung'); }).length; };
     var fns = ((d.who || {}).functions || []).filter(function (f) { return f !== 'Webadmin' && f !== 'Verwaltung'; });
     var agt = d.agt ? agtState() : null, g26 = d.agt && d.agt.g26_until && d.agt.g26_until >= today();
-    var agtTxt = !d.agt ? '' : (d.agt.course !== false && g26 && agt.last && !agt.over) ? '✓ bereit' : 'nicht bereit';
+    var agtTxt = !d.agt ? '' : agtReady(agt) ? '✓ bereit' : 'nicht bereit';
     var c = function (label, big, sub, tab) { return '<button type="button" class="ffl-card"' + (tab ? ' data-tab="' + tab + '"' : ' disabled') + '><span class="ffl-cl">' + label + '</span><span class="ffl-big ffl-big-sm">' + big + '</span>' + (sub ? esc(sub) : '') + '</button>'; };
     return '<div class="ffl-cards ffl-profcards ffl-pstats">' +
       c('Einsätze ' + year, String(cnt('einsatz')), cnt('uebung') + (cnt('uebung') === 1 ? ' Übung' : ' Übungen'), 'incidents') +
