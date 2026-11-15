@@ -1,0 +1,416 @@
+/* Wehrwerk – Infoscreen (Fernseher im Gerätehaus).
+   Eine Akzentfarbe (Feuerwehrrot), sonst Grautöne; Grün nur für „einsatzbereit“, Gelb nur für „Wichtig“.
+   Größen mit clamp(): skaliert mit der Bildschirmbreite, bleibt aber auf kleinen und sehr großen Bildschirmen lesbar.
+   Tagsüber hell, nachts dunkel (Sonnenauf-/-untergang am Gerätehaus), Hausschrift Barlow (lokal, OFL). */
+@font-face { font-family: "Barlow"; font-weight: 400; font-display: swap; src: url("fonts/Barlow-Regular.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 600; font-display: swap; src: url("fonts/Barlow-SemiBold.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 700; font-display: swap; src: url("fonts/Barlow-Bold.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 800; font-display: swap; src: url("fonts/BarlowCondensed-ExtraBold.woff2") format("woff2"); }
+
+:root, html.theme-dark {
+  --bg: #0c0f12; --card: #171b1f; --card2: #1c2126; --border: #242b31; --line: #343a40;
+  --tx: #f5f5f2; --tx2: #c9ced3; --mu: #a5adb5; --bar: #4a525a;
+  --red: #e30613; --ok: #32ad70; --warn: #e8a000; --today: rgba(227, 6, 19, .13);
+}
+html.theme-light {
+  --bg: #eceef0; --card: #ffffff; --card2: #f6f7f8; --border: #d9dde1; --line: #e1e4e8;
+  --tx: #121518; --tx2: #353b42; --mu: #5b636b; --bar: #c3c9cf;
+  --red: #e30613; --ok: #17844f; --warn: #e8a000; --today: rgba(227, 6, 19, .07);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--tx); overflow: hidden; transition: background .8s, color .8s;
+  font-family: "Barlow", "Arial Narrow", "Segoe UI", Arial, sans-serif; }
+.cond, .scr-clock b, .scr-big, .scr-h, .scr-qr b { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 800; }
+#scr { height: 100vh; height: 100dvh; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: clamp(10px, 1vw, 18px); padding: clamp(16px, 1.35vw, 28px) clamp(20px, 1.8vw, 36px) clamp(12px, 1.1vw, 22px); }
+.scr-loading { display: grid; place-items: center; height: 100vh; font-size: clamp(28px, 3.5vw, 64px); font-weight: 700; color: var(--mu); }
+
+/* Kopf */
+.scr-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 2vw; padding-bottom: clamp(8px, .75vw, 15px);
+  border-bottom: clamp(3px, .22vw, 5px) solid var(--red); }
+.scr-logo { height: clamp(40px, 4.2vw, 84px); width: auto; display: block; }
+.theme-dark .scr-logo.for-light, .theme-light .scr-logo.for-dark { display: none; }
+html:not(.theme-light):not(.theme-dark) .scr-logo.for-light { display: none; }
+.scr-clock { text-align: right; }
+.scr-clock b { display: block; font-size: clamp(44px, 3.8vw, 78px); line-height: .9; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.scr-clock span { font-size: clamp(14px, 1.1vw, 22px); color: var(--mu); font-weight: 600; }
+
+/* Raster */
+.scr-main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr) minmax(0, 1.08fr); gap: clamp(10px, 1.1vw, 22px); min-height: 0; }
+.scr-main.two { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); }
+.scr-col { display: flex; flex-direction: column; gap: clamp(10px, 1.1vw, 22px); min-height: 0; }
+.scr-card { background: var(--card); border: 1px solid var(--border); border-radius: 2px; min-height: 0; overflow: hidden;
+  padding: clamp(16px, 1.2vw, 25px) clamp(18px, 1.4vw, 29px); transition: background .8s, border-color .8s; }
+.scr-card.grow { flex: 1; display: flex; flex-direction: column; }
+.scr-card.grow .scr-list { min-height: 0; overflow: hidden; }
+.scr-label { font-size: clamp(13px, .9vw, 19px); font-weight: 700; letter-spacing: .11em; text-transform: uppercase; color: var(--mu); margin-bottom: clamp(10px, .8vw, 16px); }
+.scr-h { font-size: clamp(22px, 1.8vw, 38px); line-height: 1.08; overflow-wrap: anywhere; }
+.scr-sub { font-size: clamp(13px, 1vw, 21px); color: var(--mu); margin-top: .35em; }
+
+/* Einsätze: Zahl + Monatsbalken */
+.scr-kpi { display: flex; align-items: baseline; gap: clamp(12px, 1vw, 20px); }
+.scr-big { font-size: clamp(76px, 6.2vw, 128px); line-height: .78; font-variant-numeric: tabular-nums; }
+.scr-kpis { font-size: clamp(15px, 1.08vw, 23px); line-height: 1.25; color: var(--mu); }
+.scr-kpis span { color: var(--tx2); }
+.scr-bars { display: grid; grid-template-columns: repeat(12, 1fr); gap: clamp(3px, .35vw, 8px); height: clamp(76px, 6.6vw, 136px); margin-top: clamp(16px, 1.25vw, 26px); }
+.scr-bars .b { height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; min-width: 0; }
+.scr-bars .b i { display: block; width: 100%; background: var(--bar); border-radius: 1px 1px 0 0; }
+.scr-bars .b.now i { background: var(--red); }
+.scr-bars .b span { font-size: clamp(10px, .8vw, 16px); color: var(--mu); line-height: 1.3; font-variant-numeric: tabular-nums; }
+.scr-bars .b em { font-style: normal; font-size: clamp(10px, .78vw, 16px); color: var(--mu); margin-top: 3px; border-top: 1px solid var(--line); width: 100%; text-align: center; padding-top: 2px; }
+.scr-bars .b.now em, .scr-bars .b.now span { color: var(--tx); font-weight: 700; }
+.scr-bars .b.future em { opacity: .45; }
+
+/* Listen (Einsätze, Termine, Lehrgänge) */
+.scr-list { display: flex; flex-direction: column; }
+.scr-item { display: grid; grid-template-columns: clamp(82px, 8.6vw, 178px) minmax(0, 1fr); gap: clamp(12px, 1vw, 20px);
+  padding: clamp(10px, .7vw, 15px) 0; border-top: 1px solid var(--line); align-items: baseline; }
+.scr-item:first-child { border-top: 0; padding-top: 0; }
+.scr-when { font-size: clamp(17px, 1.25vw, 26px); line-height: 1.05; font-weight: 700; color: var(--red); font-variant-numeric: tabular-nums; }
+.scr-when small { display: block; font-size: clamp(13px, .95vw, 20px); font-weight: 500; color: var(--mu); margin-top: 2px; }
+.scr-what { min-width: 0; font-size: clamp(18px, 1.4vw, 29px); font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
+.scr-what small { display: block; font-size: clamp(13px, 1vw, 21px); font-weight: 400; color: var(--mu); margin-top: 2px; }
+.scr-what .nr { display: inline-block; font-size: clamp(12px, .85vw, 18px); font-weight: 700; color: var(--mu); border: 1px solid var(--line); border-radius: 2px;
+  padding: 1px 6px; margin-right: .5em; vertical-align: .12em; font-variant-numeric: tabular-nums; }
+/* Heute: nur die Datumsmarke rot hinterlegt (weiße Schrift) – keine rosa Fläche über die ganze Zeile */
+.scr-item.today { background: none; }
+.scr-today { display: inline-block; background: var(--red); color: #fff; padding: 0 .28em; line-height: 1.15; }
+.scr-empty { font-size: clamp(15px, 1.2vw, 24px); color: var(--mu); }
+
+/* Website-Beiträge (wechseln) */
+.scr-news { display: flex; flex-direction: column; }
+#scr-news { flex: 1; display: flex; flex-direction: column; min-height: 0; transition: opacity .6s; }
+#scr-news.out { opacity: 0; }
+.scr-newsbody { flex: 1; min-height: 0; overflow: hidden; }
+.scr-news img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 2px; margin-bottom: clamp(12px, 1vw, 20px); display: block; }
+.scr-news p { font-size: clamp(15px, 1.1vw, 23px); line-height: 1.35; color: var(--tx2); margin: .5em 0 0; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.scr-main.two .scr-newsbody:has(img) { display: grid; grid-template-columns: 1.15fr 1fr; gap: clamp(14px, 1.4vw, 28px); align-items: start; }
+.scr-main.two .scr-newsbody img { margin: 0; aspect-ratio: 4 / 3; }
+.scr-main.two .scr-news p { -webkit-line-clamp: 9; }
+.scr-dots { display: flex; gap: 6px; margin-top: clamp(8px, .8vw, 16px); }
+.scr-dots i { width: 8px; height: 8px; border-radius: 1px; background: var(--bar); }
+.scr-dots i.on { background: var(--tx); }
+
+/* Unterer Bereich: Hinweise + Fußzeile */
+.scr-bottom { display: flex; flex-direction: column; gap: clamp(10px, 1vw, 18px); }
+#scr-notices:empty { display: none; }
+.scr-notices { display: grid; gap: clamp(10px, 1.1vw, 22px); position: relative; }
+.scr-notices.n1 { grid-template-columns: 1fr; }
+.scr-notices.n2 { grid-template-columns: 1fr 1fr; }
+.scr-notices.n3 { grid-template-columns: 1fr 1fr 1fr; }
+.scr-notice { display: flex; gap: clamp(10px, 1vw, 20px); align-items: baseline; background: var(--card2); border: 1px solid var(--border);
+  border-left: clamp(4px, .35vw, 7px) solid var(--mu); border-radius: 2px; padding: clamp(12px, .9vw, 19px) clamp(16px, 1.3vw, 27px); }
+.scr-notice b { flex: 0 0 auto; font-size: clamp(12px, .9vw, 19px); letter-spacing: .1em; text-transform: uppercase; color: var(--mu); }
+.scr-notice span { font-size: clamp(17px, 1.45vw, 30px); font-weight: 700; line-height: 1.22; }
+.scr-notices.n1 .scr-notice span { font-size: clamp(19px, 1.7vw, 35px); }
+.scr-notice small { display: block; font-size: clamp(12px, .95vw, 20px); font-weight: 500; color: var(--mu); margin-top: 3px; }
+.scr-notice.lv-warn { border-left-color: var(--warn); }
+.scr-notice.lv-warn b { color: var(--tx, inherit); }
+.scr-notice.lv-alert { border-left-color: var(--red); }
+.scr-notice.lv-alert b { color: var(--red); }
+.scr-npage { position: absolute; right: 6px; bottom: -1.2em; font-size: clamp(10px, .75vw, 15px); color: var(--mu); }
+
+.scr-foot { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: clamp(10px, 1.1vw, 22px); align-items: stretch; min-height: clamp(64px, 8.8vh, 112px); }
+.scr-alert { min-width: 0; border-radius: 2px; padding: clamp(14px, 1vw, 22px) clamp(18px, 1.5vw, 31px); display: flex; align-items: center; gap: clamp(14px, 1.5vw, 30px);
+  font-size: clamp(16px, 1.3vw, 27px); font-weight: 600; background: var(--card2); border: 1px solid var(--border); }
+.scr-alert b { font-size: clamp(15px, 1.1vw, 23px); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; display: inline-flex; align-items: center; gap: .6em; }
+.scr-alert span { color: var(--tx2); font-weight: 500; }
+.scr-alert.is-ok b { color: var(--ok); }
+.scr-alert.is-ok b i { width: clamp(12px, 1vw, 21px); height: clamp(12px, 1vw, 21px); border-radius: 50%; background: var(--ok); }
+.scr-alert.is-red { background: var(--red); color: #fff; border-color: var(--red); }
+.scr-alert.is-red span { color: #fff; }
+.scr-qr { background: #fff; color: #111; border-radius: 2px; border: 1px solid var(--border); padding: clamp(10px, .8vw, 17px) clamp(14px, 1.1vw, 23px);
+  display: flex; align-items: center; gap: clamp(10px, 1vw, 20px); }
+.scr-qr .code svg, .scr-qr .code img { width: clamp(64px, 7vw, 144px); height: clamp(64px, 7vw, 144px); display: block; shape-rendering: crispEdges; }
+.scr-qr b { display: block; font-size: clamp(17px, 1.35vw, 28px); }
+.scr-qr span { font-size: clamp(12px, .95vw, 20px); line-height: 1.2; color: #444; }
+.scr-stale { position: fixed; right: 6px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--warn); display: none; }
+.scr-stale.on { display: block; }
+
+/* Niedrige oder schmale Bildschirme */
+@media (max-height: 720px) {
+  #scr { gap: 9px; padding-top: 12px; padding-bottom: 9px; }
+  .scr-card { padding-top: 12px; padding-bottom: 12px; }
+  .scr-label { margin-bottom: 7px; }
+  .scr-item { padding-top: 7px; padding-bottom: 7px; }
+  .scr-foot { min-height: 58px; }
+}
+@media (max-width: 1100px) {
+  .scr-main { grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); }
+  .scr-main:not(.two) > .scr-col:last-child { display: none; }
+  .scr-notices.n3 { grid-template-columns: 1fr; }
+}
+
+/* Unten: QR-Karte rechts über Hinweise + Statuszeile, spart Höhe für die Listen */
+.scr-bottom { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: clamp(10px, 1.1vw, 22px); row-gap: clamp(10px, 1vw, 18px); }
+.scr-foot { display: contents; }
+#scr-notices { grid-column: 1; }
+.scr-alert { grid-column: 1; min-height: clamp(52px, 6vh, 88px); }
+.scr-qr { grid-column: 2; grid-row: 1 / span 2; }
+.scr-bottom:has(#scr-notices:empty) .scr-qr { grid-row: auto; }
+.scr-qr .code svg, .scr-qr .code img { width: clamp(64px, 6vw, 128px); height: clamp(64px, 6vw, 128px); }
+
+.scr-notice .sig { display: inline; font-style: normal; font-weight: 500; color: var(--mu); font-size: .8em; margin-left: .5em; }
+
+/* Wetter im Kopf */
+.scr-weather { display: flex; align-items: center; gap: clamp(8px, .7vw, 14px); margin-left: auto; margin-right: clamp(16px, 2vw, 40px); }
+.scr-weather .ic { font-size: clamp(28px, 2.6vw, 54px); line-height: 1; }
+.scr-weather b { font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: clamp(30px, 2.8vw, 58px); line-height: 1; }
+.scr-weather span:not(.ic) { font-size: clamp(12px, .9vw, 18px); color: var(--mu); line-height: 1.3; }
+/* Amtliche Warnungen (DWD-Farben: gelb, orange, rot, violett) */
+.scr-warn { border-left-width: clamp(4px, .35vw, 7px); }
+.scr-warn.sev1 { border-left-color: #f5d000; }
+.scr-warn.sev2 { border-left-color: #ff8c00; }
+.scr-warn.sev3 { border-left-color: #e30613; }
+.scr-warn.sev4 { border-left-color: #9b1fa8; }
+.scr-warn.sev3, .scr-warn.sev4 { background: var(--card2); }
+.scr-warn b { color: var(--tx); }
+
+/* Laufender Alarm */
+.scr-alarm { background: var(--red); color: #fff; border-radius: 2px; padding: clamp(24px, 3vw, 64px); display: flex; flex-direction: column; justify-content: center; min-height: 0;
+  animation: scr-alarm 1.6s ease-in-out infinite; }
+.scr-alarm.test { background: #6b3fa0; animation: none; }
+@keyframes scr-alarm { 50% { background: #b4041a; } }
+.scr-alarm .lbl { font-size: clamp(18px, 1.6vw, 34px); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; opacity: .9; }
+.scr-alarm .kw { font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: clamp(48px, 6vw, 128px); line-height: 1.02; margin-top: .2em; }
+.scr-alarm .pl { font-size: clamp(26px, 3vw, 64px); font-weight: 700; margin-top: .4em; }
+.scr-alarm .tm { font-size: clamp(18px, 1.6vw, 34px); margin-top: .8em; opacity: .9; }
+
+/* ===== v4: Aufbau mit Alarm-Band, Statistik nach Jahren, schlichtes Wetter ===== */
+.scr-main { display: flex; flex-direction: column; gap: clamp(10px, 1.1vw, 22px); min-height: 0; }
+.scr-cols { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr) minmax(0, 1.08fr); gap: clamp(10px, 1.1vw, 22px); }
+@media (max-width: 1100px) { .scr-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); } .scr-cols > .scr-col:last-child { display: none; } }
+.scr-head { align-items: center; }
+.scr-fs { margin-left: clamp(8px, 1vw, 20px); width: clamp(34px, 2.2vw, 44px); height: clamp(34px, 2.2vw, 44px); border: 1px solid var(--border); background: transparent; color: var(--mu); border-radius: 2px; cursor: pointer; padding: 6px; opacity: .6; }
+.scr-fs:hover { opacity: 1; color: var(--tx); }
+.scr-fs svg { width: 100%; height: 100%; }
+body.is-fs .scr-fs { display: none; }
+
+/* Wetter: Linien-Symbol, Temperatur, eine Zeile Text */
+.scr-weather .ic { width: clamp(34px, 2.8vw, 58px); height: clamp(34px, 2.8vw, 58px); color: var(--tx); font-size: 0; }
+.scr-weather .ic svg { width: 100%; height: 100%; }
+.scr-weather .strong { color: var(--red); font-weight: 700; }
+
+/* Laufender Einsatz: rotes Band, blinkt bis jemand tippt */
+.scr-alarm { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: clamp(14px, 2vw, 40px); padding: clamp(14px, 1.4vw, 28px) clamp(18px, 2vw, 40px);
+  border-radius: 2px; background: var(--red); color: #fff; cursor: pointer; animation: scr-blink 1.1s steps(2, jump-none) infinite; min-height: 0; }
+.scr-alarm.seen { animation: none; }
+.scr-alarm.test { background: #6b3fa0; }
+@keyframes scr-blink { 0% { background: var(--red); } 100% { background: #7a0010; } }
+.scr-alarm .lbl { font-size: clamp(16px, 1.3vw, 28px); font-weight: 800; letter-spacing: .1em; text-transform: uppercase; line-height: 1.1; }
+.scr-alarm .lbl small { display: block; font-size: .65em; font-weight: 600; letter-spacing: .02em; text-transform: none; opacity: .85; margin-top: .3em; }
+.scr-alarm .kw { font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: clamp(34px, 3.6vw, 80px); line-height: 1; overflow-wrap: anywhere; }
+.scr-alarm .pl { font-size: clamp(18px, 1.6vw, 34px); font-weight: 700; max-width: 26vw; }
+.scr-alarm .qr { display: grid; justify-items: center; gap: 4px; font-size: clamp(12px, .8vw, 16px); font-weight: 700; }
+.scr-alarm .qr .code { width: clamp(70px, 5.5vw, 120px); background: #fff; padding: 5px; border-radius: 2px; }
+.scr-alarm .qr svg { display: block; width: 100%; height: auto; }
+.has-alarm .scr-cols { opacity: .85; }
+
+/* Statistik: Jahre zum Antippen */
+.scr-yr { display: flex; align-items: center; gap: 8px; }
+.scr-yr span { flex: 1; }
+.scr-yr button { width: clamp(28px, 1.9vw, 40px); height: clamp(28px, 1.9vw, 40px); border: 1px solid var(--border); background: var(--card2); color: var(--tx); border-radius: 2px; font-size: clamp(16px, 1.2vw, 24px); line-height: 1; cursor: pointer; }
+.scr-yr button:disabled { opacity: .25; cursor: default; }
+.scr-cats { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: clamp(10px, .9vw, 18px); font-size: clamp(12px, .85vw, 18px); color: var(--mu); }
+.scr-cats b { color: var(--tx); font-size: 1.25em; margin-right: 4px; font-variant-numeric: tabular-nums; }
+.scr-cats .c-brand b { color: var(--red); }
+.scr-years { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; height: clamp(40px, 3.4vw, 70px); margin-top: clamp(12px, 1vw, 20px); }
+.scr-years button { all: unset; display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; cursor: pointer; height: 100%; }
+.scr-years i { display: block; background: var(--bar); border-radius: 1px; }
+.scr-years button.on i { background: var(--red); }
+.scr-years em { font-style: normal; text-align: center; font-size: clamp(10px, .72vw, 15px); color: var(--mu); margin-top: 3px; }
+.scr-drill .scr-item { border: 0; padding: 0; }
+.scr-drill b { font-weight: 700; }
+.scr-credits { grid-column: 1 / -1; font-size: clamp(10px, .62vw, 13px); color: var(--mu); opacity: .8; text-align: right; margin-top: -4px; }
+.scr-stats .scr-bars { height: clamp(52px, 4.4vw, 96px); margin-top: clamp(10px, .8vw, 16px); }
+.scr-years { height: clamp(30px, 2.4vw, 52px); }
+.has-alarm .scr-stats .scr-bars { display: none; }
+
+/* ===== v4.1: ruhiger Kopf, Zahlenblock, versteckte Bedienung, Handy ===== */
+/* Kopf: Wetter und Uhr als eine Einheit, gleiche Grundlinie, getrennt durch eine feine Linie */
+.scr-headr { display: flex; align-items: flex-end; gap: clamp(18px, 2vw, 40px); }
+.scr-weather { margin: 0; display: flex; align-items: flex-end; gap: clamp(8px, .7vw, 14px); padding-right: clamp(18px, 2vw, 40px); border-right: 2px solid var(--border); }
+.scr-weather .ic { width: clamp(30px, 2.4vw, 50px); height: clamp(30px, 2.4vw, 50px); color: var(--tx); align-self: center; }
+.scr-weather .ic svg { stroke-width: 3.4; }
+.scr-weather b { font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: clamp(36px, 3vw, 62px); line-height: .9; font-variant-numeric: tabular-nums; }
+.scr-weather .txt { display: flex; flex-direction: column; font-size: clamp(14px, 1.1vw, 22px); line-height: 1.2; color: var(--mu); font-weight: 600; }
+.scr-weather .txt span:first-child { color: var(--tx2); text-transform: capitalize; }
+.scr-weather .txt .strong { color: var(--red); }
+/* Vollbild: nur sichtbar, wenn sich die Maus bewegt */
+.scr-fs { position: fixed; top: 10px; right: 10px; z-index: 5; margin: 0; width: auto; height: auto; padding: 6px 12px; border: 1px solid var(--border); background: var(--card); color: var(--tx2);
+  font: 700 13px/1 "Barlow", sans-serif; letter-spacing: .08em; text-transform: uppercase; border-radius: 2px; opacity: 0; pointer-events: none; transition: opacity .3s; }
+.scr-fs.show { opacity: .95; pointer-events: auto; }
+body.is-fs .scr-fs { display: none; }
+/* Zahlenblock: Zahl und Text auf einer Grundlinie */
+.scr-kpi { align-items: flex-end; gap: clamp(14px, 1.2vw, 24px); }
+.scr-big { line-height: .8; }
+.scr-kpis { display: flex; flex-direction: column; gap: 2px; padding-bottom: .1em; }
+.scr-kpis b { color: var(--tx); font-weight: 700; font-size: clamp(16px, 1.2vw, 25px); }
+.scr-kpis span { color: var(--mu); }
+.scr-years { display: none; }
+/* „Einsätze 2026“ ist antippbar – sieht aber aus wie eine normale Überschrift */
+.scr-yr { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.scr-ylabel { all: unset; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; }
+.scr-stats.is-open .scr-ylabel { color: var(--red); }
+.scr-ynav { display: flex; gap: 6px; }
+.scr-ynav button { border: 1px solid var(--border); background: var(--card2); color: var(--tx); border-radius: 2px; padding: 4px 10px; font: 700 clamp(12px, .8vw, 16px) "Barlow", sans-serif; letter-spacing: .04em; cursor: pointer; }
+.scr-ynav button:disabled { opacity: .3; cursor: default; }
+/* Listen zum Wischen (Termine, letzte Einsätze) – ohne sichtbaren Balken */
+.scr-scroll { overflow-y: auto !important; scrollbar-width: none; overscroll-behavior: contain; -webkit-mask-image: linear-gradient(#000 88%, transparent); mask-image: linear-gradient(#000 88%, transparent); }
+.scr-scroll::-webkit-scrollbar { display: none; }
+.scr-item.past { opacity: .5; }
+.scr-item.past .scr-when { color: var(--mu); }
+
+/* Handy / schmale Fenster: untereinander, Seite scrollt */
+@media (max-width: 800px) {
+  html, body { overflow: auto; height: auto; }
+  #scr { height: auto; min-height: 100vh; grid-template-rows: auto auto auto; padding: 14px; gap: 12px; }
+  .scr-head { flex-wrap: wrap; gap: 10px; align-items: center; }
+  .scr-logo { height: 34px; }
+  .scr-headr { width: 100%; justify-content: space-between; gap: 12px; }
+  .scr-weather { padding-right: 12px; }
+  .scr-clock b { font-size: 38px; }
+  .scr-clock span { font-size: 13px; }
+  .scr-cols { grid-template-columns: 1fr !important; }
+  .scr-cols > .scr-col:last-child { display: flex !important; }
+  .scr-card { padding: 14px 16px; }
+  .scr-big { font-size: 64px; }
+  .scr-scroll { max-height: 320px; }
+  .scr-bottom { grid-template-columns: 1fr; }
+  .scr-qr { grid-column: 1; grid-row: auto; }
+  .scr-alarm { grid-template-columns: 1fr; gap: 8px; }
+  .scr-alarm .pl { max-width: none; }
+  .scr-alarm .qr { justify-items: start; }
+  .scr-credits { text-align: left; }
+}
+.scr-weather .txt span { font-size: inherit; line-height: inherit; color: var(--mu); }
+.scr-weather .txt span:first-child { color: var(--tx2); }
+.scr-weather .txt span.strong { color: var(--red); }
+.scr-ylabel { white-space: nowrap; }
+/* alte Pfeil-Knöpfe überschreiben */
+.scr-yr button.scr-ylabel { width: auto; height: auto; border: 0; background: none; border-radius: 0; font-size: inherit; line-height: inherit; padding: 0; }
+.scr-yr .scr-ynav button { width: auto; height: auto; line-height: 1.2; }
+.scr-fs { top: auto; right: auto; bottom: 10px; left: 10px; }
+@media (max-width: 800px) { .scr-notices, .scr-notices.n2, .scr-notices.n3 { grid-template-columns: 1fr !important; } }
+/* Fahrzeugstatus (FMS) aus der Alarmierung */
+.scr-fms { display: flex; flex-wrap: wrap; gap: clamp(6px, .5vw, 10px); align-items: center; }
+.scr-fms span { display: inline-flex; align-items: center; gap: clamp(6px, .45vw, 9px); background: var(--card); border: 1px solid var(--border); padding: clamp(4px, .3vw, 6px) clamp(8px, .6vw, 12px) clamp(4px, .3vw, 6px) clamp(4px, .3vw, 6px);
+  font-weight: 700; font-size: clamp(13px, .95vw, 19px); white-space: nowrap; }
+.scr-fms b { display: inline-grid; place-items: center; width: clamp(24px, 1.7vw, 34px); height: clamp(24px, 1.7vw, 34px); color: #fff; background: #8a939b;
+  font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: clamp(16px, 1.2vw, 24px); }
+.scr-fms .f1 b, .scr-fms .f2 b { background: var(--ok); }
+.scr-fms .f3 b, .scr-fms .f4 b, .scr-fms .f7 b, .scr-fms .f8 b { background: var(--red); }
+.scr-fms .f5 b, .scr-fms .f9 b { background: var(--warn); color: #111; }
+.scr-fms .f6 b { background: #4a525a; }
+.scr-hallbtn { display: inline-flex; align-items: center; gap: 10px; background: var(--red); color: #fff; text-decoration: none; padding: clamp(10px, .8vw, 16px) clamp(14px, 1.1vw, 22px);
+  font-size: clamp(15px, 1.1vw, 22px); font-weight: 600; white-space: nowrap; }
+.scr-hallbtn b { font-weight: 800; }
+.scr-fms, .scr-hallbtn { grid-column: 1; justify-self: start; align-self: center; }
+.scr-alarm .up { font-weight: 800; text-transform: uppercase; letter-spacing: .06em; font-size: clamp(16px, 1.3vw, 26px); background: #fff; color: var(--red); display: inline-block; padding: 2px 10px; margin-top: 6px; align-self: flex-start; }
+/* In der Fahrzeughalle: Fahrzeuge als große Tippflächen, daneben „Fahrt eintragen“ */
+.scr-fms.is-hall button { display: inline-flex; align-items: center; gap: clamp(6px, .45vw, 9px); background: var(--card); color: var(--tx); border: 1px solid var(--border); cursor: pointer;
+  padding: clamp(6px, .45vw, 9px) clamp(10px, .8vw, 16px) clamp(6px, .45vw, 9px) clamp(6px, .45vw, 9px); min-height: 48px; font: 700 clamp(14px, 1vw, 20px) "Barlow", sans-serif; white-space: nowrap; touch-action: manipulation; }
+.scr-fms.is-hall button:active { transform: translateY(1px); }
+.scr-fms.is-hall .fx b { background: transparent; color: var(--mu); border: 1px dashed var(--border); }
+.scr-fms.is-hall .scr-tripbtn { background: var(--red); border-color: var(--red); color: #fff; padding-left: clamp(12px, 1vw, 20px); }
+.scr-fms.is-hall .scr-tripbtn b { width: auto; height: auto; background: none; color: #fff; }
+.scr-cats .c-missing b { color: var(--mu); }
+/* Unten (neu): links Hinweise + Statuszeile + Fahrzeuge untereinander, rechts der QR-Code über die ganze Höhe */
+.scr-bottom { display: flex; flex-direction: column; gap: clamp(6px, .6vw, 12px); }
+.scr-foot { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: clamp(10px, 1.1vw, 22px); align-items: stretch; min-height: 0; }
+.scr-fl { display: flex; flex-direction: column; justify-content: flex-end; gap: clamp(10px, 1vw, 18px); min-width: 0; }
+.scr-fl > #scr-notices, .scr-fl > .scr-alert { grid-column: auto; }
+.scr-fl > .scr-fms, .scr-fl > .scr-hallbtn { align-self: flex-start; }
+.scr-qr { grid-column: auto; grid-row: auto; }
+.scr-alert .scr-tripbtn { margin-left: auto; flex: 0 0 auto; display: inline-flex; align-items: center; gap: .5em; min-height: 48px; padding: 0 clamp(14px, 1.1vw, 24px); border: 0; border-radius: 2px;
+  background: var(--red); color: #fff; font: 700 clamp(15px, 1.1vw, 22px) "Barlow", sans-serif; letter-spacing: normal; text-transform: none; cursor: pointer; touch-action: manipulation; white-space: nowrap; }
+.scr-alert .scr-tripbtn b { color: #fff; font-size: 1.1em; letter-spacing: 0; }
+.scr-alert.is-red .scr-tripbtn, .scr-alert.is-red .scr-tripbtn b { background: #fff; color: var(--red); }
+/* Halle: Fahrzeuge als gleich breite Kacheln */
+.scr-fl > .scr-fms.is-hall { align-self: stretch; display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(130px, 8.4vw, 200px), 1fr)); }
+.scr-fms.is-hall button { min-width: 0; overflow: hidden; text-overflow: ellipsis; justify-content: flex-start; }
+@media (max-width: 800px) {
+  .scr-foot { grid-template-columns: 1fr; }
+  .scr-alert { flex-wrap: wrap; }
+  .scr-alert .scr-tripbtn { margin-left: 0; width: 100%; justify-content: center; }
+  .scr-fl > .scr-fms.is-hall { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+/* Geschätzter Anteil (Einsätze nur mit Nummer bekannt): schraffiert oben auf dem Balken */
+.scr-bars .b i { display: flex; flex-direction: column; overflow: hidden; }
+.scr-bars .b i u, .scr-est u { display: block; flex: 0 0 auto; background: repeating-linear-gradient(135deg, rgba(255,255,255,.62) 0 3px, transparent 3px 6px); }
+.scr-est { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: clamp(10px, .7vw, 14px); color: var(--mu); line-height: 1.2; }
+.scr-est u { width: 14px; height: 10px; background-color: var(--bar); flex: 0 0 14px; }
+.scr-fms.is-hall button b { flex: 0 0 auto; }
+/* Fahrzeughalle: Fahrzeugkarte statt Terminen */
+.scr-vlabel { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.scr-vlabel span { text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--mu); font-size: .9em; }
+.scr-vlist { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+.scr-veh { all: unset; box-sizing: border-box; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: clamp(10px, .9vw, 18px); cursor: pointer; touch-action: manipulation;
+  padding: clamp(9px, .75vw, 15px) 0; border-bottom: 1px solid var(--line); min-height: 52px; }
+.scr-veh:last-child { border-bottom: 0; }
+.scr-veh:active { background: var(--card2); }
+.scr-veh .fms { display: inline-grid; place-items: center; width: clamp(34px, 2.5vw, 50px); height: clamp(34px, 2.5vw, 50px); color: #fff; background: #8a939b;
+  font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: clamp(20px, 1.6vw, 32px); }
+.scr-veh.fx .fms { background: transparent; color: var(--mu); border: 1px dashed var(--border); }
+.scr-veh.f1 .fms, .scr-veh.f2 .fms { background: var(--ok); }
+.scr-veh.f3 .fms, .scr-veh.f4 .fms, .scr-veh.f7 .fms, .scr-veh.f8 .fms { background: var(--red); }
+.scr-veh.f5 .fms, .scr-veh.f9 .fms { background: var(--warn); color: #111; }
+.scr-veh.f6 .fms { background: #4a525a; }
+.scr-veh .nm { font-weight: 700; font-size: clamp(18px, 1.45vw, 30px); line-height: 1.15; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scr-veh .nm small { display: block; font-weight: 500; font-size: clamp(13px, .9vw, 18px); color: var(--mu); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scr-veh .nm em { font-style: normal; font-weight: 700; }
+.scr-veh .nm em.bad { color: var(--red); }
+.scr-veh .nm em.away { color: var(--warn); }
+.scr-veh .km { font-variant-numeric: tabular-nums; color: var(--tx2); font-weight: 600; font-size: clamp(14px, 1vw, 20px); white-space: nowrap; }
+.scr-veh.is-out .nm { color: var(--mu); }
+@media (max-width: 800px) { .scr-vlist.scr-scroll { max-height: none; -webkit-mask-image: none; mask-image: none; } }
+
+/* Halle: zwei Knöpfe in der Statuszeile; Anwesenheit dunkel, Fahrt rot */
+.scr-alert .scr-acts { margin-left: auto; display: flex; gap: clamp(8px, .6vw, 12px); flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; }
+.scr-alert .scr-acts .scr-tripbtn { margin-left: 0; }
+.scr-alert .scr-tripbtn.is-pick { background: var(--tx); color: var(--bg); }
+.scr-alert .scr-tripbtn.is-pick b { color: var(--bg); }
+.scr-alert.is-red .scr-tripbtn.is-pick, .scr-alert.is-red .scr-tripbtn.is-pick b { background: #fff; color: var(--red); }
+@media (max-width: 800px) { .scr-alert .scr-acts { width: 100%; } .scr-alert .scr-acts .scr-tripbtn { flex: 1 1 100%; } }
+
+/* Mehrere laufende Einsätze: neuester groß, weitere als Zeilen im Band */
+.scr-alarm.multi .kw { font-size: clamp(28px, 2.9vw, 64px); }
+.scr-alist { grid-column: 1 / -1; display: grid; gap: clamp(4px, .4vw, 8px); border-top: 1px solid rgba(255,255,255,.4); padding-top: clamp(8px, .7vw, 14px); margin-top: clamp(2px, .3vw, 6px); }
+.scr-alist .row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: clamp(10px, 1vw, 22px); font-size: clamp(15px, 1.25vw, 27px); font-weight: 700; line-height: 1.15; cursor: pointer; }
+.scr-alist .row .t { font-variant-numeric: tabular-nums; opacity: .9; }
+.scr-alist .row .k small { display: block; font-weight: 500; font-size: .78em; opacity: .9; }
+.scr-alist .row .k em { font-style: normal; background: #fff; color: var(--red); padding: 0 .4em; font-size: .72em; text-transform: uppercase; letter-spacing: .05em; margin-left: .4em; }
+.scr-alist .row .m { font-size: .75em; font-weight: 600; opacity: .9; white-space: nowrap; }
+.scr-alist .row.is-new .m { background: #fff; color: var(--red); padding: 2px 10px; border-radius: 2px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.scr-alist .row.more { grid-template-columns: 1fr; font-weight: 600; opacity: .9; }
+.scr-alarm.test .scr-alist .row .k em, .scr-alarm.test .scr-alist .row.is-new .m { color: #6b3fa0; }
+.scr-credits a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+
+/* Besprechungsraum: Fahrzeugstatus kompakt in der Statuszeile (optional) */
+.scr-alert .scr-fmsin { display: flex; flex-wrap: wrap; gap: clamp(4px, .4vw, 8px); align-items: center; }
+.scr-alert .scr-fmsin span { display: inline-flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--border); padding: 3px 9px 3px 3px; font-weight: 700; font-size: clamp(12px, .85vw, 17px); letter-spacing: 0; text-transform: none; white-space: nowrap; color: var(--tx); }
+.scr-alert .scr-fmsin span b { display: inline-grid; place-items: center; width: clamp(20px, 1.4vw, 28px); height: clamp(20px, 1.4vw, 28px); color: #fff; background: #8a939b; font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: clamp(13px, 1vw, 20px); letter-spacing: 0; }
+.scr-alert .scr-fmsin .f1 b, .scr-alert .scr-fmsin .f2 b { background: var(--ok); }
+.scr-alert .scr-fmsin .f3 b, .scr-alert .scr-fmsin .f4 b, .scr-alert .scr-fmsin .f7 b, .scr-alert .scr-fmsin .f8 b { background: var(--red); }
+.scr-alert .scr-fmsin .f5 b, .scr-alert .scr-fmsin .f9 b { background: var(--warn); color: #111; }
+.scr-alert .scr-fmsin .f6 b { background: #4a525a; }
+.scr-alert a.scr-tripbtn { text-decoration: none; }
+
+/* Karte zur Einsatzstelle im Alarmband (ersetzt den QR-Code): Querformat, rechts, bündig mit dem Band */
+.scr-alarm .map { justify-self: end; align-self: center; }
+.scr-alarm.multi .map { align-self: start; }
+/* Fahrzeuge im Einsatz (Status 3/4/7/8): nicht „alle einsatzbereit“ */
+.scr-alert.is-busy { background: #b45309; color: #fff; border-color: #b45309; }
+.scr-alert.is-busy b { color: #fff; }
+.scr-alist .k .tst { display: inline-block; font-style: normal; font-size: .6em; font-weight: 800; letter-spacing: .08em; background: #6b3fa0; color: #fff; padding: 2px 6px; border-radius: 2px; vertical-align: middle; }
+
+/* Handy: Kopf kompakt – Wetter ohne Windzeile (Warnungen bleiben), Datum in einer Zeile */
+@media (max-width: 480px) {
+  .scr-weather .txt span:not(:first-child):not(.strong) { display: none; }
+  .scr-clock span { white-space: nowrap; font-size: 12px; }
+}
+
+/* Fahrzeuge ohne FMS: Statuspunkt statt „–“ */
+.scr-vlist.no-fms .scr-veh .fms { width: clamp(12px, .8vw, 16px); height: clamp(12px, .8vw, 16px); border: 0; border-radius: 50%; background: var(--ok); }
+.scr-vlist.no-fms .scr-veh.is-away .fms { background: var(--warn); }
+.scr-vlist.no-fms .scr-veh.is-out .fms { background: var(--red); }

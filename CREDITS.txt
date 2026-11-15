@@ -1,0 +1,17 @@
+Wehrwerk – Feuerwehr-Portal für WordPress
+Lizenz: GPL-2.0-or-later
+
+Mitgelieferte Fremdbestandteile
+- Schrift Barlow / Barlow Condensed, Jeremy Tribby – SIL Open Font License 1.1 (assets/fonts/OFL.txt)
+- qrcode-generator, Kazuhiko Arase – MIT-Lizenz (assets/vendor/qrcode.min.js)
+- Sonnenauf-/-untergang nach dem Verfahren von „SunCalc“, Vladimir Agafonkin – BSD-2-Clause
+
+Externe Datenquellen (werden nur abgerufen, wenn eingeschaltet)
+- Wetter: Deutscher Wetterdienst (DWD), abgerufen über Bright Sky (https://brightsky.dev) – Datenbasis: Deutscher Wetterdienst
+- Amtliche Warnungen: Bundesamt für Bevölkerungsschutz und Katastrophenhilfe (BBK), Warn-App NINA (https://warnung.bund.de)
+- Ortssuche bei der Einrichtung: Nominatim / OpenStreetMap – © OpenStreetMap-Mitwirkende, ODbL 1.0
+- Optional: Plugin „Einsatzverwaltung“ (GPL) für Einsatzberichte auf der Website
+
+Dienstgrade: Vorgabe nach Anlage 1 der NRW-Verordnung über die Laufbahn der ehrenamtlichen Angehörigen der
+Freiwilligen Feuerwehr (Stand der Anlage: Änderung vom 15. Mai 2014) – bitte mit der aktuellen Fassung abgleichen.
+Geräteprüfungen: Vorgaben angelehnt an DGUV Regel 112-190 (Atemschutz) und DGUV Grundsatz 305-002 – Herstellerangaben gehen vor.

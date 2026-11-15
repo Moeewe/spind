@@ -1,0 +1,42 @@
+<div class="evq-top">
+  <div><div class="evq-kicker">{{ORG}}</div><h2>Einsatz erfassen</h2></div>
+  <button type="button" class="evq-q evq-ic" id="evq-gear" aria-label="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+</div>
+<div class="evq-mode" id="evq-mode"></div>
+
+<div class="evq-panel evq-hide" id="evq-settings">
+  <div class="evq-sh" style="margin:0">Zugang <em>nur auf diesem Gerät gespeichert</em></div>
+  <div class="evq-msg ok evq-hide" id="evq-wpnote">Du bist in WordPress angemeldet – Benutzer und Anwendungspasswort werden nicht gebraucht.</div>
+  <div id="evq-creds">
+  <div class="evq-fl"><label for="evq-user">Benutzername</label></div>
+  <input type="text" id="evq-user" autocomplete="username" autocapitalize="off" placeholder="einsatz-api">
+  <div class="evq-fl"><label for="evq-pass">Anwendungspasswort</label></div>
+  <input type="password" id="evq-pass" autocomplete="current-password" placeholder="xxxx xxxx xxxx xxxx xxxx xxxx">
+  </div>
+  <label class="evq-check"><input type="checkbox" id="evq-pub"> Direkt veröffentlichen (sonst als Entwurf)</label>
+  <div class="evq-row" style="margin-top:16px">
+    <button type="button" id="evq-test" class="evq-grow">Testen</button>
+    <button type="button" class="evq-p evq-grow" id="evq-save">Speichern</button>
+  </div>
+  <div id="evq-setmsg"></div>
+</div>
+
+<div class="evq-sec">
+  <div class="evq-sh"><span>01</span>Meldungen einfügen</div>
+  <textarea id="evq-in" aria-label="WhatsApp-Meldungen" placeholder="Eine oder viele Alarm-/WhatsApp-Meldungen hier einfügen …&#10;&#10;HILFE_P_Tür&#10;17.10.2026 - 17.31 Uhr&#10;Einsatz Nr. 38/2026{{UNIT}}"></textarea>
+  <div class="evq-row" style="margin-top:8px">
+    <button type="button" id="evq-paste" class="evq-grow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/></svg>Einfügen</button>
+    <button type="button" class="evq-p evq-grow" id="evq-parse">Erkennen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+  </div>
+  <div id="evq-parsemsg"></div>
+</div>
+
+<div class="evq-sec">
+  <div class="evq-sh"><span>02</span>Abarbeiten <em id="evq-count"></em></div>
+  <div id="evq-list"></div>
+  <div class="evq-row" id="evq-listtools" style="justify-content:flex-end;margin-top:6px">
+    <button type="button" class="evq-go" id="evq-sendall" title="Alle offenen Einträge nacheinander anlegen – so wie sie dastehen, auch ohne Fahrzeuge">Alle anlegen</button>
+    <button type="button" class="evq-q" id="evq-clear">Erledigte ausblenden</button>
+    <button type="button" class="evq-q" id="evq-clearall" title="Leert die Liste – schon veröffentlichte Berichte bleiben auf der Website">Alle aus der Liste entfernen</button>
+  </div>
+</div>

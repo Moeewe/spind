@@ -1,0 +1,27 @@
+/* Öffentliche Einsatzberichte (Wehrwerk) – ruhig, passt sich der Schrift des Themes an */
+.wwp { --wwp-red: #e30613; --wwp-ink: #111; --wwp-mu: #6b6b70; --wwp-line: #e3e3e3; max-width: 980px; margin: 0 auto; }
+.wwp a { text-decoration: none; color: inherit; }
+.wwp-years { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--wwp-line); margin-bottom: 18px; }
+.wwp-years a { padding: 8px 14px; font-weight: 700; color: var(--wwp-mu); border-bottom: 3px solid transparent; margin-bottom: -1px; }
+.wwp-years a[aria-current] { color: var(--wwp-ink); border-color: var(--wwp-red); }
+.wwp-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 20px; }
+.wwp-stats div { border: 1px solid var(--wwp-line); padding: 12px 14px; border-top: 3px solid var(--wwp-ink); }
+.wwp-stats div:first-child { border-top-color: var(--wwp-red); }
+.wwp-stats b { display: block; font-size: 30px; line-height: 1.1; }
+.wwp-stats span { color: var(--wwp-mu); font-size: 14px; }
+.wwp-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--wwp-line); }
+.wwp-list a { display: grid; grid-template-columns: 70px 1fr 6px; gap: 14px; align-items: center; padding: 12px 4px; border-bottom: 1px solid var(--wwp-line); }
+.wwp-list a:hover { background: #f6f6f6; }
+.wwp-list time { font-weight: 800; font-size: 18px; line-height: 1.1; }
+.wwp-list time small, .wwp-list .t small { display: block; font-weight: 400; font-size: 13px; color: var(--wwp-mu); }
+.wwp-list .t b { font-size: 17px; }
+.wwp-list i { width: 6px; height: 36px; background: #999; }
+.wwp .c-brand { border-top-color: var(--wwp-red) !important; } .wwp-list i.c-brand { background: var(--wwp-red); }
+.wwp-list i.c-th, .wwp-list i.c-vu { background: #1f5fa8; } .wwp-list i.c-fehl { background: #c27400; }
+.wwp-back { display: inline-block; margin-bottom: 14px; color: var(--wwp-mu) !important; }
+.wwp-kicker { color: var(--wwp-red); font-weight: 800; text-transform: uppercase; letter-spacing: .06em; font-size: 13px; }
+.wwp-one h2 { margin: 4px 0 16px; }
+.wwp-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0; margin: 0 0 18px; border-top: 1px solid var(--wwp-line); }
+.wwp-facts div { padding: 10px 0; border-bottom: 1px solid var(--wwp-line); }
+.wwp-facts dt { font-size: 13px; color: var(--wwp-mu); } .wwp-facts dd { margin: 2px 0 0; font-weight: 700; }
+@media (max-width: 600px) { .wwp-list a { grid-template-columns: 56px 1fr 5px; } }

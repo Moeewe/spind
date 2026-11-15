@@ -1,0 +1,127 @@
+/* Einsatz-Schnellerfassung */
+@font-face { font-family: "Barlow"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/Barlow-Regular.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 600; font-style: normal; font-display: swap; src: url("fonts/Barlow-SemiBold.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 700; font-style: normal; font-display: swap; src: url("fonts/Barlow-Bold.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 800; font-style: normal; font-display: swap; src: url("fonts/BarlowCondensed-ExtraBold.woff2") format("woff2"); }
+#evq{--ink:#111;--ink2:#313131;--mu:#76767a;--line:#e3e3e3;--soft:#f4f4f4;--paper:#fff;--red:#e30613;--ok:#178a45;--warn:#c27400;
+  font-family:"Barlow","Arial Narrow",Arial,sans-serif;font-size:16px;line-height:1.4;color:var(--ink2);
+  max-width:620px;margin:0 auto;padding:0 0 40px;text-align:left;-webkit-font-smoothing:antialiased}
+#evq *{box-sizing:border-box;font-family:inherit}
+#evq svg{width:18px;height:18px;flex:none;display:block}
+#evq .evq-top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:8px 0 14px;border-bottom:3px solid var(--ink)}
+#evq .evq-kicker{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--red)}
+#evq h2{font-size:34px;line-height:1;margin:4px 0 0;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:-.01em}
+#evq .evq-mode{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:var(--mu);padding:10px 0 0}
+#evq .evq-mode i{width:8px;height:8px;border-radius:50%;background:var(--mu);display:inline-block;flex:none;margin-top:6px}
+#evq .evq-mode.on i{background:var(--ok)}
+#evq .evq-sec{margin-top:28px}
+#evq .evq-sh{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;font-size:20px;font-weight:700;text-transform:uppercase;color:var(--ink)}
+#evq .evq-sh span{font-size:13px;color:var(--red);letter-spacing:.08em}
+#evq .evq-sh em{margin-left:auto;font-style:normal;font-size:14px;font-weight:400;text-transform:none;color:var(--mu)}
+#evq .evq-fl{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mu);margin:18px 0 6px}
+#evq .evq-fl small{font-size:12px;font-weight:400;letter-spacing:0;text-transform:none}
+#evq textarea,#evq input[type=text],#evq input[type=password],#evq input[type=datetime-local],#evq input[type=time],#evq select{
+  display:block;width:100%;font-size:17px;padding:11px 12px;border:1px solid #cfcfcf;border-radius:2px;background:var(--paper);color:var(--ink);
+  margin:0;box-shadow:none;height:auto;min-height:48px;outline:none;-webkit-appearance:none;appearance:none}
+#evq select{background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),linear-gradient(135deg,var(--ink) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 21px,calc(100% - 13px) 21px;background-size:5px 5px;background-repeat:no-repeat;padding-right:36px}
+#evq textarea:focus,#evq input:focus,#evq select:focus{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+#evq textarea{min-height:120px;resize:vertical;font-size:15px;line-height:1.45}
+#evq #evq-in{background:var(--soft);border-color:var(--soft)}
+#evq button{font-size:16px;font-weight:700;border-radius:2px;border:1px solid var(--ink);background:var(--paper);color:var(--ink);
+  padding:0 16px;min-height:48px;cursor:pointer;line-height:1.1;text-transform:uppercase;letter-spacing:.04em;box-shadow:none;margin:0;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:background .12s,color .12s,border-color .12s}
+#evq button:disabled{opacity:.45;cursor:default}
+#evq button.evq-p{background:var(--ink);color:#fff}
+#evq button.evq-go{background:var(--red);border-color:var(--red);color:#fff}
+#evq button.evq-q{border-color:transparent;background:transparent;color:var(--mu);padding:0 8px;text-transform:none;letter-spacing:0;font-weight:500}
+#evq button.evq-ic{width:48px;padding:0}
+#evq .evq-row{display:flex;gap:8px;align-items:stretch}
+#evq .evq-row>.evq-grow{flex:1}
+#evq .evq-panel{border:1px solid var(--line);padding:16px;margin-top:16px;background:var(--paper)}
+#evq .evq-check{display:flex;gap:10px;align-items:center;margin-top:16px;font-size:16px;color:var(--ink)}
+#evq .evq-check input{width:20px;height:20px;accent-color:var(--ink);margin:0}
+/* Segmente & Kacheln */
+#evq .evq-segs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--ink)}
+#evq .evq-seg{border:0;border-left:1px solid var(--ink);min-height:44px;padding:0 4px;font-size:15px;letter-spacing:.02em}
+#evq .evq-seg:first-child{border-left:0}
+#evq .evq-seg[aria-pressed=true]{background:var(--ink);color:#fff}
+#evq .evq-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:6px}
+#evq .evq-tile{position:relative;min-height:54px;border:1px solid #cfcfcf;font-size:18px;letter-spacing:0;text-transform:none;padding:6px 8px}
+#evq .evq-tile[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+#evq .evq-tile[aria-pressed=true]::after{content:"";position:absolute;top:6px;right:6px;width:6px;height:6px;background:var(--red)}
+#evq .evq-tiles.sm .evq-tile{min-height:44px;font-size:15px}
+#evq .evq-unit{font-size:14px;font-weight:700;color:var(--ink);margin:12px 0 6px;display:flex;justify-content:space-between;align-items:center}
+#evq .evq-unit button{min-height:28px;font-size:13px}
+/* Karten */
+#evq .evq-card{border-top:1px solid var(--line);background:var(--paper)}
+#evq .evq-card:last-child{border-bottom:1px solid var(--line)}
+#evq .evq-card.is-open{border-top:3px solid var(--red)}
+#evq .evq-head{display:flex;gap:14px;align-items:center;width:100%;border:0;background:transparent;padding:14px 0;min-height:0;
+  text-transform:none;letter-spacing:0;text-align:left;font-weight:400;color:inherit}
+#evq .evq-num{font-size:26px;line-height:1.05;font-weight:700;color:var(--ink);min-width:96px;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+#evq .evq-t{flex:1;min-width:0;display:flex;flex-direction:column}
+#evq .evq-kw{font-size:17px;font-weight:700;color:var(--ink);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#evq .evq-meta{font-size:14px;color:var(--mu)}
+#evq .evq-tag{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 7px;border:1px solid currentColor;color:var(--mu);white-space:nowrap}
+#evq .evq-tag.ok{color:#fff;background:var(--ok);border-color:var(--ok)}
+#evq .evq-tag.warn{color:var(--warn)}
+#evq .evq-tag.err{color:#fff;background:var(--red);border-color:var(--red)}
+#evq .evq-card.is-done .evq-num,#evq .evq-card.is-done .evq-kw{color:var(--mu)}
+#evq .evq-body{padding:0 0 18px}
+#evq .evq-raw{font-size:13px;color:var(--mu);border-left:3px solid var(--line);padding:2px 0 2px 10px;white-space:pre-wrap;margin-top:18px}
+#evq .evq-msg{font-size:15px;padding:12px 14px;margin-top:12px;border-left:3px solid var(--ink);background:var(--soft);color:var(--ink)}
+#evq .evq-msg.err{border-color:var(--red)}
+#evq .evq-msg.ok{border-color:var(--ok)}
+#evq .evq-msg.warn{border-color:var(--warn)}
+#evq .evq-msg a{color:var(--ink);font-weight:700}
+#evq details{margin-top:18px;border-top:1px solid var(--line)}
+#evq details summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;padding:14px 0 0;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mu)}
+#evq details summary::-webkit-details-marker{display:none}
+#evq details summary::after{content:"+";font-size:18px;line-height:12px;color:var(--ink)}
+#evq details[open] summary::after{content:"–"}
+#evq .evq-act{position:sticky;bottom:0;background:var(--paper);padding:12px 0;margin-top:18px;display:flex;gap:8px;border-top:1px solid var(--line)}
+#evq .evq-act .evq-go,#evq .evq-act .evq-grow{flex:1}
+#evq .evq-empty{color:var(--mu);font-size:15px;padding:18px 0;border-top:1px solid var(--line)}
+#evq .evq-hide{display:none}
+/* Anmeldung im Fenster */
+#evq #evq-login p { margin: 0 0 14px; }
+#evq #evq-login label { display: block; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--mu); margin-bottom: 6px; }
+#evq #evq-login .login-remember label { display: flex; gap: 10px; align-items: center; font-size: 16px; letter-spacing: 0; text-transform: none; color: var(--ink); font-weight: 400; }
+#evq #evq-login .login-remember input { width: 20px; height: 20px; margin: 0; accent-color: var(--ink); }
+#evq #evq-login input[type=submit] { width: 100%; min-height: 52px; border: 1px solid var(--red); background: var(--red); color: #fff; font-size: 16px; font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase; border-radius: 2px; cursor: pointer; }
+#evq .evq-msg.err { margin-top: 16px; }
+
+/* Lesbarkeit: Fließtext in normaler Schrift, schmale Schrift nur für Überschriften, Knöpfe und Nummern */
+#evq { --sans: "Barlow", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --cond: "Barlow Condensed", "Barlow", "Arial Narrow", Arial, sans-serif; font-family: var(--sans); line-height: 1.5; }
+#evq h2, #evq .evq-kicker, #evq .evq-sh, #evq .evq-fl, #evq button, #evq .evq-num, #evq .evq-kw, #evq .evq-tag,
+#evq details summary, #evq .evq-unit { font-family: var(--cond); }
+#evq .evq-head, #evq button.evq-q { font-family: var(--sans); }
+#evq .evq-head .evq-num, #evq .evq-head .evq-kw { font-family: var(--cond); }
+#evq .evq-meta, #evq .evq-mu, #evq .evq-mode { font-size: 15px; }
+#evq .evq-raw { font-size: 14px; }
+#evq .evq-fl { font-size: 13px; letter-spacing: .06em; }
+#evq .evq-msg { line-height: 1.45; }
+
+/* Lesbarkeit 2: überall normale Schrift, keine Großbuchstaben-Knöpfe */
+#evq { --cond: var(--sans); }
+#evq button { text-transform: none; letter-spacing: 0; font-weight: 600; }
+#evq h2 { text-transform: none; font-weight: 800; letter-spacing: -.02em; }
+#evq .evq-sh, #evq .evq-fl, #evq details summary, #evq .evq-tag { text-transform: none; letter-spacing: 0; }
+#evq .evq-fl { font-size: 14px; font-weight: 600; color: var(--ink2); }
+#evq .evq-kw { text-transform: none; }
+#evq .evq-tag { font-size: 13px; border-radius: 12px; }
+/* Bericht für die Website: Besonderer Einsatz, Bilder, Text, Einsatzbild */
+#evq .evq-web{margin-top:18px;padding:12px 14px 14px;border:1px solid var(--line);border-top:4px solid var(--red);background:var(--paper)}
+#evq .evq-webh{font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:10px}
+#evq .evq-web .evq-segs{grid-template-columns:1fr 1fr}
+#evq .evq-seg[disabled]{opacity:1;cursor:default}
+#evq .evq-file{display:flex;align-items:center;justify-content:center;min-height:64px;border:2px dashed #cfcfcf;color:var(--ink);font-weight:700;cursor:pointer;text-align:center;padding:10px}
+#evq .evq-file input{position:absolute;opacity:0;width:1px;height:1px}
+#evq .evq-file:hover{border-color:var(--ink)}
+#evq .evq-img{display:flex;gap:12px;align-items:center}
+#evq .evq-img img{width:120px;height:90px;object-fit:cover;display:block;border:1px solid var(--line)}
+#evq .evq-img div{display:grid;gap:2px;font-size:14px}
+#evq .evq-img span{color:var(--mu)}
