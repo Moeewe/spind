@@ -214,7 +214,7 @@
     // Hauptmenü = Gruppen, darunter (eigene Leiste) die Seiten der Gruppe – nur was die Person darf
     var NAV = [
       ['overview', 'Übersicht', [['overview', 'Übersicht']]],
-      ['people', 'Mitglieder', [['members', 'Mitglieder'], ['briefings', 'Unterweisungen']]],
+      ['people', 'Mitglieder', [['members', 'Mitglieder'], ['briefings', 'Unterweisungen'], ['loops', 'Alarmschleifen']]],
       ['ops', 'Einsätze', [['incidents', 'Einsätze']]],
       ['train', 'Lehrgänge', [['courses', 'Lehrgänge']]],
       ['agt', 'Atemschutz', [['agt', 'Atemschutz']]],
@@ -237,7 +237,7 @@
     var newIdeas = d.ideas.filter(function (i) { return i.status === 'new'; }).length;
     var openCloth = d.clothing.filter(function (c) { return c.status === 'open'; }).length;
     function badge(t) {
-      var n = t === 'screen' ? noticeSplit().act.length : t === 'messages' ? (d.messages || []).filter(function (m) { return m.status === 'open'; }).length : t === 'ideas' ? newIdeas : t === 'clothing' ? openCloth
+      var n = t === 'loops' ? (d.loop_requests || []).filter(function (r) { return r.status === 'open'; }).length : t === 'screen' ? noticeSplit().act.length : t === 'messages' ? (d.messages || []).filter(function (m) { return m.status === 'open'; }).length : t === 'ideas' ? newIdeas : t === 'clothing' ? openCloth
         : t === 'defects' ? d.defects.filter(function (x) { return x.status === 'new'; }).length : t === 'teams' ? (d.team_tasks || []).filter(function (k) { return k.status === 'open'; }).length : 0;
       return n;
     }
@@ -262,7 +262,7 @@
     // Zwei-Faktor ist Pflicht, aber noch nicht eingerichtet: erst einrichten, dann geht es weiter
     if (d.twofa && d.twofa.required && !d.twofa.on && !ui.twofaCodes) h += '<div class="ffl-msg warn" style="margin-top:14px"><b>Bitte zuerst die Zwei-Faktor-Anmeldung einrichten.</b> Für Verwaltungskonten ist sie Pflicht – das dauert eine Minute.</div>' + twofaBox();
     else if (ui.twofaCodes) h += twofaBox();
-    else h += ({ cd: tabCd, mail: tabMail, orders: tabOrders, rights: tabRights, security: tabSecurity, inbox: tabInbox, overview: tabOverview, courses: coursesSection, members: tabMembers, incidents: tabIncidents, clothing: tabClothing, defects: tabDefects, ideas: tabIdeas, agt: tabAgt, site: tabSite, briefings: tabBriefings, screen: tabScreen, audit: tabAudit, teams: tabTeams, messages: tabMessages, settings: tabSettings, start: tabStart, vehicles: tabVehicles, duties: function () { return '<div style="margin-top:12px">' + drillsPanel() + '</div>'; }, dutylists: function () { return tabDuties('duties'); }, uebungen: function () { return incidentList('uebung'); }, board: tabBoard, events: tabEvents, data: tabData })[ui.tab]();
+    else h += ({ cd: tabCd, mail: tabMail, orders: tabOrders, rights: tabRights, security: tabSecurity, inbox: tabInbox, overview: tabOverview, courses: coursesSection, members: tabMembers, incidents: tabIncidents, clothing: tabClothing, defects: tabDefects, ideas: tabIdeas, agt: tabAgt, site: tabSite, briefings: tabBriefings, screen: tabScreen, audit: tabAudit, teams: tabTeams, messages: tabMessages, settings: tabSettings, start: tabStart, vehicles: tabVehicles, duties: function () { return '<div style="margin-top:12px">' + drillsPanel() + '</div>'; }, dutylists: function () { return tabDuties('duties'); }, uebungen: function () { return incidentList('uebung'); }, board: tabBoard, events: tabEvents, loops: tabLoops, data: tabData })[ui.tab]();
     h += MYFUI.foot(d.foot);
     MYFForm.paint(root, h);
     [].forEach.call(root.querySelectorAll('.ffl-nav .ffl-tabs, .ffl-nav .ffl-subnav'), function (b) { var c = b.querySelector('[aria-selected=true]'); if (c && b.scrollWidth > b.clientWidth) b.scrollLeft += c.getBoundingClientRect().left - b.getBoundingClientRect().left - (b.clientWidth - c.offsetWidth) / 2; }); // aktiver Reiter bleibt sichtbar
@@ -1432,6 +1432,145 @@
     return { id: id || 0, cal_uid: uid || '', title: val2('ffl-evtitle'), date: val2('ffl-evdate'), end_date: val2('ffl-evend'), time: val2('ffl-evtime'), time_to: val2('ffl-evtimeto'), place: val2('ffl-evplace'),
       teaser: val2('ffl-evteaser'), body: val2('ffl-evbody'), link: val2('ffl-evlink'), link_label: val2('ffl-evlinkl'), visibility: val2('ffl-evvis'), ask_id: +val2('ffl-evask') || 0,
       featured: document.getElementById('ffl-evfeat').checked, cancelled: document.getElementById('ffl-evoff').checked, image_remove: !!(rm && rm.checked) };
+  }
+  // ---- Alarmschleifen: wer wird bei welcher Alarmierung mitalarmiert (pflegt meist das IT-Team) -------------------------
+  function lpName(id) { return ((d.loops || []).filter(function (l) { return l.id === id; })[0] || {}).name || '(gelöscht)'; }
+  function lpHas(mid, lid) {
+    var k = mid + ':' + lid; if (ui.lpDirty && k in ui.lpDirty) return ui.lpDirty[k];
+    if (!ui._lpSet || ui._lpSetSrc !== d.loop_members) { ui._lpSet = {}; ui._lpSetSrc = d.loop_members; (d.loop_members || []).forEach(function (x) { ui._lpSet[x[0] + ':' + x[1]] = true; }); }
+    return !!ui._lpSet[k];
+  }
+  function tabLoops() {
+    var open = (d.loop_requests || []).filter(function (r) { return r.status === 'open'; });
+    var subs = [['assign', 'Zuordnung'], ['req', 'Anfragen' + (open.length ? ' (' + open.length + ')' : '')], ['loops', 'Schleifen'], ['import', 'Excel-Liste übernehmen']];
+    var cur = ui.lpsub || (open.length ? 'req' : (d.loops || []).length ? 'assign' : 'loops');
+    var h = '<div class="ffl-subtabs" style="margin-top:12px">' + subs.map(function (x) { return '<button type="button" data-act="lpsub" data-v="' + x[0] + '" aria-selected="' + (cur === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>';
+    if (!(d.loops || []).length && cur !== 'import') return h + lpLoops();
+    return h + (cur === 'req' ? lpRequests() : cur === 'loops' ? lpLoops() : cur === 'import' ? lpImport() : lpAssign());
+  }
+  function lpAssign() {
+    var loops = (d.loops || []).filter(function (l) { return l.active; }), ms = (d.members || []).filter(function (m) { return m.active; });
+    var nD = Object.keys(ui.lpDirty || {}).length;
+    var h = '<p class="ffl-mu" style="margin-top:12px">Ankreuzen, wer in welcher Schleife ist – wie in der Excel-Liste. Gespeichert wird alles zusammen; wer sich ändert, bekommt eine kurze Nachricht im Postfach. ' +
+      'SPIND alarmiert nicht selbst: Die Liste ist die Grundlage, nach der ihr die Alarmierung einstellt.</p>';
+    var L = MYFUI.lt(ui, 'lpa', ms, { noun: 'Mitglieder', ph: 'Name suchen …', per: 50, text: function (m) { return m.name + ' ' + unitShort(m.unit); },
+      csv: { name: 'Alarmschleifen', cols: [['Name', function (m) { return m.name; }], ['Einheit', function (m) { return unitShort(m.unit); }]].concat(loops.map(function (l) { return [l.name, function (m) { return lpHas(m.id, l.id) ? 'x' : ''; }]; })) },
+      sorts: [['name', 'Name A–Z', function (m) { return m.name; }, 1], ['unit', 'Einheit', function (m) { return unitShort(m.unit) + '|' + m.name; }, 1]] });
+    h += L.bar + '<div class="ffl-scroll"><table class="ffl-table ffl-lpgrid"><thead><tr><th>Name</th>' + (multiUnit() ? '<th>Einheit</th>' : '') + loops.map(function (l) {
+      var n = ms.filter(function (m) { return lpHas(m.id, l.id); }).length;
+      return '<th title="' + esc(l.note || l.name) + '" style="text-align:center;white-space:nowrap">' + esc(l.name) + '<div class="ffl-mu" style="font-weight:400">' + n + '</div></th>';
+    }).join('') + '</tr></thead><tbody>' + L.rows.map(function (m) {
+      return '<tr><td><b>' + esc(m.name) + '</b></td>' + (multiUnit() ? '<td>' + esc(unitShort(m.unit)) + '</td>' : '') + loops.map(function (l) {
+        var k = m.id + ':' + l.id, ch = ui.lpDirty && k in ui.lpDirty;
+        return '<td style="text-align:center' + (ch ? ';background:var(--tint-warn)' : '') + '"><input type="checkbox" data-lp="' + k + '" aria-label="' + esc(m.name + ' – ' + l.name) + '"' + (lpHas(m.id, l.id) ? ' checked' : '') + '></td>';
+      }).join('') + '</tr>';
+    }).join('') + '</tbody></table></div>' + L.pager;
+    return h + '<div class="ffl-savebar" id="ffl-lpbar"' + (nD ? '' : ' hidden') + '><span>' + nD + (nD === 1 ? ' Änderung' : ' Änderungen') + ' noch nicht gespeichert</span><button type="button" class="ffl-q" data-act="lpdiscard">Verwerfen</button><button type="button" class="ffl-p" data-act="lpsave">Speichern</button></div>';
+  }
+  function lpRequests() {
+    var rs = d.loop_requests || [], open = rs.filter(function (r) { return r.status === 'open'; }), done = rs.filter(function (r) { return r.status !== 'open'; });
+    var ST = { done: ['st-ok', 'eingetragen'], declined: ['st-bad', 'abgelehnt'], withdrawn: ['st-no', 'zurückgezogen'] };
+    function what(r) {
+      return [r.add.length ? '<span class="ffl-chip st-ok">+ ' + esc(r.add.map(lpName).join(', ')) + '</span>' : '', r.remove.length ? '<span class="ffl-chip st-bad">− ' + esc(r.remove.map(lpName).join(', ')) + '</span>' : ''].join(' ') +
+        (r.note ? '<div class="ffl-mu" style="margin-top:4px">„' + esc(r.note) + '“</div>' : '');
+    }
+    var h = '<div class="ffl-sec" style="margin-top:12px"><div class="ffl-sh">Offene Anfragen<em>' + open.length + '</em></div>';
+    h += open.length ? open.map(function (r) {
+      return '<div class="ffl-pbox" style="margin-top:10px"><div class="ffl-row" style="justify-content:space-between;align-items:flex-start"><div><b>' + esc(r.name) + '</b><div class="ffl-mu">' + fmtDT(r.created) + ' · jetzt: ' +
+        esc(((d.loop_members || []).filter(function (x) { return x[0] === r.member_id; }).map(function (x) { return lpName(x[1]); }).join(', ')) || 'keine Schleife') + '</div><div style="margin-top:6px">' + what(r) + '</div></div></div>' +
+        '<label class="ffl-fl" for="ffl-lpans-' + r.id + '">Antwort (bei Ablehnung nötig)</label><input type="text" id="ffl-lpans-' + r.id + '" maxlength="500" placeholder="z. B. Tagschleife nur für Tagesverfügbare">' +
+        '<div class="ffl-row" style="margin-top:8px"><button type="button" class="ffl-p ffl-sm" data-act="lpyes" data-id="' + r.id + '">Annehmen und eintragen</button><button type="button" class="ffl-q ffl-sm" data-act="lpno" data-id="' + r.id + '">Ablehnen</button></div></div>';
+    }).join('') : '<p class="ffl-mu">Keine offenen Anfragen. Mitglieder fragen im Profil unter „Alarmschleifen“ an.</p>';
+    h += '</div>';
+    if (done.length) h += '<details class="ffl-sec"><summary class="ffl-sh" style="cursor:pointer">Erledigt (letzte 60 Tage)<em>' + done.length + '</em></summary>' + done.map(function (r) {
+      var s = ST[r.status] || ['st-no', r.status];
+      return '<div class="ffl-row" style="padding:8px 0;border-bottom:1px solid var(--line);align-items:flex-start"><div style="flex:1"><b>' + esc(r.name) + '</b> <span class="ffl-chip ' + s[0] + '">' + s[1] + '</span><div>' + what(r) + '</div>' +
+        (r.answer ? '<div class="ffl-mu">Antwort: ' + esc(r.answer) + '</div>' : '') + '</div><span class="ffl-mu">' + fmtDT(r.decided || r.created) + (r.decided_by ? ' · ' + esc(r.decided_by) : '') + '</span></div>';
+    }).join('') + '</details>';
+    return h;
+  }
+  function lpLoops() {
+    var ls = d.loops || [], sug = (d.loop_suggest || []).filter(function (s) { return !ls.some(function (l) { return l.name.toLowerCase() === s.toLowerCase(); }); });
+    var h = '<div class="ffl-sec" style="margin-top:12px"><div class="ffl-sh">Schleifen<em>' + ls.length + '</em></div>';
+    if (!ls.length) h += '<p class="ffl-mu" style="margin-top:0">Noch keine Schleifen. Legt sie einzeln an, übernehmt Vorschläge oder gleich eure Excel-Liste (Reiter „Excel-Liste übernehmen“).</p>';
+    h += ls.length ? '<div class="ffl-scroll"><table class="ffl-table"><thead><tr><th style="width:70px">Reihe</th><th>Name</th><th>Hinweis</th><th>Mitglieder</th><th>aktiv</th><th></th></tr></thead><tbody>' + ls.map(function (l) {
+      return '<tr><td><input type="number" data-lpf="sort" data-id="' + l.id + '" value="' + l.sort + '" style="width:60px"></td><td><input type="text" data-lpf="name" data-id="' + l.id + '" value="' + esc(l.name) + '" maxlength="80"></td>' +
+        '<td><input type="text" data-lpf="note" data-id="' + l.id + '" value="' + esc(l.note) + '" maxlength="200" placeholder="z. B. nur tagsüber verfügbar"></td><td>' + l.n + '</td>' +
+        '<td><input type="checkbox" data-lpf="active" data-id="' + l.id + '"' + (l.active ? ' checked' : '') + ' aria-label="aktiv"></td><td><button type="button" class="ffl-q ffl-sm" data-act="lpdel" data-id="' + l.id + '">Löschen</button></td></tr>';
+    }).join('') + '</tbody></table></div><div class="ffl-row" style="margin-top:8px"><button type="button" class="ffl-p" data-act="lpsaveall">Speichern</button><span class="ffl-mu">Nicht mehr aktive Schleifen bleiben mit ihrer Zuordnung erhalten, erscheinen aber nicht mehr in der Tabelle und bei den Mitgliedern.</span></div>' : '';
+    h += '<div class="ffl-pbox" style="margin-top:14px"><div class="ffl-sh" style="font-size:17px">Neue Schleife</div><div class="ffl-row"><input type="text" id="ffl-lpnew" maxlength="80" placeholder="z. B. Waldbrand" style="flex:1 1 200px;width:auto">' +
+      '<input type="text" id="ffl-lpnewnote" maxlength="200" placeholder="Hinweis (optional)" style="flex:2 1 260px;width:auto"><button type="button" class="ffl-p" data-act="lpadd">Anlegen</button></div>' +
+      (sug.length ? '<div class="ffl-fl" style="margin-top:10px">Vorschläge</div><div class="ffl-row" style="flex-wrap:wrap;gap:6px">' + sug.map(function (s) { return '<label class="ffl-check" style="margin:0 10px 0 0"><input type="checkbox" data-lpsug="' + esc(s) + '"> ' + esc(s) + '</label>'; }).join('') +
+        '</div><button type="button" class="ffl-sm" style="margin-top:8px" data-act="lpsug">Ausgewählte anlegen</button>' : '') + '</div></div>';
+    return h;
+  }
+  function lpImport() {
+    var p = ui.lpImp;
+    var h = '<div class="ffl-sec" style="margin-top:12px"><div class="ffl-sh">Excel-Liste übernehmen</div><p class="ffl-mu" style="margin-top:0">Erste Spalte: Name (wie in SPIND, „Nachname, Vorname“ oder „Vorname Nachname“). Weitere Spalten: je Schleife eine Spalte, ' +
+      'angekreuzt mit „x“ (oder 1, ja). In Excel markieren, kopieren und hier einfügen – oder als CSV-Datei wählen. Fehlende Schleifen werden angelegt. Je Person gilt danach genau, was in der Liste steht.</p>' +
+      '<textarea id="ffl-lpimp" rows="6" placeholder="Name&#9;Alle&#9;Tagschleife&#9;Waldbrand&#10;Muster, Max&#9;x&#9;&#9;x">' + esc(ui.lpImpText || '') + '</textarea>' +
+      '<div class="ffl-row" style="margin-top:8px"><input type="file" id="ffl-lpimpfile" accept=".csv,.txt,text/csv"><button type="button" class="ffl-sm" data-act="lpprev">Vorschau</button></div>';
+    if (p) {
+      h += '<div class="ffl-pbox" style="margin-top:12px"><b>' + p.rows.length + ' Personen, ' + p.header.length + ' Schleifen</b>' + (p.newLoops.length ? ' · neu angelegt werden: ' + esc(p.newLoops.join(', ')) : '') +
+        (p.missing.length ? '<div class="ffl-msg warn" style="margin-top:8px">Nicht gefunden (werden übersprungen): ' + esc(p.missing.slice(0, 20).join(', ')) + (p.missing.length > 20 ? ' …' : '') + '</div>' : '') +
+        '<div class="ffl-scroll" style="margin-top:8px"><table class="ffl-table"><thead><tr><th>Name</th>' + p.header.map(function (x) { return '<th>' + esc(x) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+        p.rows.slice(0, 8).map(function (r) { return '<tr><td>' + esc(r.name) + '</td>' + p.header.map(function (x) { return '<td style="text-align:center">' + (r.on.indexOf(x) >= 0 ? '✓' : '') + '</td>'; }).join('') + '</tr>'; }).join('') +
+        '</tbody></table></div>' + (p.rows.length > 8 ? '<p class="ffl-mu">… und ' + (p.rows.length - 8) + ' weitere</p>' : '') +
+        '<div class="ffl-row" style="margin-top:8px"><button type="button" class="ffl-p" data-act="lpimport">Übernehmen</button><button type="button" class="ffl-q ffl-sm" data-act="lpimpclear">Verwerfen</button></div></div>';
+    }
+    return h + '</div>';
+  }
+  function lpParse(text) {
+    var t = parseCsv(text || ''); if (t.length < 2) return null;
+    var head = t[0].slice(1).map(function (x) { return String(x).trim(); }), ok = /^(x|✓|✔|ja|j|1|yes)$/i;
+    var cols = []; head.forEach(function (x, i) { if (x && !/^(einheit|zug|lz|nr|nummer|funktion|vorname|nachname)$/i.test(x)) cols.push([i + 1, x]); });
+    var names = {}; (d.members || []).forEach(function (m) { names[m.name.toLowerCase()] = 1; var p = m.name.split(','); if (p.length === 2) names[(p[1].trim() + ' ' + p[0].trim()).toLowerCase()] = 1; });
+    var rows = t.slice(1).map(function (r) { return { name: String(r[0] || '').trim().replace(/\s+/g, ' '), on: cols.filter(function (c) { return ok.test(String(r[c[0]] || '').trim()); }).map(function (c) { return c[1]; }) }; }).filter(function (r) { return r.name; });
+    var have = (d.loops || []).map(function (l) { return l.name.toLowerCase(); });
+    return { header: cols.map(function (c) { return c[1]; }), rows: rows, missing: rows.filter(function (r) { return !names[r.name.toLowerCase()]; }).map(function (r) { return r.name; }),
+      newLoops: cols.map(function (c) { return c[1]; }).filter(function (x) { return have.indexOf(x.toLowerCase()) < 0; }) };
+  }
+  function loopsClick(act, t, id) {
+    switch (act) {
+      case 'lpsub': ui.lpsub = t.getAttribute('data-v'); render(); return true;
+      case 'lpdiscard': ui.lpDirty = {}; render(); return true;
+      case 'lpsave':
+        var ch = Object.keys(ui.lpDirty || {}).map(function (k) { var p = k.split(':'); return { member_id: +p[0], loop_id: +p[1], on: ui.lpDirty[k] }; });
+        post('loops/assign', { changes: ch }).then(function (r) { ui.lpDirty = {}; flash('ok', r.changed + (r.changed === 1 ? ' Änderung gespeichert.' : ' Änderungen gespeichert.')); }); return true;
+      case 'lpadd':
+        var nm = val2('ffl-lpnew').trim(); if (!nm) return flash('err', 'Bitte einen Namen eingeben.'), true;
+        post('loop', { name: nm, note: val2('ffl-lpnewnote') }, 'Schleife angelegt.'); return true;
+      case 'lpsug':
+        var names = [].map.call(root.querySelectorAll('[data-lpsug]:checked'), function (x) { return x.getAttribute('data-lpsug'); });
+        if (!names.length) return flash('err', 'Bitte Vorschläge ankreuzen.'), true;
+        post('loop', { suggest: true, names: names }).then(function (r) { flash('ok', r.added + ' Schleifen angelegt.'); }); return true;
+      case 'lpsaveall':
+        var jobs = (d.loops || []).map(function (l) {
+          var g = function (f) { return root.querySelector('[data-lpf="' + f + '"][data-id="' + l.id + '"]'); };
+          var nv = { id: l.id, name: g('name').value.trim(), note: g('note').value.trim(), sort: +g('sort').value || 0, active: g('active').checked };
+          return nv.name !== l.name || nv.note !== l.note || nv.sort !== l.sort || nv.active !== l.active ? nv : null;
+        }).filter(Boolean);
+        if (!jobs.length) return flash('ok', 'Nichts geändert.'), true;
+        jobs.reduce(function (p, j) { return p.then(function () { return api('POST', 'admin/loop', j); }); }, Promise.resolve()).then(function () { return reload(); }).then(function () { flash('ok', 'Gespeichert.'); }, function (e) { flash('err', e.message); }); return true;
+      case 'lpdel':
+        var lx = (d.loops || []).filter(function (l) { return l.id === id; })[0];
+        if (lx && confirm('Schleife „' + lx.name + '“ löschen? ' + (lx.n ? lx.n + ' Zuordnungen gehen dabei verloren. Wenn sie nur nicht mehr genutzt wird: „aktiv“ abwählen.' : ''))) post('loop', { id: id, 'delete': true }, 'Gelöscht.'); return true;
+      case 'lpprev':
+        var tx = val2('ffl-lpimp'), f = document.getElementById('ffl-lpimpfile');
+        var go = function (text) { ui.lpImpText = text; ui.lpImp = lpParse(text); if (!ui.lpImp) flash('err', 'Keine Tabelle erkannt – erste Zeile mit Überschriften, darunter je Person eine Zeile.'); else render(); };
+        if (f && f.files && f.files[0]) { var rd = new FileReader(); rd.onload = function () { go(String(rd.result)); }; rd.readAsText(f.files[0], 'utf-8'); } else go(tx); return true;
+      case 'lpimpclear': ui.lpImp = null; ui.lpImpText = ''; render(); return true;
+      case 'lpimport':
+        var pi = ui.lpImp; if (!pi) return true;
+        if (!confirm('Liste übernehmen? Für ' + (pi.rows.length - pi.missing.length) + ' Personen gilt danach genau diese Zuordnung (für die ' + pi.header.length + ' Schleifen der Liste).')) return true;
+        post('loops/import', { header: pi.header, rows: pi.rows }).then(function (r) { ui.lpImp = null; ui.lpImpText = ''; ui.lpsub = 'assign';
+          flash('ok', r.changed + ' Zuordnungen geändert bei ' + r.members + ' Personen' + (r.loops_added ? ', ' + r.loops_added + ' Schleifen neu' : '') + (r.missing.length ? ' · nicht gefunden: ' + r.missing.length : '') + '.'); }); return true;
+      case 'lpyes': case 'lpno':
+        var ans = val2('ffl-lpans-' + id).trim();
+        if (act === 'lpno' && !ans) return flash('err', 'Bitte kurz begründen, warum es nicht geht.'), true;
+        post('loops/decide', { id: id, accept: act === 'lpyes', answer: ans }, act === 'lpyes' ? 'Eingetragen – das Mitglied bekommt Bescheid.' : 'Abgelehnt – das Mitglied bekommt Bescheid.'); return true;
+    }
+    return false;
   }
   function tabDuties(area) {
     area = area || 'duties';
@@ -3253,7 +3392,7 @@
   }
 
   // ---- Bereiche: welche Reiter darf wer sehen ------------------------------------
-  var TAB_AREA = { briefings: 'members', site: 'full', events: 'full', overview: 'any', courses: 'courses', members: 'members', incidents: 'incidents', clothing: 'clothing', defects: 'defects', ideas: 'ideas',
+  var TAB_AREA = { briefings: 'members', site: 'full', events: 'full', loops: 'loops', overview: 'any', courses: 'courses', members: 'members', incidents: 'incidents', clothing: 'clothing', defects: 'defects', ideas: 'ideas',
     agt: 'agt', screen: 'screen', vehicles: 'vehicles', duties: 'duties', dutylists: 'duties', uebungen: 'incidents', board: 'board', orders: 'orders', messages: 'any', data: 'any', settings: 'full', rights: 'full', security: 'full', start: 'full', audit: 'full' };
   function allowedTab(t) {
     if (t === 'mail') return !!d.smtp; // nur Administratoren (Server schickt die Daten sonst gar nicht)
@@ -4392,6 +4531,7 @@
     'me/need': 'Lehrgangswunsch', 'me/clothing': 'Kleidung gemeldet', 'me/clothing/withdraw': 'Kleidung zurückgezogen', 'me/idea': 'Anregung abgegeben',
     'me/ics/reset': 'Kalender-Link erneuert',
     'admin/event': 'Veranstaltung gespeichert', 'admin/event/delete': 'Veranstaltung gelöscht',
+    'admin/loop': 'Alarmschleife gespeichert', 'admin/loops/assign': 'Alarmschleifen zugeordnet', 'admin/loops/import': 'Alarmschleifen-Liste übernommen', 'admin/loops/decide': 'Anfrage Alarmschleifen entschieden', 'me/loops/request': 'Alarmschleifen angefragt',
     'admin/settings': 'Einstellungen', 'admin/member': 'Mitglied gespeichert', 'admin/member/delete': 'Mitglied gelöscht',
     'admin/member/invite': 'Einladung verschickt', 'admin/members/bulk': 'Mitglieder importiert',
     'admin/course': 'Lehrgang gespeichert', 'admin/course/delete': 'Lehrgang gelöscht', 'admin/courses/bulk': 'Lehrgänge importiert',
@@ -4667,6 +4807,7 @@
     if (t.id === 'ffl-importcat') { ui.importCat = t.value; return render(); }
     if (t.id === 'ffl-onlyneeds') { ui.printOnlyNeeds = t.checked; return render(); }
     if (t.id === 'ffl-agtonly') { ui.agtOnly = t.checked; return render(); }
+    if (t.hasAttribute('data-lp')) { var lk = t.getAttribute('data-lp'), lpp = lk.split(':'); ui.lpDirty = ui.lpDirty || {}; delete ui.lpDirty[lk]; if (lpHas(+lpp[0], +lpp[1]) !== t.checked) ui.lpDirty[lk] = t.checked; return render(); }
     if (t.id === 'ffl-agtsecond') return post('agt/rule', { second: t.checked }, t.checked ? 'Regel eingeschaltet: zweiter Nachweis nötig.' : 'Regel ausgeschaltet.');
     if (t.id === 'ffl-cfilter') { ui.cFilter = t.value; return render(); }
     // Beim Ankreuzen nur den Zähler auf dem Knopf aktualisieren (Liste und Scroll-Position bleiben)
@@ -4831,7 +4972,7 @@
       resetYearUi(); return reload();
     }
     var act = t.getAttribute('data-act'), id = +t.getAttribute('data-id');
-    if (incidentAdminClick(act, t, id) || eventClick(act, t, id) || coreAdminClick(act, t, id) || workshopClick(act, t, id) || vehicleClick(act, t, id) || dutyBoardClick(act, t, id) || dataClick(act, t, id) || teamClick(act, t, id)) return;
+    if (incidentAdminClick(act, t, id) || eventClick(act, t, id) || loopsClick(act, t, id) || coreAdminClick(act, t, id) || workshopClick(act, t, id) || vehicleClick(act, t, id) || dutyBoardClick(act, t, id) || dataClick(act, t, id) || teamClick(act, t, id)) return;
     switch (act) {
       case 'makecurrent':
         if (!confirm(ui.year + ' zum Abfragejahr machen? Mitglieder melden dann Bedarf für ' + ui.year + '. Die Daten von ' + d.settings.year + ' bleiben im Archiv.')) return;
@@ -5424,7 +5565,7 @@
     }
     else if (go) {
       // Benachrichtigung „admin:bereich“ → direkt in den passenden Bereich
-      var GO = { orders: 'orders', clothing: 'clothing', defects: 'defects', duties: 'duties', incidents: 'incidents', members: 'members', messages: 'messages', teams: 'teams', vehicles: 'vehicles', ideas: 'ideas', courses: 'courses', agt: 'agt' };
+      var GO = { loops: 'loops', orders: 'orders', clothing: 'clothing', defects: 'defects', duties: 'duties', incidents: 'incidents', members: 'members', messages: 'messages', teams: 'teams', vehicles: 'vehicles', ideas: 'ideas', courses: 'courses', agt: 'agt' };
       if (go === 'vehicledue') { ui.tab = 'vehicles'; ui.vsub = 'due'; ui.profile = null; }
       else if (GO[go]) { ui.tab = GO[go]; ui.profile = null; if (go === 'vehicles') ui.vsub = 'bookings'; }
     }

@@ -48,6 +48,7 @@ function myf_route_area($route) {
     if (strpos($p, 'duty') === 0 || strpos($p, 'team/') === 0) return 'any';
     if (strpos($p, 'board') === 0) return 'board';
     if (strpos($p, 'order/') === 0) return 'orders';
+    if ($p === 'loop' || strpos($p, 'loops/') === 0) return 'loops';
     return 'full';
 }
 

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SPIND
  * Description: Feuerwehr-Portal: Mitgliederbereich und Verwaltung für Einsätze, Berichte, Lehrgänge, Atemschutz, Fahrzeuge, Dienste und Dashboards.
- * Version: 0.16.1
+ * Version: 0.17.0
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Plugin URI: https://github.com/Moeewe/spind
@@ -40,14 +40,14 @@ add_action('admin_notices', function () {
         . '<a href="' . esc_url(add_query_arg('spind_ok', 1)) . '">Hinweis ausblenden</a></p></div>';
 });
 
-define('MYF_VERSION', '0.16.1');
+define('MYF_VERSION', '0.17.0');
 // Beta bis zum produktiven Einsatz (dann 1.0.0); Versionshinweise in releases.json
 define('MYF_CHANNEL', 'Beta');
 // Version der Dateien (JS/CSS): ändert sich mit jeder neuen Datei – so laden Browser, Fernseher und der Offline-Speicher
 // nach einem Update sicher die neuen Dateien, auch wenn die Versionsnummer gleich geblieben ist
 define('MYF_ASSET_VER', MYF_VERSION . '.' . max(array_map(function ($f) { return (int) @filemtime($f); }, array_merge([__FILE__], (array) glob(__DIR__ . '/assets/*.js'), (array) glob(__DIR__ . '/assets/*.css')))));
 define('MYF_DIR', plugin_dir_path(__FILE__));
-define('MYF_DB_VERSION', '50');
+define('MYF_DB_VERSION', '51');
 define('MYF_URL', plugin_dir_url(__FILE__));
 define('MYF_ROLE', 'ffw_mitglied');
 
@@ -107,6 +107,7 @@ require __DIR__ . '/includes/security.php';
 require __DIR__ . '/includes/reports.php';
 require __DIR__ . '/includes/drills.php';
 require __DIR__ . '/includes/events.php';
+require __DIR__ . '/includes/loops.php';
 require __DIR__ . '/includes/reset.php';
 require __DIR__ . '/includes/backup.php';
 require __DIR__ . '/includes/twofa.php';

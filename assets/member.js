@@ -1573,7 +1573,7 @@
   // ---- Benachrichtigungen & „Bescheid geben“ ------------------------------------
   window.MYFOpenInbox = function () { st.tab = 'inbox'; render(); window.scrollTo(0, root.offsetTop - 20); };
   function unread() { return (d.notifications || []).filter(function (n) { return !n.read; }).length; }
-  var NTAB = { orders: 'orders', start: 'start', defects: 'defects', ideas: 'ideas', agt: 'agt', clothing: 'clothing', courses: 'courses', incidents: 'incidents', messages: 'inbox', notices: 'notices', duties: 'duties', board: 'board', vehicle: 'vehicle', bookings: 'vehicle' };
+  var NTAB = { orders: 'orders', start: 'start', defects: 'defects', ideas: 'ideas', agt: 'agt', clothing: 'clothing', courses: 'courses', incidents: 'incidents', messages: 'inbox', notices: 'notices', duties: 'duties', board: 'board', vehicle: 'vehicle', bookings: 'vehicle', loops: 'loops' };
   function vInbox() {
     var ns = d.notifications || [];
     var h = '<div class="ffl-sec"><div class="ffl-sh">Benachrichtigungen<em>' + (unread() ? unread() + ' neu' : 'alles gelesen') + '</em></div>' +
@@ -1954,6 +1954,7 @@
         card('data', 'Meine Angaben', nAddr === 3 ? 'vollständig' : 'für Bescheinigungen fehlt noch etwas', nAddr < 3) +
         card('skills', 'Funktion & Fähigkeiten', '') +
         card('sizes', 'Spind & Größen', lockerSummary() + ' · ' + (filled ? filled + ' von ' + nSizes + ' Größen' : 'noch keine Größen'), !filled) +
+        (d.loops_all ? card('loops', 'Alarmschleifen', (d.loops_mine || []).length ? (d.loops_mine.length === 1 ? '1 Schleife' : d.loops_mine.length + ' Schleifen') : 'keine Schleife', !(d.loops_mine || []).length) : '') +
         card('training', 'Meine Ausbildung', '') +
         ((d.briefings || []).length ? card('brief', 'Meine Unterweisungen', '') : '') +
         '<section class="ffl-pcard" id="myf-p-konto"><div class="ffl-sh">Darstellung & Konto</div>' + acc + '</section></div>' + profBar();
@@ -1962,6 +1963,7 @@
       row('data', 'Meine Angaben', nAddr === 3 ? 'Name, Anschrift, Handy – vollständig' : 'Für Bescheinigungen fehlt noch etwas', nAddr < 3) +
       row('skills', 'Funktion & Fähigkeiten', [day ? 'tagsüber: ' + day : '', nTr ? nTr + (nTr === 1 ? ' Merkmal' : ' Merkmale') : 'Führerscheine, Beruf …'].filter(Boolean).join(' · ')) +
       row('sizes', 'Spind & Größen', lockerSummary() + ' · ' + (filled ? filled + ' von ' + nSizes + ' Größen' : 'Größen fehlen noch'), !filled) +
+      (d.loops_all ? row('loops', 'Alarmschleifen', loopSummary() + (d.loop_request && d.loop_request.status === 'open' ? ' · Anfrage offen' : ''), !(d.loops_mine || []).length) : '') +
       ((d.briefings || []).length ? row('brief', 'Meine Unterweisungen', (function () { var o = d.briefings.filter(function (b) { return !b.ack; }).length; return o ? o + ' noch zu bestätigen' : 'alle bestätigt ✓'; })(), d.briefings.some(function (b) { return !b.ack; })) : '') +
       row('training', 'Meine Ausbildung', myTraining().length + (myTraining().length === 1 ? ' Lehrgang' : ' Lehrgänge') + ' · nachtragen lassen') + '</div>';
     return h + acc;
@@ -1988,7 +1990,7 @@
     return jobs.reduce(function (p, j) { return p.then(j); }, Promise.resolve()).then(function () { st.pdirty = {}; return reload(); })
       .then(function () { note('ok', 'Gespeichert.'); }, function (err) { note('err', err.message); });
   }
-  var PSEC = { data: 'Meine Angaben', skills: 'Funktion & Fähigkeiten', sizes: 'Spind & Größen', training: 'Meine Ausbildung', brief: 'Meine Unterweisungen' };
+  var PSEC = { data: 'Meine Angaben', skills: 'Funktion & Fähigkeiten', sizes: 'Spind & Größen', loops: 'Alarmschleifen', training: 'Meine Ausbildung', brief: 'Meine Unterweisungen' };
   // Mein Spind (die Klamotten liegen ja darin): Nummer, Ort, Schlüssel-Stand, seit wann – stimmt etwas nicht, direkt der Kleiderkammer Bescheid geben
   function lockerSummary() {
     var lk = d.my_locker || [];
@@ -2062,7 +2064,33 @@
         return '<div><label class="ffl-fl" for="myf-sz-' + k + '">' + esc(d.size_keys[k]) + '</label><input type="text" id="myf-sz-' + k + '" data-size="' + k + '" value="' + esc(d.sizes[k] || '') + '" autocapitalize="characters" enterkeyhint="next"></div>';
       }).join('') + '</div></form></div>';
     out.sizes = hSizes;
+    if (d.loops_all) out.loops = loopsHtml();
     return out;
+  }
+  // Alarmschleifen: welche habe ich, Änderung beim IT-Team anfragen (das Team entscheidet und trägt ein)
+  function loopSummary() { var n = (d.loops_mine || []).length; return n ? n + (n === 1 ? ' Schleife' : ' Schleifen') + ': ' + loopNames(d.loops_mine).join(', ') : 'keine Schleife'; }
+  function loopNames(ids) { var by = {}; (d.loops_all || []).forEach(function (l) { by[l.id] = l.name; }); return (ids || []).map(function (i) { return by[i]; }).filter(Boolean); }
+  function loopsHtml() {
+    var mine = d.loops_mine || [], r = d.loop_request, all = d.loops_all || [];
+    var h = '<div class="ffl-sec"><p class="ffl-mu" style="margin-top:0">Bei diesen Alarmierungen wirst du mitalarmiert. Gepflegt wird die Liste vom IT-Team.</p>' +
+      (mine.length ? '<div class="ffl-chips">' + loopNames(mine).map(function (n) { return '<span class="ffl-chip st-fn">' + esc(n) + '</span>'; }).join('') + '</div>' : '<p><b>Du bist zurzeit in keiner Schleife.</b></p>');
+    if (r && r.status === 'open') {
+      h += '<div class="ffl-msg" style="margin-top:12px"><b>Deine Anfrage liegt beim IT-Team</b> (' + dt(r.created) + ')' +
+        (r.add.length ? '<div>dazu: ' + esc(loopNames(r.add).join(', ')) + '</div>' : '') + (r.remove.length ? '<div>raus: ' + esc(loopNames(r.remove).join(', ')) + '</div>' : '') +
+        (r.note ? '<div class="ffl-mu">„' + esc(r.note) + '“</div>' : '') + '<div class="ffl-row" style="margin-top:8px"><button type="button" class="ffl-sm" data-act="lpreq">Anfrage ändern</button><button type="button" class="ffl-q ffl-sm" data-act="lpwithdraw">Zurückziehen</button></div></div>';
+    } else if (r && (r.status === 'done' || r.status === 'declined')) {
+      h += '<div class="ffl-msg ' + (r.status === 'done' ? 'ok' : 'warn') + '" style="margin-top:12px">' + (r.status === 'done' ? 'Deine Anfrage wurde eingetragen.' : 'Deine Anfrage wurde abgelehnt.') + (r.answer ? ' „' + esc(r.answer) + '“' : '') + '</div>';
+    }
+    if (st.lpForm) {
+      var want = st.lpWant || mine.slice();
+      h += '<div class="ffl-pbox" style="margin-top:12px"><div class="ffl-fl">In welchen Schleifen möchtest du sein?</div><div class="ffl-lpw">' + all.map(function (l) {
+        var on = want.indexOf(l.id) >= 0, was = mine.indexOf(l.id) >= 0;
+        return '<label class="ffl-check"><input type="checkbox" data-lpw="' + l.id + '"' + (on ? ' checked' : '') + '> ' + esc(l.name) + (l.note ? ' <span class="ffl-mu">– ' + esc(l.note) + '</span>' : '') +
+          (on !== was ? ' <span class="ffl-chip ' + (on ? 'st-ok">dazu' : 'st-bad">raus') + '</span>' : '') + '</label>';
+      }).join('') + '</div><label class="ffl-fl" for="myf-lpnote" style="margin-top:10px">Bemerkung (optional)</label><textarea id="myf-lpnote" rows="2" maxlength="500" placeholder="z. B. Ab Januar Schichtdienst – bitte aus der Tagschleife nehmen">' + esc(st.lpNote || '') + '</textarea>' +
+        '<div class="ffl-row" style="margin-top:10px"><button type="button" class="ffl-p" data-act="lpsend"' + (navigator.onLine ? '' : ' disabled') + '>Anfrage senden</button><button type="button" class="ffl-q" data-act="lpcancel">Abbrechen</button></div></div>';
+    } else if (!(r && r.status === 'open')) h += '<div class="ffl-row" style="margin-top:12px"><button type="button" class="ffl-sm" data-act="lpreq">Änderung anfragen</button></div>';
+    return h + '</div>';
   }
 
   // ---- Ereignisse ------------------------------------------------------------
@@ -2090,6 +2118,15 @@
     if (act === 'pdiscard') { st.pdirty = {}; return render(); }
     if (act === 'psec') { st.psec = v || null; st.msg = null; render(); return window.scrollTo(0, Math.max(0, root.getBoundingClientRect().top + window.pageYOffset - 20)); }
     if (act === 'ptheme') { MYFUI.setTheme(v); return render(); }
+    if (act === 'lpreq') { var orq = d.loop_request && d.loop_request.status === 'open' ? d.loop_request : null; st.lpForm = true; st.lpNote = orq ? orq.note : '';
+      st.lpWant = (d.loops_mine || []).filter(function (x) { return !orq || orq.remove.indexOf(x) < 0; }).concat(orq ? orq.add : []); return render(); }
+    if (act === 'lpcancel') { st.lpForm = false; st.lpWant = null; return render(); }
+    if (act === 'lpsend') {
+      var want = st.lpWant || [], mine = d.loops_mine || [];
+      var body = { add: want.filter(function (x) { return mine.indexOf(x) < 0; }), remove: mine.filter(function (x) { return want.indexOf(x) < 0; }), note: (document.getElementById('myf-lpnote') || {}).value || '' };
+      return api('POST', 'me/loops/request', body).then(function () { st.lpForm = false; st.lpWant = null; st.lpNote = ''; st.msg = { type: 'ok', text: 'Anfrage gesendet – das IT-Team meldet sich.' }; return reload(); }, function (e) { alert(e.message); });
+    }
+    if (act === 'lpwithdraw') { if (!confirm('Anfrage zurückziehen?')) return; return api('POST', 'me/loops/request', { withdraw: true }).then(reload, function (e) { alert(e.message); }); }
     // Tag im Belegungsraster angetippt: Fahrzeug und Zeitraum ins Formular (8–18 Uhr als Vorschlag), zum Formular scrollen
     if (act === 'bkday') {
       var vsel = document.getElementById('myf-bveh'), bs = document.getElementById('myf-bstart'), be = document.getElementById('myf-bend');
@@ -2219,6 +2256,7 @@
       if (v === 'admin:cert' && d.incident_manage) { st.tab = 'incidents'; st.isub = 'cert'; st.inc = null; st.report = null; st.cv = null; save('tab', 'incidents'); return reload(); }
       if (/^admin:incident:\d+$/.test(v) && d.incident_manage) v = 'einsatz:' + v.slice(15);
       if (v.indexOf('admin') === 0) { if (window.MYFAdminOpen) window.MYFAdminOpen(v.slice(6)); return; }
+      if (v === 'loops') { st.tab = 'profile'; st.psec = 'loops'; save('tab', 'profile'); return reload(); }
       if (v.indexOf('brief:') === 0) { st.tab = 'start'; st.briefOpen = +v.slice(6); save('tab', 'start'); return reload().then(function () { var bx = document.querySelector('.ffl-briefbox'); if (bx) bx.scrollIntoView({ block: 'center' }); }); }
       if (v.indexOf('einsatz:') === 0) {
         st.wantInc = +v.slice(8); var wx = anyInc(st.wantInc), mine = wx && myPart(wx.id);
@@ -2310,6 +2348,10 @@
   root.addEventListener('input', function (e) { if (e.target.closest && e.target.closest('#myf-report')) repAutosave(); });
   root.addEventListener('change', function (e) { if (e.target.id === 'myf-iyear') { st.iYear = +e.target.value || 0; if (st.lt) Object.keys(st.lt).forEach(function (k) { if (k.indexOf('lead_') === 0) st.lt[k].page = 0; }); reload(); } });
   // Fahrzeug an-/abhaken: Zeitfelder ein-/ausblenden
+  // Alarmschleifen-Anfrage: Auswahl merken, ohne das Formular neu aufzubauen
+  root.addEventListener('change', function (e) { var lw = e.target.getAttribute && e.target.getAttribute('data-lpw'); if (!lw) return;
+    var nt = document.getElementById('myf-lpnote'); if (nt) st.lpNote = nt.value;
+    st.lpWant = (st.lpWant || (d.loops_mine || []).slice()).filter(function (x) { return x !== +lw; }); if (e.target.checked) st.lpWant.push(+lw); render(); });
   root.addEventListener('change', function (e) { if (e.target.getAttribute && e.target.getAttribute('data-vf') === 'on') { var tr = e.target.closest('tr'); if (tr) tr.classList.toggle('is-off', !e.target.checked); } });
   root.addEventListener('change', function (e) {
     if (e.target.closest && e.target.closest('#myf-report')) {

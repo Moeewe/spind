@@ -25,7 +25,7 @@ function myf_install_archive($c) {
 
 // Bereiche, die man einzeln zurücksetzen kann (Tabelle => optionale Bedingung für das Löschen)
 const MYF_RESET_GROUPS = [
-    'members' => ['Mitglieder, Funktionen-Zuordnung, Ausbildungsnachweise, Unterweisungen, Rückfragen', ['members' => '', 'member_traits' => '', 'quals' => '', 'messages' => '', 'briefings' => '', 'briefing_acks' => '']],
+    'members' => ['Mitglieder, Funktionen-Zuordnung, Ausbildungsnachweise, Unterweisungen, Rückfragen, Zuordnung zu Alarmschleifen', ['members' => '', 'member_traits' => '', 'quals' => '', 'messages' => '', 'briefings' => '', 'briefing_acks' => '', 'loop_members' => '', 'loop_requests' => '']],
     'incidents' => ['Einsätze, Einsatzberichte, Beteiligung, Alarm-Eingänge', ['incidents' => '', 'participation' => '', 'alarm_log' => '', 'asu' => '']],
     'courses' => ['Lehrgänge: Jahre, Wünsche, Termine (Vorlagen bleiben)', ['courses' => 'year <> 0', 'dates' => '', 'needs' => '']],
     'agt' => ['Atemschutz & Werkstätten: Geräte, Prüfungen, Nachweise', ['devices' => '', 'device_checks' => '', 'agt_log' => '']],

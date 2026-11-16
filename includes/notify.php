@@ -102,7 +102,7 @@ add_action('myf_mail_run', function () {
 function myf_notify_area($area, $kind, $title, $body = '', $link = '', $dedupe = '') { myf_notify(myf_area_members($area), $kind, $title, $body, $link, $dedupe); }
 
 // Erledigt ist erledigt: Meldungen zu einem Vorgang (Schlüssel z. B. „partreq:12“) gelten bei allen als erledigt, sobald jemand ihn bearbeitet hat
-const MYF_NOTE_KEYS = ['partreq', 'cert', 'bkreq', 'msg', 'defect', 'cloth', 'idea'];
+const MYF_NOTE_KEYS = ['partreq', 'cert', 'bkreq', 'msg', 'defect', 'cloth', 'idea', 'loopreq'];
 function myf_note_open($key) {
     global $wpdb;
     if (!preg_match('/^([a-z]+):(\d+)(?::(\d+))?$/', $key, $k)) return true;
@@ -114,6 +114,7 @@ function myf_note_open($key) {
         'defect' => ['SELECT 1 FROM ' . myf_t('defects') . " WHERE id = %d AND status = 'new'", [(int) $k[2]]],
         'cloth' => ['SELECT 1 FROM ' . myf_t('clothing') . " WHERE id = %d AND status = 'open'", [(int) $k[2]]],
         'idea' => ['SELECT 1 FROM ' . myf_t('ideas') . " WHERE id = %d AND status = 'new'", [(int) $k[2]]],
+        'loopreq' => ['SELECT 1 FROM ' . myf_t('loop_requests') . " WHERE id = %d AND status = 'open'", [(int) $k[2]]],
     ][$k[1]] ?? null;
     return !$q || (bool) $wpdb->get_var($wpdb->prepare($q[0], ...$q[1]));
 }

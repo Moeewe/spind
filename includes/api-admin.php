@@ -481,7 +481,7 @@ function myf_api_admin_member_delete(WP_REST_Request $req) {
         || (int) $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM ' . myf_t('trips') . ' WHERE driver_id = %d', $id)))
         return myf_err('Dieses Mitglied hat Einsätze, Übungen oder Fahrten. Damit die Dokumentation vollständig bleibt, bitte „Anonymisieren“ statt Löschen.');
     // Alles Persönliche dieses Mitglieds entfernen – keine verwaisten Einträge
-    foreach (['needs', 'quals', 'agt_log', 'clothing', 'cloth_stock', 'member_traits', 'briefing_acks', 'drill_absence', 'duty_assign', 'board_rsvp', 'loans', 'member_history', 'notifications', 'messages', 'bookings', 'order_items'] as $t)
+    foreach (['needs', 'quals', 'agt_log', 'clothing', 'cloth_stock', 'member_traits', 'briefing_acks', 'drill_absence', 'duty_assign', 'board_rsvp', 'loans', 'member_history', 'notifications', 'messages', 'bookings', 'order_items', 'loop_members', 'loop_requests'] as $t)
         if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', myf_t($t)))) $wpdb->delete(myf_t($t), ['member_id' => $id]);
     foreach (['ideas', 'defects', 'team_tasks', 'devices', 'lockers'] as $t) if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', myf_t($t)))) $wpdb->update(myf_t($t), ['member_id' => null], ['member_id' => $id]);
     if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', myf_t('locker_log')))) $wpdb->update(myf_t('locker_log'), ['member_id' => null], ['member_id' => $id]);

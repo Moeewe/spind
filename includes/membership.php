@@ -79,7 +79,7 @@ add_action('rest_api_init', function () {
         $m = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . myf_t('members') . ' WHERE id = %d', $id));
         if (!$m) return myf_err('Mitglied nicht gefunden.', 404);
         if ($req->get_param('confirm') !== 'ANONYMISIEREN') return myf_err('Zur Sicherheit bitte ANONYMISIEREN eintippen.');
-        foreach (['needs', 'clothing', 'cloth_stock', 'member_traits', 'briefing_acks', 'drill_absence', 'notifications', 'loans', 'messages', 'board_rsvp', 'duty_assign', 'order_items'] as $t) {
+        foreach (['needs', 'clothing', 'cloth_stock', 'member_traits', 'briefing_acks', 'drill_absence', 'notifications', 'loans', 'messages', 'board_rsvp', 'duty_assign', 'order_items', 'loop_members', 'loop_requests'] as $t) {
             if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', myf_t($t)))) $wpdb->delete(myf_t($t), ['member_id' => $id]);
         }
         $wpdb->update(myf_t('ideas'), ['member_id' => null], ['member_id' => $id]);

@@ -2,6 +2,17 @@
 
 Beta (0.x) bis zum produktiven Einsatz. Version 1.0.0 erscheint, wenn SPIND produktiv läuft, auf GitHub veröffentlicht ist und die ersten Tests durch sind.
 
+## 0.17.0 – 16.11.2026
+
+**Alarmschleifen: Zuordnung online pflegen, Änderungen anfragen**
+
+- Neu unter „Mitglieder → Alarmschleifen“: Schleifen wie „Alle“, „Tagschleife“, „Waldbrand“, „TH“ oder je Zug anlegen und Mitglieder zuordnen – in einer Tabelle wie in der bisherigen Excel-Liste, mit Suche und Excel-Export.
+- Die bisherige Excel-Liste lässt sich übernehmen: kopieren und einfügen oder als CSV wählen, mit Vorschau. Fehlende Schleifen werden angelegt, Namen als „Nachname, Vorname“ oder „Vorname Nachname“ erkannt; wer nicht gefunden wird, steht in der Vorschau.
+- Gepflegt wird das vom neuen Bereich „Alarmschleifen“. Er ist anfangs dem IT-Team und der Wehrführung zugeordnet und lässt sich unter „Einstellungen → Rechte“ anpassen.
+- Mitglieder sehen im Profil unter „Alarmschleifen“, in welchen Schleifen sie sind, und können eine Änderung anfragen (dazu, raus, mit Bemerkung). Das IT-Team bekommt eine Nachricht, nimmt an – dann ist die Änderung sofort eingetragen – oder lehnt mit Begründung ab. Auch in der App.
+- Wer von einer Änderung betroffen ist, bekommt eine kurze Nachricht im Postfach. Jede Änderung steht im Änderungsprotokoll.
+- SPIND alarmiert dabei nicht selbst: Die Liste ist die Grundlage, nach der ihr die Alarmierung einstellt.
+
 ## 0.16.1 – 15.11.2026
 
 **Atemschutz: Jahresnachweis fertig, gleiche Regel überall**

@@ -30,7 +30,7 @@ function myf_audit_entity($path) {
         'admin/setup' => 'settings', 'admin/teams' => 'settings', 'admin/wsrules' => 'settings', 'admin/team/task' => 'team_tasks', 'admin/team/member' => 'members', 'admin/webreports' => 'settings', 'admin/ranks' => 'settings', 'admin/promote' => 'members', 'me/incident/web' => 'incidents', 'admin/incident/pub' => 'incidents', 'admin/drills' => 'drills', 'admin/incident/retention' => 'incidents', 'me/drill/absence' => 'drill_absence',
         'asu' => 'asu', 'asu/reopen' => 'asu', 'asu/file' => 'asu', 'admin/site' => 'settings', 'admin/site/pages' => 'settings', 'admin/site/instagram' => 'settings', 'admin/site/photos' => 'media', 'admin/briefing' => 'briefings', 'admin/briefing/ack' => 'briefings', 'admin/briefing/delete' => 'briefings', 'admin/member/history' => 'members', 'admin/member/history/delete' => 'members', 'admin/member/anonymize' => 'members', 'loan' => 'loans', 'loan/return' => 'loans', 'loan/setup' => 'settings', 'me/briefing' => 'briefings',
         'admin/locker' => 'lockers', 'admin/backup' => 'backup', 'me/2fa' => 'security', 'admin/secret' => 'security',
-        'admin/event' => 'events', 'admin/event/delete' => 'events', 'me/notice' => 'notices', 'admin/notice' => 'notices', 'admin/notice/delete' => 'notices', 'admin/member/noticeright' => 'members',
+        'admin/loop' => 'loops', 'admin/loops/assign' => 'loop_members', 'admin/loops/import' => 'loop_members', 'admin/loops/decide' => 'loop_requests', 'me/loops/request' => 'loop_requests', 'admin/event' => 'events', 'admin/event/delete' => 'events', 'me/notice' => 'notices', 'admin/notice' => 'notices', 'admin/notice/delete' => 'notices', 'admin/member/noticeright' => 'members',
     ];
     return $map[$path] ?? '';
 }

@@ -36,11 +36,12 @@ const MYF_RIGHTS = [
     'area_board' => 'Bereich Aushänge & Einladungen',
     'area_screen' => 'Bereich Dashboard (Einstellungen)',
     'area_orders' => 'Bereich Bestellkarten (Karten anlegen und vorschlagen)',
+    'area_loops' => 'Bereich Alarmschleifen (wer ist in welcher Schleife, Änderungswünsche der Mitglieder)',
     'demo_manage' => 'Demo-Modus für Vorführungen (Demo-Bestand anlegen, ansehen, Alarmszenarien, beenden)',
 ];
 // Verwaltungsbereich → Recht
 const MYF_AREAS = ['members' => 'area_members', 'courses' => 'area_courses', 'incidents' => 'incident_manage', 'agt' => 'area_agt', 'strecke' => 'area_strecke', 'vehicles' => 'area_vehicles',
-    'defects' => 'area_defects', 'clothing' => 'area_clothing', 'ideas' => 'area_ideas', 'duties' => 'area_duties', 'board' => 'area_board', 'screen' => 'area_screen', 'orders' => 'area_orders'];
+    'defects' => 'area_defects', 'clothing' => 'area_clothing', 'ideas' => 'area_ideas', 'duties' => 'area_duties', 'board' => 'area_board', 'screen' => 'area_screen', 'orders' => 'area_orders', 'loops' => 'area_loops'];
 // Voreinstellung: alles für alle – nur Dashboard-Hinweise für Führung, Gerätewarte und Maschinisten
 const MYF_RIGHTS_DEFAULT_TRAITS = [
     'notices' => ['Wehrführung', 'LZ-Führung', 'Gerätewart', 'Maschinist'],
@@ -60,6 +61,7 @@ const MYF_RIGHTS_DEFAULT_TRAITS = [
     'area_board' => ['Wehrführung', 'LZ-Führung'],
     'area_screen' => ['Wehrführung', 'LZ-Führung'],
     'area_orders' => ['Wehrführung', 'LZ-Führung', 'Gruppenführer'],
+    'area_loops' => ['Team IT & Technik', 'Wehrführung'],
     'demo_manage' => ['Wehrführung', 'LZ-Führung'],
 ];
 const MYF_FUNCTION_TRAITS = ['Wehrführung', 'LZ-Führung', 'Gruppenführer', 'Maschinist'];
@@ -112,7 +114,7 @@ function myf_areas() {
 }
 function myf_area_labels() {
     $l = ['members' => 'Mitglieder', 'courses' => 'Lehrgänge', 'incidents' => 'Einsätze', 'agt' => 'Atemschutzwerkstatt', 'strecke' => 'Übungsstrecke', 'vehicles' => 'Gerätewerkstatt & Fahrzeuge',
-        'defects' => 'Mängel', 'clothing' => 'Kleiderkammer', 'ideas' => 'Anregungen', 'duties' => 'Dienste', 'board' => 'Aushänge', 'screen' => 'Dashboard', 'orders' => 'Bestellkarten'];
+        'defects' => 'Mängel', 'clothing' => 'Kleiderkammer', 'ideas' => 'Anregungen', 'duties' => 'Dienste', 'board' => 'Aushänge', 'screen' => 'Dashboard', 'orders' => 'Bestellkarten', 'loops' => 'Alarmschleifen'];
     foreach (myf_teams() as $t) $l['team_' . $t['key']] = $t['name'];
     return $l;
 }

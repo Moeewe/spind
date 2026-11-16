@@ -245,6 +245,7 @@ function myf_install() {
     myf_install_security();
     myf_install_drills($c);
     if (function_exists('myf_install_events')) myf_install_events($c);
+    if (function_exists('myf_install_loops')) myf_install_loops($c);
     myf_install_hall($c);
     if (function_exists('myf_install_passkeys')) myf_install_passkeys($c);
     myf_install_archive($c);

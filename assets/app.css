@@ -2294,3 +2294,7 @@ html[data-myf-theme="dark"] .ffl .ffl-msg button.ffl-sm.ffl-p, html[data-myf-the
 /* Veranstaltungen (besondere Termine) im Kalender und auf der Startseite */
 .ffl .ffl-evmore { margin-top: 6px; }
 .ffl .ffl-evmore > summary { cursor: pointer; font-weight: 700; }
+
+/* Alarmschleifen: Auswahl untereinander, gut antippbar */
+.ffl .ffl-lpw { display: grid; gap: 4px; margin-top: 6px; }
+.ffl .ffl-lpw .ffl-check { display: flex; align-items: center; gap: 8px; min-height: 40px; margin: 0; }
